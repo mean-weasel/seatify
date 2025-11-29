@@ -398,3 +398,40 @@
 .violation-badge:hover {
   transform: scale(1.1);
 }
+
+/* Swap Target Styles */
+.seat-guest.swap-target {
+  z-index: 50;
+}
+
+.seat-guest.swap-target .seat-guest-circle {
+  box-shadow: 0 0 0 4px var(--color-info), 0 0 16px rgba(59, 130, 246, 0.5);
+  animation: swapPulse 1s ease-in-out infinite;
+  transform: scale(1.15);
+}
+
+@keyframes swapPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px var(--color-info), 0 0 16px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--color-info), 0 0 24px rgba(59, 130, 246, 0.7);
+  }
+}
+
+.swap-icon {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-info);
+  color: white;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  animation: popIn var(--duration-normal) var(--ease-spring);
+  z-index: 100;
+}

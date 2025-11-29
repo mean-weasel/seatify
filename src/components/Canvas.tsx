@@ -14,11 +14,12 @@ import { CanvasGuest } from './CanvasGuest';
 import { TablePropertiesPanel } from './TablePropertiesPanel';
 import { CanvasSearch } from './CanvasSearch';
 import { CanvasMinimap } from './CanvasMinimap';
-import type { TableShape, Table, AlignmentGuide } from '../types';
+import type { TableShape, Table, AlignmentGuide, Guest } from '../types';
 import './Canvas.css';
 
 const SNAP_THRESHOLD = 80; // pixels in canvas coordinates
 const ALIGNMENT_THRESHOLD = 10; // pixels for alignment guide detection
+const SWAP_THRESHOLD = 40; // pixels for detecting swap target
 
 // Snap a position to grid
 function snapToGrid(value: number, gridSize: number, enabled: boolean): number {
@@ -140,6 +141,80 @@ function findNearbyTable(x: number, y: number, tables: Table[]): Table | null {
   return null;
 }
 
+// Calculate seat positions for a table (simplified version)
+function getSeatPositionsForTable(table: Table, capacity: number): { x: number; y: number }[] {
+  const positions: { x: number; y: number }[] = [];
+
+  if (table.shape === 'round' || table.shape === 'oval') {
+    const radiusX = table.width / 2 + 20;
+    const radiusY = table.shape === 'oval' ? table.height / 2 + 20 : radiusX;
+    for (let i = 0; i < capacity; i++) {
+      const angle = (2 * Math.PI * i) / capacity - Math.PI / 2;
+      positions.push({
+        x: table.x + table.width / 2 + radiusX * Math.cos(angle),
+        y: table.y + table.height / 2 + radiusY * Math.sin(angle),
+      });
+    }
+  } else {
+    // Rectangle/square - simplified
+    const longSideSeats = Math.ceil(capacity / 2);
+    const seatSpacing = table.width / (longSideSeats + 1);
+    for (let i = 0; i < longSideSeats; i++) {
+      positions.push({
+        x: table.x + seatSpacing * (i + 1),
+        y: table.y - 20,
+      });
+    }
+    for (let i = 0; i < capacity - longSideSeats; i++) {
+      positions.push({
+        x: table.x + seatSpacing * (i + 1),
+        y: table.y + table.height + 20,
+      });
+    }
+  }
+
+  return positions;
+}
+
+// Find a nearby seated guest for swapping
+function findNearbySeatedGuest(
+  x: number,
+  y: number,
+  tables: Table[],
+  guests: Guest[],
+  excludeGuestId: string
+): Guest | null {
+  let closestGuest: Guest | null = null;
+  let closestDistance = SWAP_THRESHOLD;
+
+  for (const table of tables) {
+    const seatedGuests = guests.filter((g) => g.tableId === table.id);
+    if (seatedGuests.length === 0) continue;
+
+    const seatPositions = getSeatPositionsForTable(table, table.capacity);
+
+    for (const guest of seatedGuests) {
+      if (guest.id === excludeGuestId) continue;
+
+      // Get guest's seat position
+      const seatIndex = guest.seatIndex ?? seatedGuests.indexOf(guest);
+      const seatPos = seatPositions[seatIndex] || seatPositions[0];
+      if (!seatPos) continue;
+
+      const dx = x - seatPos.x;
+      const dy = y - seatPos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestGuest = guest;
+      }
+    }
+  }
+
+  return closestGuest;
+}
+
 export function Canvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const {
@@ -160,12 +235,14 @@ export function Canvas() {
     clearAlignmentGuides,
     pushHistory,
     addQuickGuest,
+    swapGuestSeats,
   } = useStore();
 
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [draggedGuestId, setDraggedGuestId] = useState<string | null>(null);
   const [nearbyTableId, setNearbyTableId] = useState<string | null>(null);
+  const [swapTargetGuestId, setSwapTargetGuestId] = useState<string | null>(null);
   const [dragType, setDragType] = useState<string | null>(null);
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [showTableDropdown, setShowTableDropdown] = useState(false);
@@ -275,15 +352,32 @@ export function Canvas() {
       const newX = originalPos.canvasX + delta.x / canvas.zoom;
       const newY = originalPos.canvasY + delta.y / canvas.zoom;
 
-      const nearbyTable = findNearbyTable(newX, newY, event.tables);
-      setNearbyTableId(nearbyTable?.id || null);
+      // Check for swap target (another seated guest nearby)
+      const swapTarget = findNearbySeatedGuest(
+        newX,
+        newY,
+        event.tables,
+        event.guests,
+        active.id as string
+      );
+      setSwapTargetGuestId(swapTarget?.id || null);
+
+      // Only show nearby table if no swap target
+      if (!swapTarget) {
+        const nearbyTable = findNearbyTable(newX, newY, event.tables);
+        setNearbyTableId(nearbyTable?.id || null);
+      } else {
+        setNearbyTableId(null);
+      }
     }
   };
 
   const handleDragEnd = (dragEvent: DragEndEvent) => {
     const { active, over, delta } = dragEvent;
+    const currentSwapTarget = swapTargetGuestId;
     setDraggedGuestId(null);
     setNearbyTableId(null);
+    setSwapTargetGuestId(null);
     setDragType(null);
     clearAlignmentGuides();
 
@@ -327,6 +421,13 @@ export function Canvas() {
 
       const newX = originalPos.canvasX + delta.x / canvas.zoom;
       const newY = originalPos.canvasY + delta.y / canvas.zoom;
+
+      // Check if we're swapping with another guest
+      if (currentSwapTarget) {
+        pushHistory('Swap guests');
+        swapGuestSeats(active.id as string, currentSwapTarget);
+        return;
+      }
 
       const nearbyTable = findNearbyTable(newX, newY, event.tables);
 
@@ -521,6 +622,7 @@ export function Canvas() {
                 guests={event.guests.filter((g) => g.tableId === table.id)}
                 isSelected={canvas.selectedTableId === table.id}
                 isSnapTarget={nearbyTableId === table.id}
+                swapTargetGuestId={swapTargetGuestId}
               />
             ))}
 

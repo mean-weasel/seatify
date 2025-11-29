@@ -10,12 +10,14 @@ interface TableComponentProps {
   guests: Guest[];
   isSelected: boolean;
   isSnapTarget?: boolean;
+  swapTargetGuestId?: string | null;
 }
 
 interface SeatGuestProps {
   guest: Guest;
   seatPosition: { x: number; y: number };
   tablePosition: { x: number; y: number };
+  isSwapTarget?: boolean;
 }
 
 // Dietary restriction icons
@@ -30,7 +32,7 @@ const DIETARY_ICONS: Record<string, string> = {
   'dairy-free': '🥛',
 };
 
-function SeatGuest({ guest, seatPosition, tablePosition }: SeatGuestProps) {
+function SeatGuest({ guest, seatPosition, tablePosition, isSwapTarget }: SeatGuestProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: guest.id,
     data: {
@@ -82,7 +84,7 @@ function SeatGuest({ guest, seatPosition, tablePosition }: SeatGuestProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`seat-guest ${isDragging ? 'dragging' : ''} ${groupColor ? 'has-group' : ''}`}
+      className={`seat-guest ${isDragging ? 'dragging' : ''} ${groupColor ? 'has-group' : ''} ${isSwapTarget ? 'swap-target' : ''}`}
       title={tooltipParts.join('\n')}
       {...attributes}
       {...listeners}
@@ -97,11 +99,12 @@ function SeatGuest({ guest, seatPosition, tablePosition }: SeatGuestProps) {
       {groupColor && <span className="group-dot" style={{ backgroundColor: groupColor }} />}
       {dietaryIcon && <span className="dietary-icon">{dietaryIcon}</span>}
       {hasAccessibility && <span className="accessibility-icon">♿</span>}
+      {isSwapTarget && <span className="swap-icon">⇄</span>}
     </div>
   );
 }
 
-export function TableComponent({ table, guests, isSelected, isSnapTarget }: TableComponentProps) {
+export function TableComponent({ table, guests, isSelected, isSnapTarget, swapTargetGuestId }: TableComponentProps) {
   const { selectTable, removeTable, getViolationsForTable } = useStore();
   const violations = getViolationsForTable(table.id);
   const hasViolations = violations.length > 0;
@@ -274,6 +277,7 @@ export function TableComponent({ table, guests, isSelected, isSnapTarget }: Tabl
                 guest={guest}
                 seatPosition={pos}
                 tablePosition={{ x: table.x, y: table.y }}
+                isSwapTarget={swapTargetGuestId === guest.id}
               />
             )}
           </div>

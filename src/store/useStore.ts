@@ -123,6 +123,7 @@ interface AppState {
   assignGuestToTable: (guestId: string, tableId: string | undefined, seatIndex?: number) => void;
   moveGuestOnCanvas: (guestId: string, x: number, y: number) => void;
   detachGuestFromTable: (guestId: string, canvasX: number, canvasY: number) => void;
+  swapGuestSeats: (guestId1: string, guestId2: string) => void;
   addRelationship: (guestId: string, targetGuestId: string, type: Guest['relationships'][0]['type'], strength: number) => void;
   removeRelationship: (guestId: string, targetGuestId: string) => void;
   importGuests: (guests: Partial<Guest>[]) => void;
@@ -499,6 +500,28 @@ export const useStore = create<AppState>()(
             ),
           },
         })),
+
+      swapGuestSeats: (guestId1, guestId2) =>
+        set((state) => {
+          const guest1 = state.event.guests.find((g) => g.id === guestId1);
+          const guest2 = state.event.guests.find((g) => g.id === guestId2);
+          if (!guest1 || !guest2) return state;
+
+          return {
+            event: {
+              ...state.event,
+              guests: state.event.guests.map((g) => {
+                if (g.id === guestId1) {
+                  return { ...g, tableId: guest2.tableId, seatIndex: guest2.seatIndex };
+                }
+                if (g.id === guestId2) {
+                  return { ...g, tableId: guest1.tableId, seatIndex: guest1.seatIndex };
+                }
+                return g;
+              }),
+            },
+          };
+        }),
 
       addRelationship: (guestId, targetGuestId, type, strength) =>
         set((state) => ({
