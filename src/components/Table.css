@@ -2,7 +2,10 @@
   position: absolute;
   cursor: grab;
   user-select: none;
-  transition: all var(--duration-normal) var(--ease-bounce);
+  /* Only transition visual properties, not position */
+  transition: box-shadow var(--duration-normal) var(--ease-bounce),
+              border-color var(--duration-normal) var(--ease-bounce),
+              opacity var(--duration-normal) var(--ease-bounce);
 }
 
 .table-component:active {
@@ -12,7 +15,8 @@
 .table-component.dragging {
   opacity: 0.9;
   z-index: 100;
-  transform: scale(1.02) rotate(1deg);
+  /* Disable transition during drag for smooth movement */
+  transition: none;
 }
 
 .table-component.selected {
@@ -21,6 +25,25 @@
 
 .table-component.selected .table-surface {
   box-shadow: 0 0 0 4px var(--color-primary), var(--shadow-lg);
+}
+
+.table-component.selected::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border: 2px dashed var(--color-primary-light);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .table-component.drop-target .table-surface {
@@ -56,6 +79,26 @@
 
 .table-component.square .table-surface {
   border-radius: var(--radius-xl);
+}
+
+.table-component.oval .table-surface {
+  border-radius: 50%;
+}
+
+.table-component.half-round .table-surface {
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+
+.table-component.serpentine .table-surface {
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg) 0%,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg) 50%,
+    var(--color-bg-secondary) 75%,
+    var(--color-bg) 100%
+  );
 }
 
 .table-label {
@@ -138,4 +181,220 @@
 .table-delete:hover {
   transform: scale(1.15) !important;
   box-shadow: var(--shadow-lg);
+}
+
+/* Snap target - when a guest is being dragged near this table */
+.table-component.snap-target .table-surface {
+  box-shadow: 0 0 0 4px var(--color-success), 0 0 24px rgba(74, 222, 128, 0.4);
+  border-color: var(--color-success);
+}
+
+/* Seat Guest styles */
+.seat-guest {
+  position: relative;
+  cursor: grab;
+  transition: transform var(--duration-normal) var(--ease-bounce);
+}
+
+.seat-guest:active {
+  cursor: grabbing;
+}
+
+.seat-guest.dragging {
+  opacity: 0.5;
+  z-index: 1000;
+}
+
+.seat-guest-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  border: 2px solid var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-bounce),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.seat-guest:hover .seat-guest-circle {
+  transform: scale(1.15);
+  box-shadow: var(--shadow-md);
+}
+
+.seat-guest .status-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+}
+
+.seat-guest .initials {
+  text-transform: uppercase;
+}
+
+/* Dietary and Accessibility Icons */
+.seat-guest .dietary-icon {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  font-size: 10px;
+  background: var(--color-bg);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.seat-guest .accessibility-icon {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 10px;
+  background: var(--color-info-light);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.seat-guest .group-dot {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.seat-guest.has-group .seat-guest-circle {
+  border-style: solid;
+}
+
+/* Capacity Ring Styles */
+.capacity-ring {
+  z-index: -1;
+}
+
+.capacity-progress {
+  stroke: var(--color-success);
+  transition: stroke-dashoffset var(--duration-slow) var(--ease-out),
+    stroke var(--duration-normal);
+}
+
+.capacity-nearly-full .capacity-progress,
+.table-count.nearly-full {
+  stroke: var(--color-warning);
+}
+
+.capacity-full .capacity-progress {
+  stroke: var(--color-success);
+}
+
+.capacity-over .capacity-progress {
+  stroke: var(--color-error);
+}
+
+/* Table count status colors */
+.table-count.available {
+  color: var(--color-text-secondary);
+}
+
+.table-count.nearly-full {
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+}
+
+.table-count.full {
+  color: var(--color-success);
+  background: var(--color-success-light);
+  font-weight: var(--font-weight-semibold);
+}
+
+.table-count.over {
+  color: var(--color-error);
+  background: var(--color-error-light);
+  font-weight: var(--font-weight-bold);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Capacity status effects on table */
+.table-component.capacity-full .table-surface {
+  border-color: var(--color-success);
+}
+
+.table-component.capacity-over .table-surface {
+  border-color: var(--color-error);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Constraint Violation Styles */
+.table-component.has-violations .table-surface {
+  box-shadow: 0 0 0 3px var(--color-warning), var(--shadow-md);
+}
+
+.table-component.has-required-violations .table-surface {
+  box-shadow: 0 0 0 3px var(--color-error), var(--shadow-md);
+  animation: violationPulse 2s ease-in-out infinite;
+}
+
+@keyframes violationPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px var(--color-error), var(--shadow-md);
+  }
+  50% {
+    box-shadow: 0 0 0 3px var(--color-error), 0 0 16px rgba(248, 113, 113, 0.5);
+  }
+}
+
+.violation-badge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: help;
+  z-index: 20;
+  animation: popIn var(--duration-normal) var(--ease-spring);
+}
+
+.violation-badge.preferred {
+  background: var(--color-warning);
+  color: #1a1a1a;
+}
+
+.violation-badge.required {
+  background: var(--color-error);
+  color: white;
+}
+
+.violation-badge:hover {
+  transform: scale(1.1);
 }

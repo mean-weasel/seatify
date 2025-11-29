@@ -7,6 +7,13 @@ interface OptimizationResult {
   assignments: Map<string, string>; // guestId -> tableId
   score: number;
   violations: string[];
+  breakdown: {
+    constraints: number;
+    relationships: number;
+    groups: number;
+    capacity: number;
+  };
+  tableScores: Map<string, { score: number; issues: number }>;
 }
 
 export function OptimizeView() {
@@ -142,24 +149,118 @@ export function OptimizeView() {
         </button>
 
         {result && (
-          <div className="result-panel">
-            <h3>Optimization Complete</h3>
-            <p className="score">
-              Score: <strong>{result.score.toFixed(1)}</strong>/100
-            </p>
+          <div className="result-panel enhanced">
+            <div className="result-header">
+              <div className="score-circle-container">
+                <div className={`score-circle ${getGradeClass(result.score)}`}>
+                  <svg viewBox="0 0 120 120">
+                    <circle className="score-bg" cx="60" cy="60" r="52" />
+                    <circle
+                      className="score-fill"
+                      cx="60"
+                      cy="60"
+                      r="52"
+                      strokeDasharray={`${(result.score / 100) * 327} 327`}
+                    />
+                  </svg>
+                  <div className="score-value">
+                    <span className="score-number">{Math.round(result.score)}</span>
+                    <span className="score-max">/100</span>
+                  </div>
+                </div>
+                <span className={`grade-label ${getGradeClass(result.score)}`}>
+                  {getGrade(result.score)}
+                </span>
+              </div>
+
+              <div className="score-breakdown">
+                <h4>Score Breakdown</h4>
+                <div className="breakdown-item">
+                  <div className="breakdown-header">
+                    <span>Constraints</span>
+                    <span className="breakdown-value">{result.breakdown.constraints}%</span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div className="breakdown-fill" style={{ width: `${result.breakdown.constraints}%` }} />
+                  </div>
+                </div>
+                <div className="breakdown-item">
+                  <div className="breakdown-header">
+                    <span>Relationships</span>
+                    <span className="breakdown-value">{result.breakdown.relationships}%</span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div className="breakdown-fill" style={{ width: `${result.breakdown.relationships}%` }} />
+                  </div>
+                </div>
+                <div className="breakdown-item">
+                  <div className="breakdown-header">
+                    <span>Groups</span>
+                    <span className="breakdown-value">{result.breakdown.groups}%</span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div className="breakdown-fill" style={{ width: `${result.breakdown.groups}%` }} />
+                  </div>
+                </div>
+                <div className="breakdown-item">
+                  <div className="breakdown-header">
+                    <span>Capacity</span>
+                    <span className="breakdown-value">{result.breakdown.capacity}%</span>
+                  </div>
+                  <div className="breakdown-bar">
+                    <div className="breakdown-fill" style={{ width: `${result.breakdown.capacity}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {result.violations.length > 0 && (
-              <div className="violations">
-                <h4>Warnings:</h4>
-                <ul>
+              <div className="issues-section">
+                <h4>Issues & Warnings ({result.violations.length})</h4>
+                <div className="issues-list">
                   {result.violations.map((v, i) => (
-                    <li key={i}>{v}</li>
+                    <div key={i} className="issue-item">
+                      <span className="issue-icon">!</span>
+                      <span className="issue-message">{v}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
+
+            <div className="table-analysis">
+              <h4>Table Analysis</h4>
+              <div className="table-cards">
+                {event.tables.map(table => {
+                  const tableData = result.tableScores.get(table.id) || { score: 0, issues: 0 };
+                  const guestsAtTable = event.guests.filter(g => result.assignments.get(g.id) === table.id);
+                  return (
+                    <div key={table.id} className={`table-card ${getGradeClass(tableData.score)}`}>
+                      <div className="table-card-header">
+                        <span className="table-name">{table.name}</span>
+                        <span className="table-occupancy">{guestsAtTable.length}/{table.capacity}</span>
+                      </div>
+                      <div className="table-score">
+                        <span className="table-score-value">{tableData.score}</span>
+                        <span className="table-score-label">compatibility</span>
+                      </div>
+                      {tableData.issues > 0 && (
+                        <span className="table-issues-badge">{tableData.issues} issue{tableData.issues > 1 ? 's' : ''}</span>
+                      )}
+                      <div className="table-guests">
+                        {guestsAtTable.slice(0, 8).map(g => (
+                          <div key={g.id} className="mini-avatar" title={g.name} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="result-actions">
               <button className="apply-btn" onClick={applyOptimization}>
-                Apply Seating
+                Apply Arrangement
               </button>
               <button className="cancel-btn" onClick={() => setResult(null)}>
                 Discard
@@ -272,6 +373,20 @@ function formatConstraintType(type: Constraint['type']): string {
   }
 }
 
+function getGradeClass(score: number): string {
+  if (score >= 90) return 'excellent';
+  if (score >= 70) return 'good';
+  if (score >= 50) return 'fair';
+  return 'poor';
+}
+
+function getGrade(score: number): string {
+  if (score >= 90) return 'Excellent';
+  if (score >= 70) return 'Good';
+  if (score >= 50) return 'Fair';
+  return 'Needs Work';
+}
+
 function optimizeSeating(
   guests: Guest[],
   tables: Table[],
@@ -279,9 +394,19 @@ function optimizeSeating(
 ): OptimizationResult {
   const assignments = new Map<string, string>();
   const violations: string[] = [];
+  const tableScores = new Map<string, { score: number; issues: number }>();
+
+  // Initialize table scores
+  tables.forEach(t => tableScores.set(t.id, { score: 100, issues: 0 }));
 
   if (tables.length === 0) {
-    return { assignments, score: 0, violations: ['No tables available'] };
+    return {
+      assignments,
+      score: 0,
+      violations: ['No tables available'],
+      breakdown: { constraints: 0, relationships: 0, groups: 0, capacity: 0 },
+      tableScores,
+    };
   }
 
   // Group guests by their group attribute
@@ -468,9 +593,69 @@ function optimizeSeating(
     violations.push(`${unassigned.length} guest(s) could not be assigned`);
   }
 
+  // Calculate breakdown scores
+  const totalCapacity = tables.reduce((sum, t) => sum + t.capacity, 0);
+  const capacityScore = totalCapacity >= guests.length ? 100 : Math.round((totalCapacity / guests.length) * 100);
+  const constraintScore = constraints.length > 0
+    ? Math.max(0, 100 - (violations.filter(v => v.includes('Constraint')).length * 20))
+    : 100;
+  const groupScore = guestsByGroup.size > 0
+    ? Math.round((groupsKeptTogether / guestsByGroup.size) * 100)
+    : 100;
+
+  // Relationship score based on how many positive relationships are at the same table
+  let relationshipScore = 100;
+  guests.forEach(guest => {
+    const guestTable = assignments.get(guest.id);
+    guest.relationships.forEach(rel => {
+      const relTable = assignments.get(rel.guestId);
+      if (rel.type === 'avoid' && guestTable === relTable) {
+        relationshipScore -= 15;
+      } else if (rel.type !== 'avoid' && guestTable !== relTable) {
+        relationshipScore -= 5;
+      }
+    });
+  });
+  relationshipScore = Math.max(0, Math.min(100, relationshipScore));
+
+  // Calculate per-table scores
+  tables.forEach(table => {
+    const guestsAtTable = guests.filter(g => assignments.get(g.id) === table.id);
+    let tableScore = 100;
+    let issues = 0;
+
+    // Check for avoid relationships at this table
+    guestsAtTable.forEach(g => {
+      g.relationships.forEach(rel => {
+        if (rel.type === 'avoid') {
+          const relatedAtTable = guestsAtTable.find(gt => gt.id === rel.guestId);
+          if (relatedAtTable) {
+            tableScore -= 20;
+            issues++;
+          }
+        }
+      });
+    });
+
+    // Check for mixed groups (slight penalty)
+    const groups = new Set(guestsAtTable.map(g => g.group).filter(Boolean));
+    if (groups.size > 2) {
+      tableScore -= 5;
+    }
+
+    tableScores.set(table.id, { score: Math.max(0, tableScore), issues });
+  });
+
   return {
     assignments,
     score: Math.max(0, Math.min(100, score)),
     violations,
+    breakdown: {
+      constraints: constraintScore,
+      relationships: relationshipScore,
+      groups: groupScore,
+      capacity: capacityScore,
+    },
+    tableScores,
   };
 }

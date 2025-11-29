@@ -30,6 +30,16 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-right: 0.25rem;
 }
 
 .toolbar-group button {
@@ -115,4 +125,253 @@
 
 .canvas-empty p:last-child {
   font-size: var(--font-size-base);
+}
+
+/* Toolbar Enhancements */
+.toolbar-divider {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--color-border);
+  margin-left: 0.5rem;
+}
+
+.toolbar-group button.active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.toolbar-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Grid Size Dropdown */
+.grid-size-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background var(--duration-fast);
+}
+
+.dropdown-menu button:hover {
+  background: var(--color-bg-hover);
+}
+
+.dropdown-menu button.selected {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Grid Overlay */
+.canvas-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, var(--color-border-light) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border-light) 1px, transparent 1px);
+  opacity: 0.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .canvas-grid-overlay {
+    opacity: 0.3;
+  }
+}
+
+/* Alignment Guides */
+.alignment-guide {
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.alignment-guide-horizontal {
+  height: 1px;
+  background: var(--color-primary);
+  box-shadow: 0 0 4px var(--color-primary);
+}
+
+.alignment-guide-vertical {
+  width: 1px;
+  background: var(--color-primary);
+  box-shadow: 0 0 4px var(--color-primary);
+}
+
+/* Add guide endpoints */
+.alignment-guide::before,
+.alignment-guide::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+}
+
+.alignment-guide-horizontal::before {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.alignment-guide-horizontal::after {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+
+.alignment-guide-vertical::before {
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.alignment-guide-vertical::after {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+}
+
+/* Table Navigation Dropdown */
+.table-nav-dropdown {
+  position: relative;
+}
+
+.table-dropdown-menu {
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 180px;
+}
+
+.table-nav-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+.table-nav-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.table-nav-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+}
+
+.table-nav-item.full .table-nav-count {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+/* Simplified Toolbar Styles */
+.toolbar-spacer {
+  flex: 1;
+}
+
+/* Add Table Dropdown */
+.add-dropdown {
+  position: relative;
+}
+
+.add-button {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%) !important;
+  color: white !important;
+  border-color: var(--color-primary) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  padding: 0.625rem 1.25rem !important;
+}
+
+.add-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.add-dropdown-menu {
+  min-width: 180px;
+  left: 0;
+  transform: none;
+}
+
+.add-dropdown-menu button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  text-align: left !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.table-shape-icon {
+  font-size: 1rem;
+  width: 1.25rem;
+  text-align: center;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: 0.25rem;
+  border: 1px solid var(--color-border-light);
+}
+
+.zoom-controls button {
+  padding: 0.5rem 0.75rem !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: var(--font-size-lg) !important;
+  font-weight: var(--font-weight-bold) !important;
+}
+
+.zoom-controls button:hover {
+  background: var(--color-bg-hover) !important;
+  transform: none !important;
+}
+
+/* Add Guest Button */
+.add-guest-button {
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+  color: white;
+  border: 2px solid var(--color-secondary);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-bounce);
+}
+
+.add-guest-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }

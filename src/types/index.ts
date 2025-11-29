@@ -35,19 +35,45 @@ export interface Guest {
   tableId?: string;
   seatIndex?: number;
 
+  // Canvas position (for unassigned guests)
+  canvasX?: number;
+  canvasY?: number;
+
   // Metadata
   group?: string; // e.g., "Bride's family", "Marketing team"
   rsvpStatus: 'pending' | 'confirmed' | 'declined';
   notes?: string;
 }
 
-export type TableShape = 'round' | 'rectangle' | 'square';
+export type TableShape = 'round' | 'rectangle' | 'square' | 'oval' | 'half-round' | 'serpentine';
 
 export interface Table {
   id: string;
   name: string;
   shape: TableShape;
   capacity: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+}
+
+// Venue elements (non-seating items like dance floors, stages, etc.)
+export type VenueElementType =
+  | 'dance-floor'
+  | 'stage'
+  | 'dj-booth'
+  | 'bar'
+  | 'buffet'
+  | 'entrance'
+  | 'exit'
+  | 'photo-booth';
+
+export interface VenueElement {
+  id: string;
+  type: VenueElementType;
+  label: string;
   x: number;
   y: number;
   width: number;
@@ -87,6 +113,7 @@ export interface Event {
   constraints: Constraint[];
   surveyQuestions: SurveyQuestion[];
   surveyResponses: SurveyResponse[];
+  venueElements: VenueElement[];
 }
 
 export interface CanvasState {
@@ -95,4 +122,28 @@ export interface CanvasState {
   panY: number;
   selectedTableId: string | null;
   selectedGuestId: string | null;
+  selectedVenueElementId: string | null;
+}
+
+export interface CanvasPreferences {
+  showGrid: boolean;
+  snapToGrid: boolean;
+  gridSize: 20 | 40 | 80;
+  showAlignmentGuides: boolean;
+}
+
+export interface AlignmentGuide {
+  type: 'horizontal' | 'vertical';
+  position: number;
+  start: number;
+  end: number;
+}
+
+export interface ConstraintViolation {
+  constraintId: string;
+  constraintType: Constraint['type'];
+  priority: Constraint['priority'];
+  description: string;
+  guestIds: string[];
+  tableIds: string[];
 }

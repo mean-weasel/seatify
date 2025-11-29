@@ -2,8 +2,13 @@ import { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import './Header.css';
 
-export function Header() {
-  const { event, setEventName, setEventType, activeView, setActiveView, resetEvent, exportEvent, importEvent, importGuests } = useStore();
+interface HeaderProps {
+  onPrint?: () => void;
+}
+
+export function Header({ onPrint }: HeaderProps) {
+  const { event, setEventName, setEventType, activeView, setActiveView, resetEvent, exportEvent, importEvent, importGuests, loadDemoData, undo, redo, canUndo, canRedo } = useStore();
+  const hasData = event.guests.length > 0 || event.tables.length > 0;
   const [showImportModal, setShowImportModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,6 +81,13 @@ export function Header() {
     }
   };
 
+  const handleLoadDemo = () => {
+    if (hasData && !confirm('This will replace your current data with demo data. Continue?')) {
+      return;
+    }
+    loadDemoData();
+  };
+
   return (
     <header className="header">
       <div className="header-left">
@@ -98,14 +110,50 @@ export function Header() {
             <option value="other">Other</option>
           </select>
         </div>
+        <div className="undo-redo-group">
+          <button
+            className="undo-btn"
+            onClick={undo}
+            disabled={!canUndo()}
+            title="Undo (Cmd+Z)"
+          >
+            ↶
+          </button>
+          <button
+            className="redo-btn"
+            onClick={redo}
+            disabled={!canRedo()}
+            title="Redo (Cmd+Shift+Z)"
+          >
+            ↷
+          </button>
+        </div>
       </div>
 
       <nav className="header-nav">
+        <button
+          className={`nav-btn ${activeView === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveView('dashboard')}
+        >
+          Dashboard
+        </button>
         <button
           className={`nav-btn ${activeView === 'canvas' ? 'active' : ''}`}
           onClick={() => setActiveView('canvas')}
         >
           Floor Plan
+        </button>
+        <button
+          className={`nav-btn ${activeView === 'guests' ? 'active' : ''}`}
+          onClick={() => setActiveView('guests')}
+        >
+          Guests
+        </button>
+        <button
+          className={`nav-btn ${activeView === 'survey' ? 'active' : ''}`}
+          onClick={() => setActiveView('survey')}
+        >
+          Survey
         </button>
         <button
           className={`nav-btn ${activeView === 'optimize' ? 'active' : ''}`}
@@ -116,12 +164,20 @@ export function Header() {
       </nav>
 
       <div className="header-right">
+        <button className="action-btn demo-btn" onClick={handleLoadDemo}>
+          Load Demo
+        </button>
         <button className="action-btn" onClick={() => setShowImportModal(true)}>
           Import
         </button>
         <button className="action-btn" onClick={handleExport}>
           Export
         </button>
+        {onPrint && (
+          <button className="action-btn" onClick={onPrint}>
+            Print
+          </button>
+        )}
         <button className="action-btn danger" onClick={handleReset}>
           Reset
         </button>

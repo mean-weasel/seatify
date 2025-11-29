@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guest Management - SeatOptima Storyboard</title>
+  <link rel="stylesheet" href="storyboard-styles.css">
+</head>
+<body>
+  <div class="storyboard">
+    <header class="storyboard-header">
+      <p class="breadcrumb"><a href="index.html">Storyboards</a> / Guest Management</p>
+      <h1>Guest Management</h1>
+      <p class="description">
+        Add guests manually or import from CSV. Guests appear as draggable circles on the canvas
+        that can be freely positioned and assigned to tables by dragging.
+      </p>
+      <div class="meta-bar">
+        <span class="meta-item"><strong>6</strong> steps</span>
+        <span class="meta-item"><strong>~3 min</strong> to complete</span>
+        <span class="meta-item"><strong>Prerequisite:</strong> None</span>
+      </div>
+    </header>
+
+    <div class="steps">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h2 class="step-title">View Guests on Canvas</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            In the <span class="action-highlight">Floor Plan</span> view, guests appear as colorful circles
+            on the canvas. Unassigned guests are freely positioned, while assigned guests orbit around
+            their tables. Hover over any guest circle to see their name.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+                <div class="mockup-nav">
+                  <span class="mockup-nav-item">Dashboard</span>
+                  <span class="mockup-nav-item active">Floor Plan</span>
+                  <span class="mockup-nav-item">Guests</span>
+                </div>
+              </div>
+              <div class="mockup-body" style="position:relative">
+                <!-- Collapsed sidebar tab -->
+                <div style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:white;border:2px solid #ddd;border-left:none;border-radius:0 8px 8px 0;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:0.4rem;z-index:10">
+                  <span style="color:#f97066">◀</span>
+                  <span style="writing-mode:vertical-rl;font-weight:600">Guests</span>
+                  <span style="background:#f97066;color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.35rem">8</span>
+                </div>
+                <div class="mockup-main" style="position:relative;margin-left:20px">
+                  <!-- Unassigned guests -->
+                  <div style="position:absolute;top:15%;left:10%;width:28px;height:28px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold">SM</div>
+                  <div style="position:absolute;top:28%;left:10%;width:28px;height:28px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold">JA</div>
+                  <div style="position:absolute;top:41%;left:10%;width:28px;height:28px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold">EM</div>
+                  <!-- Table with seated guests -->
+                  <div class="mockup-table" style="position:absolute;top:50%;left:55%;transform:translate(-50%,-50%);width:60px;height:60px"></div>
+                  <!-- Seated guests orbiting table -->
+                  <div style="position:absolute;top:32%;left:55%;transform:translateX(-50%);width:22px;height:22px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:0.35rem;font-weight:bold">AC</div>
+                  <div style="position:absolute;top:68%;left:55%;transform:translateX(-50%);width:22px;height:22px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:0.35rem;font-weight:bold">MC</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h2 class="step-title">Add a Guest</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Expand the sidebar by clicking it, then click <span class="action-highlight">+ Add Guest</span>.
+            Enter details including name, email, company, group, and dietary restrictions.
+            New guests appear as circles in a staging area on the left side of the canvas.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body" style="align-items:center;justify-content:center;background:rgba(0,0,0,0.3)">
+                <div style="background:white;border-radius:8px;padding:0.75rem;width:50%;box-shadow:0 4px 20px rgba(0,0,0,0.15)">
+                  <div style="font-weight:600;font-size:0.625rem;margin-bottom:0.5rem">Add Guest</div>
+                  <div style="display:flex;flex-direction:column;gap:0.375rem;font-size:0.5rem">
+                    <div>
+                      <div style="color:#999;font-size:0.4rem;margin-bottom:0.1rem">Name *</div>
+                      <div style="background:#f5f5f5;padding:0.2rem;border-radius:3px">John Smith</div>
+                    </div>
+                    <div>
+                      <div style="color:#999;font-size:0.4rem;margin-bottom:0.1rem">Email</div>
+                      <div style="background:#f5f5f5;padding:0.2rem;border-radius:3px">john@email.com</div>
+                    </div>
+                    <div>
+                      <div style="color:#999;font-size:0.4rem;margin-bottom:0.1rem">Group</div>
+                      <div style="background:#f5f5f5;padding:0.2rem;border-radius:3px">Groom's Family</div>
+                    </div>
+                    <div style="display:flex;gap:0.25rem;margin-top:0.25rem">
+                      <span style="background:#f97066;color:white;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.4rem">Save</span>
+                      <span style="background:#f5f5f5;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.4rem">Cancel</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h2 class="step-title">Drag Guests to Tables</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Click and drag any guest circle toward a table. When you get close enough (within range),
+            the table glows green to indicate it will accept the guest. Release to assign them.
+            The guest circle will snap into an orbit position around the table.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body" style="position:relative">
+                <div class="mockup-main" style="position:relative;width:100%">
+                  <!-- Guest being dragged -->
+                  <div style="position:absolute;top:35%;left:30%;width:32px;height:32px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;box-shadow:0 8px 20px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold;transform:scale(1.1);z-index:10">JS</div>
+                  <!-- Drag arrow -->
+                  <div style="position:absolute;top:38%;left:42%;font-size:1.2rem">→</div>
+                  <!-- Table with green glow -->
+                  <div style="position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);width:60px;height:60px;background:white;border:3px solid #22c55e;border-radius:50%;box-shadow:0 0 0 4px rgba(74,222,128,0.3),0 0 20px rgba(74,222,128,0.2);display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#666">Table 1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Tip:</strong> The snap threshold is generous - you don't need to drop the guest
+            exactly on the table, just get close enough for the green glow to appear.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h2 class="step-title">Detach Guests from Tables</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            To remove a guest from a table, simply drag their circle away from the table.
+            Once you're far enough away from any table, the guest becomes a free-floating
+            circle on the canvas again, ready to be repositioned or assigned elsewhere.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body" style="position:relative">
+                <div class="mockup-main" style="position:relative;width:100%">
+                  <!-- Table -->
+                  <div class="mockup-table" style="position:absolute;top:50%;left:60%;transform:translate(-50%,-50%);width:60px;height:60px"></div>
+                  <!-- Guest being dragged away -->
+                  <div style="position:absolute;top:30%;left:25%;width:32px;height:32px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;box-shadow:0 8px 20px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold;z-index:10">JS</div>
+                  <!-- Arrow showing drag direction -->
+                  <div style="position:absolute;top:45%;left:35%;font-size:1rem;transform:rotate(-45deg)">←</div>
+                  <!-- Remaining guest on table -->
+                  <div style="position:absolute;top:68%;left:60%;transform:translateX(-50%);width:22px;height:22px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:0.35rem;font-weight:bold">MC</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">5</span>
+          <h2 class="step-title">Import Guests from CSV</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            For bulk import, click <span class="action-highlight">Import</span> in the header and select
+            "Import Guest List (CSV)". Your CSV should have columns for name, email, company, group, etc.
+            Imported guests appear as circles in the staging area.
+          </p>
+          <div class="callout">
+            <strong>CSV Format:</strong> The first row should be headers. Common columns:
+            <code style="background:#f5f5f5;padding:0.1rem 0.25rem;border-radius:3px;font-size:0.8125rem">name, email, company, group, jobtitle</code>
+          </div>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+                <div style="margin-left:auto;display:flex;gap:0.25rem">
+                  <span style="background:#f97066;color:white;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">Import</span>
+                </div>
+              </div>
+              <div class="mockup-body" style="align-items:center;justify-content:center;background:rgba(0,0,0,0.3)">
+                <div style="background:white;border-radius:8px;padding:0.75rem;width:55%;box-shadow:0 4px 20px rgba(0,0,0,0.15)">
+                  <div style="font-weight:600;font-size:0.625rem;margin-bottom:0.5rem">Import Data</div>
+                  <div style="border:2px solid #f5f5f5;border-radius:6px;padding:0.5rem;margin-bottom:0.375rem">
+                    <div style="font-weight:500;font-size:0.5rem">Import Guest List (CSV)</div>
+                    <div style="font-size:0.4rem;color:#999">Upload a CSV file with columns: name, email...</div>
+                    <div style="background:#f5f5f5;padding:0.2rem;border-radius:3px;margin-top:0.25rem;font-size:0.4rem">Choose file...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">6</span>
+          <h2 class="step-title">Use Sidebar for Filtering</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Expand the sidebar to search and filter guests. Use the search box to find guests by name,
+            or filter by group and RSVP status. Clicking a guest in the sidebar highlights them on the canvas.
+          </p>
+          <ul style="margin:0.75rem 0;padding-left:1.5rem;color:#555;line-height:1.8">
+            <li><strong>Search:</strong> Find guests by name, email, or company</li>
+            <li><strong>Filter by group:</strong> Show only specific groups (e.g., "Bride's Family")</li>
+            <li><strong>Filter by status:</strong> Show Confirmed, Pending, or Declined guests</li>
+          </ul>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar" style="display:flex;flex-direction:column;gap:0.25rem;padding:0.375rem;font-size:0.4rem">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-weight:600;font-size:0.5rem">Guests</span>
+                    <span style="color:#999">▶</span>
+                  </div>
+                  <div style="background:white;padding:0.2rem;border-radius:3px;border:1px solid #ddd">Search...</div>
+                  <div style="display:flex;gap:0.2rem">
+                    <div style="flex:1;background:white;padding:0.15rem;border-radius:3px;font-size:0.35rem">All Groups ▾</div>
+                    <div style="flex:1;background:white;padding:0.15rem;border-radius:3px;font-size:0.35rem">All Status ▾</div>
+                  </div>
+                  <div style="color:#999;font-size:0.35rem;text-transform:uppercase;margin-top:0.25rem">Unassigned (3)</div>
+                  <div style="background:#fff;padding:0.2rem;border-radius:3px">Sarah M.</div>
+                  <div style="background:#fff;padding:0.2rem;border-radius:3px">John A.</div>
+                </div>
+                <div class="mockup-main" style="position:relative">
+                  <div style="position:absolute;top:20%;left:15%;width:28px;height:28px;background:linear-gradient(135deg,#f97066,#ff8a65);border-radius:50%;border:3px solid #f97066;box-shadow:0 0 0 4px rgba(249,112,102,0.2);display:flex;align-items:center;justify-content:center;color:white;font-size:0.4rem;font-weight:bold">SM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="storyboard-nav">
+      <a href="02-floor-plan-setup.html" class="nav-link">← Previous: Floor Plan Setup</a>
+      <a href="04-relationship-mapping.html" class="nav-link primary">Next: Relationship Mapping →</a>
+    </nav>
+  </div>
+</body>
+</html>

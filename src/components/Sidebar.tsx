@@ -35,8 +35,13 @@ export function Sidebar() {
 
   if (!sidebarOpen) {
     return (
-      <button className="sidebar-toggle collapsed" onClick={toggleSidebar}>
-        ◀ Guests ({stats.total})
+      <button className="sidebar-toggle-collapsed" onClick={toggleSidebar}>
+        <span className="toggle-icon">◀</span>
+        <span className="toggle-label">Guests</span>
+        <span className="toggle-count">{stats.total}</span>
+        <span className="toggle-stats">
+          {stats.total - stats.assigned} unassigned
+        </span>
       </button>
     );
   }

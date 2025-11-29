@@ -1,0 +1,477 @@
+import { useState, useMemo } from 'react';
+import { useStore } from '../store/useStore';
+import { GuestForm } from './GuestForm';
+import { RelationshipMatrix } from './RelationshipMatrix';
+import type { Guest } from '../types';
+import './GuestManagementView.css';
+
+type SortColumn = 'name' | 'group' | 'rsvpStatus' | 'table';
+type SortDirection = 'asc' | 'desc';
+type ViewMode = 'list' | 'relationships';
+
+export function GuestManagementView() {
+  const {
+    event,
+    removeGuest,
+    updateGuest,
+    assignGuestToTable
+  } = useStore();
+
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
+  const [sortColumn, setSortColumn] = useState<SortColumn>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterAssigned, setFilterAssigned] = useState<string>('all');
+  const [showAddGuest, setShowAddGuest] = useState(false);
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [selectedGuestDetail, setSelectedGuestDetail] = useState<string | null>(null);
+
+  // Get table name by ID
+  const getTableName = (tableId: string | undefined) => {
+    if (!tableId) return null;
+    const table = event.tables.find(t => t.id === tableId);
+    return table?.name || null;
+  };
+
+  // Filter and sort guests
+  const filteredGuests = useMemo(() => {
+    let guests = [...event.guests];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      guests = guests.filter(g =>
+        g.name.toLowerCase().includes(query) ||
+        g.email?.toLowerCase().includes(query) ||
+        g.company?.toLowerCase().includes(query) ||
+        g.group?.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (filterStatus !== 'all') {
+      guests = guests.filter(g => g.rsvpStatus === filterStatus);
+    }
+
+    // Assigned filter
+    if (filterAssigned === 'assigned') {
+      guests = guests.filter(g => g.tableId);
+    } else if (filterAssigned === 'unassigned') {
+      guests = guests.filter(g => !g.tableId);
+    }
+
+    // Sort
+    guests.sort((a, b) => {
+      let aVal: string = '';
+      let bVal: string = '';
+
+      switch (sortColumn) {
+        case 'name':
+          aVal = a.name;
+          bVal = b.name;
+          break;
+        case 'group':
+          aVal = a.group || '';
+          bVal = b.group || '';
+          break;
+        case 'rsvpStatus':
+          aVal = a.rsvpStatus;
+          bVal = b.rsvpStatus;
+          break;
+        case 'table':
+          aVal = getTableName(a.tableId) || 'zzz';
+          bVal = getTableName(b.tableId) || 'zzz';
+          break;
+      }
+
+      const comparison = aVal.localeCompare(bVal);
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    return guests;
+  }, [event.guests, searchQuery, filterStatus, filterAssigned, sortColumn, sortDirection]);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const toggleGuestSelection = (id: string) => {
+    const newSelected = new Set(selectedGuests);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedGuests(newSelected);
+  };
+
+  const selectAll = () => {
+    if (selectedGuests.size === filteredGuests.length) {
+      setSelectedGuests(new Set());
+    } else {
+      setSelectedGuests(new Set(filteredGuests.map(g => g.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Delete ${selectedGuests.size} selected guests?`)) {
+      selectedGuests.forEach(id => removeGuest(id));
+      setSelectedGuests(new Set());
+    }
+  };
+
+  const handleBulkAssign = (tableId: string) => {
+    selectedGuests.forEach(id => assignGuestToTable(id, tableId));
+    setSelectedGuests(new Set());
+  };
+
+  const handleBulkStatusChange = (status: Guest['rsvpStatus']) => {
+    selectedGuests.forEach(id => updateGuest(id, { rsvpStatus: status }));
+    setSelectedGuests(new Set());
+  };
+
+  const selectedGuestData = selectedGuestDetail
+    ? event.guests.find(g => g.id === selectedGuestDetail)
+    : null;
+
+  return (
+    <div className="guest-management-view">
+      {/* Toolbar */}
+      <div className="gm-toolbar">
+        <div className="toolbar-left">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search guests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="declined">Declined</option>
+          </select>
+
+          <select
+            value={filterAssigned}
+            onChange={(e) => setFilterAssigned(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Guests</option>
+            <option value="assigned">Assigned</option>
+            <option value="unassigned">Unassigned</option>
+          </select>
+        </div>
+
+        <div className="toolbar-right">
+          <div className="view-toggle">
+            <button
+              className={viewMode === 'list' ? 'active' : ''}
+              onClick={() => setViewMode('list')}
+            >
+              Guest List
+            </button>
+            <button
+              className={viewMode === 'relationships' ? 'active' : ''}
+              onClick={() => setViewMode('relationships')}
+            >
+              Relationships
+            </button>
+          </div>
+          <span className="guest-count">{filteredGuests.length} guests</span>
+          <button className="add-guest-btn" onClick={() => setShowAddGuest(true)}>
+            + Add Guest
+          </button>
+        </div>
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedGuests.size > 0 && (
+        <div className="bulk-actions-bar">
+          <span className="selection-count">{selectedGuests.size} selected</span>
+
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                handleBulkAssign(e.target.value);
+                e.target.value = '';
+              }
+            }}
+            className="bulk-select"
+            defaultValue=""
+          >
+            <option value="" disabled>Assign to table...</option>
+            {event.tables.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                handleBulkStatusChange(e.target.value as Guest['rsvpStatus']);
+                e.target.value = '';
+              }
+            }}
+            className="bulk-select"
+            defaultValue=""
+          >
+            <option value="" disabled>Change status...</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="declined">Declined</option>
+          </select>
+
+          <button className="bulk-btn danger" onClick={handleBulkDelete}>
+            Delete
+          </button>
+
+          <button
+            className="bulk-btn clear"
+            onClick={() => setSelectedGuests(new Set())}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      <div className="gm-content">
+        {viewMode === 'relationships' ? (
+          <RelationshipMatrix />
+        ) : (
+        <div className="guest-table-container">
+          {filteredGuests.length === 0 ? (
+            <div className="empty-state">
+              <h3>No guests found</h3>
+              <p>Add guests or adjust your filters.</p>
+              <button className="add-guest-btn" onClick={() => setShowAddGuest(true)}>
+                + Add Guest
+              </button>
+            </div>
+          ) : (
+            <table className="guest-table">
+              <thead>
+                <tr>
+                  <th className="checkbox-col">
+                    <input
+                      type="checkbox"
+                      checked={selectedGuests.size === filteredGuests.length && filteredGuests.length > 0}
+                      onChange={selectAll}
+                    />
+                  </th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort('name')}
+                  >
+                    Name {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort('group')}
+                  >
+                    Group {sortColumn === 'group' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort('rsvpStatus')}
+                  >
+                    RSVP {sortColumn === 'rsvpStatus' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th
+                    className="sortable"
+                    onClick={() => handleSort('table')}
+                  >
+                    Table {sortColumn === 'table' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredGuests.map((guest) => (
+                  <tr
+                    key={guest.id}
+                    className={`${selectedGuests.has(guest.id) ? 'selected' : ''} ${selectedGuestDetail === guest.id ? 'highlighted' : ''}`}
+                    onClick={() => setSelectedGuestDetail(guest.id)}
+                  >
+                    <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedGuests.has(guest.id)}
+                        onChange={() => toggleGuestSelection(guest.id)}
+                      />
+                    </td>
+                    <td>
+                      <div className="guest-name-cell">
+                        <div className="guest-avatar">
+                          {guest.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div>
+                          <span className="guest-name">{guest.name}</span>
+                          {guest.company && (
+                            <span className="guest-company">{guest.company}</span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {guest.group ? (
+                        <span className="group-chip">{guest.group}</span>
+                      ) : (
+                        <span className="no-group">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`rsvp-badge ${guest.rsvpStatus}`}>
+                        {guest.rsvpStatus}
+                      </span>
+                    </td>
+                    <td>
+                      {guest.tableId ? (
+                        <span className="table-badge">{getTableName(guest.tableId)}</span>
+                      ) : (
+                        <span className="unassigned">Unassigned</span>
+                      )}
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <div className="row-actions">
+                        <button
+                          className="action-icon-btn"
+                          onClick={() => setEditingGuest(guest)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="action-icon-btn danger"
+                          onClick={() => {
+                            if (confirm(`Delete ${guest.name}?`)) {
+                              removeGuest(guest.id);
+                            }
+                          }}
+                        >
+                          Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        )}
+
+        {/* Detail Panel */}
+        {selectedGuestData && (
+          <div className="guest-detail-panel">
+            <div className="detail-header">
+              <h3>Guest Details</h3>
+              <button className="close-btn" onClick={() => setSelectedGuestDetail(null)}>×</button>
+            </div>
+            <div className="detail-content">
+              <div className="detail-avatar">
+                {selectedGuestData.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+              <h2>{selectedGuestData.name}</h2>
+              {selectedGuestData.email && (
+                <p className="detail-email">{selectedGuestData.email}</p>
+              )}
+              {selectedGuestData.company && (
+                <p className="detail-company">{selectedGuestData.company}</p>
+              )}
+
+              <div className="detail-badges">
+                <span className={`rsvp-badge ${selectedGuestData.rsvpStatus}`}>
+                  {selectedGuestData.rsvpStatus}
+                </span>
+                {selectedGuestData.group && (
+                  <span className="group-chip">{selectedGuestData.group}</span>
+                )}
+              </div>
+
+              {selectedGuestData.interests && selectedGuestData.interests.length > 0 && (
+                <div className="detail-section">
+                  <h4>Interests</h4>
+                  <div className="tag-list">
+                    {selectedGuestData.interests.map(i => (
+                      <span key={i} className="tag">{i}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedGuestData.dietaryRestrictions && selectedGuestData.dietaryRestrictions.length > 0 && (
+                <div className="detail-section">
+                  <h4>Dietary Restrictions</h4>
+                  <div className="tag-list">
+                    {selectedGuestData.dietaryRestrictions.map(d => (
+                      <span key={d} className="tag warning">{d}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedGuestData.relationships.length > 0 && (
+                <div className="detail-section">
+                  <h4>Relationships</h4>
+                  <div className="relationships-list">
+                    {selectedGuestData.relationships.map(rel => {
+                      const relatedGuest = event.guests.find(g => g.id === rel.guestId);
+                      return relatedGuest ? (
+                        <div key={rel.guestId} className={`relationship-item ${rel.type}`}>
+                          <span className="rel-name">{relatedGuest.name}</span>
+                          <span className="rel-type">{rel.type}</span>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {selectedGuestData.notes && (
+                <div className="detail-section">
+                  <h4>Notes</h4>
+                  <p className="notes-text">{selectedGuestData.notes}</p>
+                </div>
+              )}
+
+              <div className="detail-actions">
+                <button
+                  className="detail-btn"
+                  onClick={() => setEditingGuest(selectedGuestData)}
+                >
+                  Edit Guest
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Guest Modal */}
+      {(showAddGuest || editingGuest) && (
+        <GuestForm
+          guestId={editingGuest?.id}
+          onClose={() => {
+            setShowAddGuest(false);
+            setEditingGuest(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}

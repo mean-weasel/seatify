@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floor Plan Setup - SeatOptima Storyboard</title>
+  <link rel="stylesheet" href="storyboard-styles.css">
+</head>
+<body>
+  <div class="storyboard">
+    <header class="storyboard-header">
+      <p class="breadcrumb"><a href="index.html">Storyboards</a> / Floor Plan Setup</p>
+      <h1>Floor Plan Setup</h1>
+      <p class="description">
+        Create your event's floor plan by adding tables, arranging them on the canvas,
+        and customizing their properties like capacity, shape, and size.
+      </p>
+      <div class="meta-bar">
+        <span class="meta-item"><strong>6</strong> steps</span>
+        <span class="meta-item"><strong>~3 min</strong> to complete</span>
+        <span class="meta-item"><strong>Prerequisite:</strong> None</span>
+      </div>
+    </header>
+
+    <div class="steps">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <h2 class="step-title">Navigate to Floor Plan View</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Click the <span class="action-highlight">Floor Plan</span> tab in the navigation bar.
+            This view shows the interactive canvas where you'll arrange tables and guests.
+            The collapsible sidebar on the left provides guest filtering and search.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+                <div class="mockup-nav">
+                  <span class="mockup-nav-item">Dashboard</span>
+                  <span class="mockup-nav-item active">Floor Plan</span>
+                  <span class="mockup-nav-item">Guests</span>
+                </div>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main" style="flex-direction:column">
+                  <div style="display:flex;gap:0.375rem;margin-bottom:0.5rem">
+                    <span style="background:#f5f5f5;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">⭕ Round</span>
+                    <span style="background:#f5f5f5;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">▭ Rectangle</span>
+                    <span style="background:#f5f5f5;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">⬜ Square</span>
+                  </div>
+                  <span style="color:#999;font-size:0.5rem">No tables yet</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <h2 class="step-title">Add Tables Using Toolbar</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Use the toolbar buttons at the top of the canvas to add tables:
+          </p>
+          <ul style="margin:0.75rem 0;padding-left:1.5rem;color:#555;line-height:1.8">
+            <li><strong>⭕ Round:</strong> Circular tables (default 8 seats)</li>
+            <li><strong>▭ Rectangle:</strong> Long rectangular tables (default 10 seats)</li>
+            <li><strong>⬜ Square:</strong> Square tables (default 8 seats)</li>
+          </ul>
+          <p class="step-description">
+            Each click adds a new table to the center of the canvas. Tables are automatically named "Table 1", "Table 2", etc.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main" style="position:relative">
+                  <div style="position:absolute;top:0.5rem;left:50%;transform:translateX(-50%);display:flex;gap:0.25rem">
+                    <span style="background:#f97066;color:white;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">⭕ Round</span>
+                    <span style="background:#f5f5f5;padding:0.2rem 0.4rem;border-radius:4px;font-size:0.5rem">▭ Rectangle</span>
+                  </div>
+                  <div class="mockup-table" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <h2 class="step-title">Drag Tables to Position</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Click and drag any table to reposition it on the canvas. Arrange tables to match your venue layout.
+            Use <span class="keyboard-shortcut">Ctrl/Cmd + Scroll</span> to zoom in/out,
+            or <span class="keyboard-shortcut">Shift + Drag</span> to pan the canvas.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main" style="position:relative">
+                  <div class="mockup-table" style="position:absolute;top:20%;left:20%;opacity:0.5;border-style:dashed"></div>
+                  <div class="mockup-table" style="position:absolute;top:50%;left:60%;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></div>
+                  <div style="position:absolute;top:35%;left:40%;font-size:1.5rem">↗️</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <h2 class="step-title">Select a Table to Edit</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            Click any table to select it. A properties panel appears on the right side showing
+            editable settings. The selected table displays a coral highlight with a dashed outline.
+          </p>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main" style="position:relative">
+                  <div class="mockup-table" style="position:absolute;top:40%;left:30%"></div>
+                  <div style="position:absolute;top:40%;left:55%;width:50px;height:50px;border:3px solid #f97066;border-radius:50%;box-shadow:0 0 0 6px rgba(249,112,102,0.2)"></div>
+                  <div style="position:absolute;right:0.5rem;top:1rem;width:30%;background:white;border-radius:6px;padding:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:0.5rem">
+                    <div style="font-weight:600;margin-bottom:0.25rem">Table Settings</div>
+                    <div style="color:#999;font-size:0.4rem">Name: Table 1</div>
+                    <div style="color:#999;font-size:0.4rem">Capacity: 8</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">5</span>
+          <h2 class="step-title">Customize Table Properties</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            In the properties panel, you can modify:
+          </p>
+          <ul style="margin:0.75rem 0;padding-left:1.5rem;color:#555;line-height:1.8">
+            <li><strong>Name:</strong> Give the table a descriptive name (e.g., "Head Table", "VIP")</li>
+            <li><strong>Shape:</strong> Switch between round, rectangle, or square</li>
+            <li><strong>Capacity:</strong> Set seats from 1-20 using +/- buttons</li>
+            <li><strong>Size:</strong> Choose Small/Medium/Large presets or set exact dimensions</li>
+          </ul>
+          <div class="screenshot">
+            <div class="screenshot-mockup">
+              <div class="mockup-header">
+                <span class="mockup-logo">SeatOptima</span>
+              </div>
+              <div class="mockup-body">
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main" style="justify-content:flex-end;padding:0.5rem">
+                  <div style="width:40%;background:white;border-radius:6px;padding:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:0.5rem">
+                    <div style="font-weight:600;margin-bottom:0.5rem;display:flex;justify-content:space-between">Table Settings <span style="color:#999">×</span></div>
+                    <div style="margin-bottom:0.375rem">
+                      <div style="color:#999;font-size:0.4rem;text-transform:uppercase;margin-bottom:0.125rem">Name</div>
+                      <div style="background:#f5f5f5;padding:0.25rem;border-radius:3px">Head Table</div>
+                    </div>
+                    <div style="margin-bottom:0.375rem">
+                      <div style="color:#999;font-size:0.4rem;text-transform:uppercase;margin-bottom:0.125rem">Shape</div>
+                      <div style="display:flex;gap:0.25rem">
+                        <span style="background:#f5f5f5;padding:0.2rem 0.3rem;border-radius:3px">⭕</span>
+                        <span style="background:#fff5f3;border:1px solid #f97066;padding:0.2rem 0.3rem;border-radius:3px">▭</span>
+                        <span style="background:#f5f5f5;padding:0.2rem 0.3rem;border-radius:3px">⬜</span>
+                      </div>
+                    </div>
+                    <div style="margin-bottom:0.375rem">
+                      <div style="color:#999;font-size:0.4rem;text-transform:uppercase;margin-bottom:0.125rem">Capacity</div>
+                      <div style="display:flex;align-items:center;gap:0.25rem">
+                        <span style="background:#f5f5f5;padding:0.15rem 0.3rem;border-radius:3px">−</span>
+                        <span style="font-weight:600">10</span>
+                        <span style="background:#f5f5f5;padding:0.15rem 0.3rem;border-radius:3px">+</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">6</span>
+          <h2 class="step-title">Delete Unwanted Tables</h2>
+        </div>
+        <div class="step-content">
+          <p class="step-description">
+            To remove a table, select it and click the <span class="action-highlight">Delete Table</span> button
+            in the properties panel. A confirmation dialog appears if guests are assigned.
+            You can also hover over a table to see a quick-delete (×) button.
+          </p>
+          <div class="callout">
+            <strong>Tip:</strong> Deleting a table automatically moves any seated guests back onto
+            the canvas as free-floating circles, ready to be reassigned.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="storyboard-nav">
+      <a href="01-quick-start-demo.html" class="nav-link">← Previous: Quick Start</a>
+      <a href="03-guest-management.html" class="nav-link primary">Next: Guest Management →</a>
+    </nav>
+  </div>
+</body>
+</html>

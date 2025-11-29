@@ -1,0 +1,57 @@
+.mockup-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+.mockup-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-primary);
+  flex-shrink: 0;
+}
+
+.mockup-nav h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.mockup-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mockup-tab {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-bounce);
+}
+
+.mockup-tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.mockup-tab.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 112, 102, 0.3);
+}
+
+.mockup-content {
+  flex: 1;
+  overflow: hidden;
+}

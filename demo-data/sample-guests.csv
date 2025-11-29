@@ -1,0 +1,14 @@
+name,email,company,group,jobtitle
+Alice Johnson,alice@company.com,Acme Corp,Marketing Team,Marketing Director
+Bob Smith,bob@company.com,Acme Corp,Marketing Team,Content Manager
+Carol Williams,carol@company.com,Acme Corp,Engineering,Senior Developer
+David Brown,david@company.com,Acme Corp,Engineering,Tech Lead
+Emma Davis,emma@company.com,Acme Corp,Sales,Account Executive
+Frank Miller,frank@partner.com,Partner Inc,Partners,CEO
+Grace Lee,grace@partner.com,Partner Inc,Partners,COO
+Henry Wilson,henry@client.com,Client Co,VIP Clients,VP Operations
+Ivy Chen,ivy@client.com,Client Co,VIP Clients,Director
+Jack Taylor,jack@email.com,,Friends,
+Kate Anderson,kate@email.com,,Friends,
+Leo Martinez,leo@email.com,,Family,
+Maria Garcia,maria@email.com,,Family,

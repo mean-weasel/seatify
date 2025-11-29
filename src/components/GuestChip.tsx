@@ -2,6 +2,40 @@ import { useDraggable } from '@dnd-kit/core';
 import type { Guest } from '../types';
 import './GuestChip.css';
 
+// Generate consistent color from string (group name)
+const GROUP_COLORS = [
+  '#7dd3fc', // sky
+  '#86efac', // green
+  '#fcd34d', // amber
+  '#f9a8d4', // pink
+  '#a5b4fc', // indigo
+  '#fca5a5', // red
+  '#fdba74', // orange
+  '#c4b5fd', // violet
+  '#5eead4', // teal
+  '#fde68a', // yellow
+  '#f0abfc', // fuchsia
+  '#93c5fd', // blue
+  '#a3e635', // lime
+  '#fb923c', // orange-dark
+  '#a78bfa', // purple
+  '#f472b6', // pink-dark
+  '#22d3ee', // cyan
+  '#34d399', // emerald
+  '#facc15', // yellow-dark
+  '#f87171', // red-light
+];
+
+export function getGroupColor(group: string | undefined): string | null {
+  if (!group) return null;
+  // Simple hash function to get consistent color
+  let hash = 0;
+  for (let i = 0; i < group.length; i++) {
+    hash = group.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return GROUP_COLORS[Math.abs(hash) % GROUP_COLORS.length];
+}
+
 interface GuestChipProps {
   guest: Guest;
   compact?: boolean;
@@ -39,13 +73,18 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
     }
   };
 
+  const groupColor = getGroupColor(guest.group);
+
   if (compact) {
     return (
       <div
         ref={setNodeRef}
         className={`guest-chip compact ${isDragging ? 'dragging' : ''}`}
-        style={style}
-        title={`${guest.name}${guest.company ? ` - ${guest.company}` : ''}`}
+        style={{
+          ...style,
+          ...(groupColor ? { borderColor: groupColor } : {}),
+        }}
+        title={`${guest.name}${guest.company ? ` - ${guest.company}` : ''}${guest.group ? ` (${guest.group})` : ''}`}
         onClick={onClick}
         {...attributes}
         {...listeners}
@@ -55,6 +94,7 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
           className="status-dot"
           style={{ backgroundColor: getStatusColor() }}
         />
+        {groupColor && <span className="group-indicator" style={{ backgroundColor: groupColor }} />}
       </div>
     );
   }
@@ -62,8 +102,11 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
   return (
     <div
       ref={setNodeRef}
-      className={`guest-chip ${isDragging ? 'dragging' : ''} ${guest.tableId ? 'assigned' : ''}`}
-      style={style}
+      className={`guest-chip ${isDragging ? 'dragging' : ''} ${guest.tableId ? 'assigned' : ''} ${groupColor ? 'has-group' : ''}`}
+      style={{
+        ...style,
+        ...(groupColor ? { '--group-color': groupColor } as React.CSSProperties : {}),
+      }}
       onClick={onClick}
       {...attributes}
       {...listeners}
@@ -74,7 +117,11 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
       <div className="guest-info">
         <span className="guest-name">{guest.name}</span>
         {guest.company && <span className="guest-company">{guest.company}</span>}
-        {guest.group && <span className="guest-group">{guest.group}</span>}
+        {guest.group && (
+          <span className="guest-group" style={{ backgroundColor: groupColor || undefined }}>
+            {guest.group}
+          </span>
+        )}
       </div>
       {guest.tableId && (
         <span className="assigned-badge" title="Assigned to table">✓</span>
