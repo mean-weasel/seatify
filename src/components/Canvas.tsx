@@ -23,6 +23,7 @@ import { LayoutToolbar } from './LayoutToolbar';
 import { MainToolbar } from './MainToolbar';
 import { GridControls } from './GridControls';
 import { RelationshipMatrix } from './RelationshipMatrix';
+import { EmptyState } from './EmptyState';
 import type { Table, AlignmentGuide, Guest } from '../types';
 import './Canvas.css';
 
@@ -925,10 +926,13 @@ export function Canvas() {
             />
           )}
 
-          {event.tables.length === 0 && event.guests.filter((g) => !g.tableId).length === 0 && (
+          {event.tables.length === 0 && (
             <div className="canvas-empty">
-              <h2>Welcome to TableCraft!</h2>
-              <p>Click "Add Table" above to create tables, then drag guests from the sidebar to assign seats.</p>
+              <EmptyState
+                variant="canvas"
+                title="Start Your Floor Plan"
+                description="Click 'Add Table' above to create tables, then drag guests from the sidebar to assign seats."
+              />
             </div>
           )}
         </div>

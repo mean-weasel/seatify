@@ -1,0 +1,125 @@
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+}
+
+.empty-state-container--canvas {
+  padding: 3rem;
+}
+
+.empty-state-container--guests-unassigned,
+.empty-state-container--guests-assigned,
+.empty-state-container--search {
+  padding: 1.5rem 1rem;
+}
+
+.empty-state-illustration-wrapper {
+  margin-bottom: 1.25rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state-illustration {
+  width: 160px;
+  height: 120px;
+}
+
+.empty-state-illustration--small {
+  width: 100px;
+  height: 70px;
+}
+
+.empty-state-title {
+  margin: 0 0 0.5rem 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.empty-state-container--canvas .empty-state-title {
+  font-size: var(--font-size-xl);
+}
+
+.empty-state-container--guests-unassigned .empty-state-title,
+.empty-state-container--guests-assigned .empty-state-title,
+.empty-state-container--search .empty-state-title {
+  font-size: var(--font-size-base);
+}
+
+.empty-state-description {
+  margin: 0 0 1.25rem 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.empty-state-container--guests-unassigned .empty-state-description,
+.empty-state-container--guests-assigned .empty-state-description,
+.empty-state-container--search .empty-state-description {
+  font-size: var(--font-size-sm);
+  margin-bottom: 0;
+}
+
+.empty-state-action {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-bounce);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-state-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.empty-state-action:active {
+  transform: translateY(0);
+}
+
+/* Sidebar specific styling */
+.guest-list .empty-state-container {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-border);
+}
+
+/* Success variant styling for all-assigned state */
+.empty-state-container--guests-unassigned .empty-state-title {
+  color: var(--color-success);
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .empty-state-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .empty-state-illustration {
+    width: 120px;
+    height: 90px;
+  }
+
+  .empty-state-illustration--small {
+    width: 80px;
+    height: 56px;
+  }
+
+  .empty-state-title {
+    font-size: var(--font-size-base);
+  }
+
+  .empty-state-description {
+    font-size: var(--font-size-sm);
+  }
+}

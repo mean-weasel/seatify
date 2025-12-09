@@ -4,6 +4,7 @@ import { useIsMobile } from '../hooks/useResponsive';
 import { GuestChip } from './GuestChip';
 import { GuestForm } from './GuestForm';
 import { GroupLegend } from './GroupLegend';
+import { EmptyState } from './EmptyState';
 import './Sidebar.css';
 
 export function Sidebar() {
@@ -146,11 +147,19 @@ export function Sidebar() {
               />
             ))}
             {unassignedGuests.length === 0 && (
-              <p className="empty-message">
-                {filteredGuests.length === 0
-                  ? 'No guests match your filters'
-                  : 'All guests are assigned!'}
-              </p>
+              filteredGuests.length === 0 ? (
+                <EmptyState
+                  variant="search"
+                  title="No Results Found"
+                  description="Try adjusting your search or filters"
+                />
+              ) : (
+                <EmptyState
+                  variant="guests-unassigned"
+                  title="All Guests Seated!"
+                  description="Everyone has been assigned to a table"
+                />
+              )
             )}
           </div>
         </div>
@@ -167,6 +176,13 @@ export function Sidebar() {
                 </div>
               );
             })}
+            {assignedGuests.length === 0 && (
+              <EmptyState
+                variant="guests-assigned"
+                title="No Guests Assigned Yet"
+                description="Drag guests from above to assign them to tables"
+              />
+            )}
           </div>
         </div>
       </div>
