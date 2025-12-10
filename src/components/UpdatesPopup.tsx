@@ -60,7 +60,7 @@ export function UpdatesButton({ variant = 'header' }: UpdatesButtonProps) {
         onClick={() => setIsOpen(true)}
         title="What's New"
       >
-        {variant === 'landing' ? "What's New" : '?'}
+        {variant === 'landing' ? "What's New" : '✨'}
       </button>
       <UpdatesPopup isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
