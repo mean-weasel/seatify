@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { version } from '../../package.json';
 import updates from '../updates.json';
 import './UpdatesPopup.css';
@@ -11,7 +12,8 @@ interface UpdatesPopupProps {
 export function UpdatesPopup({ isOpen, onClose }: UpdatesPopupProps) {
   if (!isOpen) return null;
 
-  return (
+  // Use portal to render at document body level for proper centering
+  return createPortal(
     <div className="updates-overlay" onClick={onClose}>
       <div className="updates-popup" onClick={(e) => e.stopPropagation()}>
         <div className="updates-header">
@@ -39,7 +41,8 @@ export function UpdatesPopup({ isOpen, onClose }: UpdatesPopupProps) {
           <span className="current-version">Current version: v{version}</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -57,7 +60,7 @@ export function UpdatesButton({ variant = 'header' }: UpdatesButtonProps) {
         onClick={() => setIsOpen(true)}
         title="What's New"
       >
-        {variant === 'landing' ? "What's New" : '?'}
+        {variant === 'landing' ? "What's New" : '✨'}
       </button>
       <UpdatesPopup isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
