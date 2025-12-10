@@ -188,8 +188,9 @@
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  min-width: 60px;
+  min-width: 100px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .shortcut-desc {
