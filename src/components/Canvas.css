@@ -20,8 +20,14 @@
   z-index: 10;
 }
 
+/* Manual dark mode */
+[data-theme="dark"] .canvas-toolbar {
+  background: rgba(36, 28, 24, 0.9);
+}
+
+/* System dark mode - only when no manual override */
 @media (prefers-color-scheme: dark) {
-  .canvas-toolbar {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .canvas-toolbar {
     background: rgba(36, 28, 24, 0.9);
   }
 }
@@ -204,8 +210,14 @@
   opacity: 0.6;
 }
 
+/* Manual dark mode */
+[data-theme="dark"] .canvas-grid-overlay {
+  opacity: 0.3;
+}
+
+/* System dark mode - only when no manual override */
 @media (prefers-color-scheme: dark) {
-  .canvas-grid-overlay {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .canvas-grid-overlay {
     opacity: 0.3;
   }
 }

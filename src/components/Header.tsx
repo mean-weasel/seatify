@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { version } from '../../package.json';
 import { UpdatesButton } from './UpdatesPopup';
@@ -9,7 +10,36 @@ interface HeaderProps {
 }
 
 export function Header({ onLogoClick, onShowHelp }: HeaderProps) {
-  const { event, setEventName } = useStore();
+  const { event, setEventName, theme, cycleTheme } = useStore();
+
+  // Apply theme to document
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.setAttribute('data-theme', 'light');
+    } else if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      // System mode - remove attribute so media query takes over
+      root.removeAttribute('data-theme');
+    }
+  }, [theme]);
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light': return '\u2600'; // Sun
+      case 'dark': return '\u263D'; // Moon
+      default: return '\u2699'; // Gear (system)
+    }
+  };
+
+  const getThemeTitle = () => {
+    switch (theme) {
+      case 'light': return 'Light mode (click for dark)';
+      case 'dark': return 'Dark mode (click for system)';
+      default: return 'System theme (click for light)';
+    }
+  };
 
   return (
     <header className="header">
@@ -31,6 +61,13 @@ export function Header({ onLogoClick, onShowHelp }: HeaderProps) {
             ?
           </button>
         )}
+        <button
+          className="theme-btn"
+          onClick={cycleTheme}
+          title={getThemeTitle()}
+        >
+          {getThemeIcon()}
+        </button>
         <div className="event-info">
           <input
             type="text"

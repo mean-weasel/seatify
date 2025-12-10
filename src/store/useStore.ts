@@ -81,11 +81,17 @@ interface HistoryEntry {
 
 const MAX_HISTORY_SIZE = 50;
 
+// Theme type
+type Theme = 'light' | 'dark' | 'system';
+
 interface AppState {
   // Current event
   event: Event;
   canvas: CanvasState;
   canvasPrefs: CanvasPreferences;
+
+  // Theme
+  theme: Theme;
 
   // Undo/Redo history
   history: HistoryEntry[];
@@ -229,6 +235,10 @@ interface AppState {
   pushHistory: (description: string) => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
+
+  // Actions - Theme
+  setTheme: (theme: Theme) => void;
+  cycleTheme: () => void;
 
   // Actions - Persistence
   resetEvent: () => void;
@@ -546,6 +556,7 @@ export const useStore = create<AppState>()(
       alignmentGuides: [],
       activeView: 'canvas',
       sidebarOpen: false,
+      theme: 'system',
       visibleGroups: 'all',
       contextMenu: {
         isOpen: false,
@@ -1440,6 +1451,16 @@ export const useStore = create<AppState>()(
       setActiveView: (activeView) => set({ activeView }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 
+      // Theme actions
+      setTheme: (theme) => set({ theme }),
+      cycleTheme: () =>
+        set((state) => {
+          const themes: Theme[] = ['light', 'dark', 'system'];
+          const currentIndex = themes.indexOf(state.theme);
+          const nextIndex = (currentIndex + 1) % themes.length;
+          return { theme: themes[nextIndex] };
+        }),
+
       // Group Visibility actions
       toggleGroupVisibility: (groupKey) =>
         set((state) => {
@@ -1820,7 +1841,7 @@ export const useStore = create<AppState>()(
     {
       name: 'seating-arrangement-storage',
       version: 8, // Increment to apply new zoom/pan defaults
-      partialize: (state) => ({ event: state.event }),
+      partialize: (state) => ({ event: state.event, theme: state.theme }),
       migrate: () => {
         // Return fresh default state when version changes
         return { event: createDefaultEvent() };

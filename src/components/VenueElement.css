@@ -41,9 +41,44 @@
               opacity var(--duration-normal) var(--ease-bounce);
 }
 
-/* Dark mode adjustments for venue elements */
+/* Dark mode adjustments for venue elements - manual mode */
+[data-theme="dark"] .venue-element {
+  /* Dance floor - slightly brighter for dark mode */
+  --venue-dance-primary: #5b2ca5;
+  --venue-dance-secondary: #8b4ce8;
+
+  /* Stage - slightly lighter for visibility */
+  --venue-stage-dark: #5a4738;
+  --venue-stage-light: #7b5433;
+  --venue-stage-border: #9b6e4c;
+  --venue-stage-text: #fef9c3;
+
+  /* DJ Booth - slightly brighter */
+  --venue-dj-primary: #5b2ca5;
+  --venue-dj-secondary: #8b4ce8;
+  --venue-dj-border: #b76ff7;
+  --venue-dj-text: #f3e8ff;
+
+  /* Bar - slightly lighter */
+  --venue-bar-dark: #8a4510;
+  --venue-bar-mid: #a4500f;
+  --venue-bar-border: #c46310;
+  --venue-bar-text: #fef9c3;
+
+  /* Buffet - dark surface in dark mode */
+  --venue-buffet-light: #2a2420;
+  --venue-buffet-dark: #1f1a16;
+
+  /* Photo booth - adjusted for dark mode */
+  --venue-photo-light: #4c2020;
+  --venue-photo-dark: #4a4020;
+  --venue-photo-border: #fb923c;
+  --venue-photo-text: #fed7aa;
+}
+
+/* Dark mode adjustments for venue elements - system mode */
 @media (prefers-color-scheme: dark) {
-  .venue-element {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .venue-element {
     /* Dance floor - slightly brighter for dark mode */
     --venue-dance-primary: #5b2ca5;
     --venue-dance-secondary: #8b4ce8;

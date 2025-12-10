@@ -28,11 +28,13 @@
 .toast-success {
   border-color: var(--color-success);
   background: var(--color-success-light);
+  color: #166534;
 }
 
 .toast-info {
   border-color: var(--color-info);
   background: var(--color-info-light);
+  color: #1e40af;
 }
 
 .toast-warning {
@@ -44,6 +46,7 @@
 .toast-error {
   border-color: var(--color-error);
   background: var(--color-error-light);
+  color: #991b1b;
 }
 
 .toast-message {
