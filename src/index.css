@@ -134,9 +134,58 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark Mode */
+/* Dark Mode Variables - shared between manual and system dark mode */
+:root[data-theme="dark"],
+:root:not([data-theme="light"]):not([data-theme="dark"]) {
+  /* This selector matches manual dark mode OR when theme is unset/system */
+}
+
+/* Manual Dark Mode */
+:root[data-theme="dark"] {
+  --color-primary: #ff8a7d;
+  --color-primary-hover: #ff9f94;
+  --color-primary-light: #3d2520;
+  --color-primary-dark: #ffb4aa;
+
+  --color-secondary: #ffbe98;
+  --color-secondary-hover: #ffcaa8;
+  --color-secondary-light: #2d2018;
+
+  --color-accent: #d99b7c;
+  --color-accent-light: #2a1f18;
+
+  --color-bg: #1a1412;
+  --color-bg-secondary: #241c18;
+  --color-bg-hover: #2e241f;
+  --color-bg-warm: #1f1815;
+
+  --color-text: #faf5f0;
+  --color-text-secondary: #c9b8a8;
+  --color-text-light: #8a7968;
+
+  --color-border: #3d3028;
+  --color-border-light: #2e261f;
+
+  --rel-family-bg: #1e3a4f;
+  --rel-friend-bg: #1a3326;
+  --rel-colleague-bg: #3d3018;
+  --rel-partner-bg: #3d1f30;
+  --rel-acquaintance-bg: #2d2820;
+  --rel-avoid-bg: #3d1f1f;
+
+  /* Darker error for gradients in dark mode */
+  --color-error-dark: #b91c1c;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(255, 138, 125, 0.25);
+}
+
+/* System Dark Mode - only applies when data-theme is not explicitly set */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
     --color-primary: #ff8a7d;
     --color-primary-hover: #ff9f94;
     --color-primary-light: #3d2520;

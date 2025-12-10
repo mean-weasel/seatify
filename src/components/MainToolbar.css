@@ -11,8 +11,14 @@
   z-index: 200;
 }
 
+/* Manual dark mode */
+[data-theme="dark"] .main-toolbar {
+  background: rgba(36, 28, 24, 0.95);
+}
+
+/* System dark mode */
 @media (prefers-color-scheme: dark) {
-  .main-toolbar {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .main-toolbar {
     background: rgba(36, 28, 24, 0.95);
   }
 }

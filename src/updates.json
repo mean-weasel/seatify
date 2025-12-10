@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.2.0",
+    "highlights": [
+      "Dark mode toggle - switch between light, dark, and system themes",
+      "Your theme preference is saved and persists across sessions",
+      "Improved toast notification contrast for better readability"
+    ]
+  },
+  {
     "version": "0.1.0",
     "highlights": [
       "New tables and guests now animate when added, making them easy to spot",

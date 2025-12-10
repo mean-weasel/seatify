@@ -9,8 +9,14 @@
   z-index: 50;
 }
 
+/* Manual dark mode */
+[data-theme="dark"] .sidebar {
+  background: var(--color-bg);
+}
+
+/* System dark mode - only when no manual override */
 @media (prefers-color-scheme: dark) {
-  .sidebar {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) .sidebar {
     background: var(--color-bg);
   }
 }
