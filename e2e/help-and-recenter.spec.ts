@@ -12,7 +12,7 @@ async function enterApp(page: import('@playwright/test').Page) {
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
-  await page.click('button:has-text("Launch App")');
+  await page.click('button:has-text("Start Planning")');
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 }
 

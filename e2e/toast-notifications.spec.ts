@@ -12,7 +12,7 @@ async function enterApp(page: import('@playwright/test').Page) {
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
-  await page.click('button:has-text("Launch App")');
+  await page.click('button:has-text("Start Planning")');
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 }
 
@@ -24,7 +24,7 @@ test.describe.skip('Toast Notifications', () => {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     // Re-enter app after reload
-    await page.click('button:has-text("Launch App")');
+    await page.click('button:has-text("Start Planning")');
     await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 
     // Add a table using toolbar dropdown

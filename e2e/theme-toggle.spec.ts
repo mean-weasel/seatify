@@ -12,7 +12,7 @@ async function enterApp(page: import('@playwright/test').Page) {
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
-  await page.click('button:has-text("Launch App")');
+  await page.click('button:has-text("Start Planning")');
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 }
 
@@ -34,7 +34,7 @@ test.describe('Theme toggle functionality', () => {
       const data = { state: { hasCompletedOnboarding: true }, version: 9 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
-    await page.click('button:has-text("Launch App")');
+    await page.click('button:has-text("Start Planning")');
     await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
   });
 
@@ -93,7 +93,7 @@ test.describe('Theme toggle functionality', () => {
 
     // Reload the page and re-enter the app
     await page.reload();
-    await page.click('button:has-text("Launch App")');
+    await page.click('button:has-text("Start Planning")');
     await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 
     // Theme should still be dark (persisted in localStorage)

@@ -12,8 +12,8 @@ async function enterApp(page: import('@playwright/test').Page) {
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
-  // Click "Launch App" button on landing page
-  await page.click('button:has-text("Launch App")');
+  // Click CTA button on landing page
+  await page.click('button:has-text("Start Planning")');
   // Wait for app to load
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 }
@@ -22,14 +22,14 @@ test.describe('TableCraft App Demo', () => {
   test('landing page shows correct branding', async ({ page }) => {
     await page.goto('/');
 
-    // Check page title
-    await expect(page).toHaveTitle('TableCraft');
+    // Check page title contains TableCraft
+    await expect(page).toHaveTitle(/TableCraft/);
 
     // Check landing page logo
     await expect(page.locator('.landing-logo')).toContainText('TableCraft');
 
     // Check CTA button exists
-    await expect(page.locator('button:has-text("Launch App")')).toBeVisible();
+    await expect(page.locator('button:has-text("Start Planning")')).toBeVisible();
   });
 
   test('demo data loads with tables and guests', async ({ page }) => {
@@ -181,7 +181,7 @@ test.describe('Optimization Feature', () => {
     await page.reload();
 
     // Re-enter the app after reload
-    await page.click('button:has-text("Launch App")');
+    await page.click('button:has-text("Start Planning")');
     await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 
     await page.waitForTimeout(1000);
