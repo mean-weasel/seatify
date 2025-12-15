@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import type { SurveyQuestion } from '../types';
 import './SurveyBuilderView.css';
 
@@ -330,7 +331,7 @@ export function SurveyBuilderView() {
                             <select className="preview-select" disabled>
                               <option>Select guests you know...</option>
                               {event.guests.slice(0, 5).map(g => (
-                                <option key={g.id}>{g.name}</option>
+                                <option key={g.id}>{getFullName(g)}</option>
                               ))}
                             </select>
                           </div>

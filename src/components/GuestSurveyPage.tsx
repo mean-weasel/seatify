@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import type { Guest, SurveyQuestion } from '../types';
 import './GuestSurveyPage.css';
 
@@ -142,7 +143,7 @@ export function GuestSurveyPage() {
                     checked={((answers[question.id] as string[]) || []).includes(otherGuest.id)}
                     onChange={() => handleMultiselectToggle(question.id, otherGuest.id)}
                   />
-                  <span>{otherGuest.name}</span>
+                  <span>{getFullName(otherGuest)}</span>
                 </label>
               ))}
             </div>
@@ -198,7 +199,7 @@ export function GuestSurveyPage() {
 
       {step === 'questions' && guest && (
         <form className="survey-form questions-form" onSubmit={handleSubmit}>
-          <h2>Hi, {guest.name.split(' ')[0]}!</h2>
+          <h2>Hi, {guest.firstName || getFullName(guest).split(' ')[0]}!</h2>
           <p>Please answer a few questions to help us with seating.</p>
 
           {event.surveyQuestions.map((question, index) => (

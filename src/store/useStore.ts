@@ -27,7 +27,7 @@ function detectConstraintViolations(event: Event): ConstraintViolation[] {
               constraintId: constraint.id,
               constraintType: constraint.type,
               priority: constraint.priority,
-              description: constraint.description || `${guests.map(g => g.name).join(', ')} should be seated together`,
+              description: constraint.description || `${guests.map(g => `${g.firstName} ${g.lastName}`).join(', ')} should be seated together`,
               guestIds: constraint.guestIds,
               tableIds,
             });
@@ -55,7 +55,7 @@ function detectConstraintViolations(event: Event): ConstraintViolation[] {
                 constraintId: constraint.id,
                 constraintType: constraint.type,
                 priority: constraint.priority,
-                description: constraint.description || `${guestsAtTable.map(g => g.name).join(' and ')} should not be seated together`,
+                description: constraint.description || `${guestsAtTable.map(g => `${g.firstName} ${g.lastName}`).join(' and ')} should not be seated together`,
                 guestIds: guestsAtTable.map(g => g.id),
                 tableIds: [tableId],
               });
@@ -140,7 +140,7 @@ interface AppState extends OnboardingState {
 
   // Actions - Event
   setEventName: (name: string) => void;
-  setEventType: (type: Event['type']) => void;
+  setEventType: (eventType: Event['eventType']) => void;
 
   // Actions - Tables
   addTable: (shape: TableShape, x: number, y: number) => void;
@@ -277,7 +277,7 @@ const createDefaultEvent = (): Event => {
   return {
     id: uuidv4(),
     name: 'My Event',
-    type: 'wedding',
+    eventType: 'wedding',
     tables: [
       {
         id: table1Id,
@@ -316,7 +316,7 @@ const createDefaultEvent = (): Event => {
     guests: [
       // Table 1 guests (4 of 8) - Family
       {
-        id: 'demo-guest-1', name: 'Emma Wilson', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Family',
+        id: 'demo-guest-1', firstName: 'Emma', lastName: 'Wilson', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Family',
         relationships: [
           { guestId: 'demo-guest-2', type: 'partner', strength: 5 },
           { guestId: 'demo-guest-13', type: 'family', strength: 4 },
@@ -325,7 +325,7 @@ const createDefaultEvent = (): Event => {
         interests: ['golf', 'wine tasting', 'travel'], email: 'emma@wilson-law.com'
       },
       {
-        id: 'demo-guest-2', name: 'James Wilson', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Family',
+        id: 'demo-guest-2', firstName: 'James', lastName: 'Wilson', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Family',
         relationships: [
           { guestId: 'demo-guest-1', type: 'partner', strength: 5 },
         ],
@@ -333,7 +333,7 @@ const createDefaultEvent = (): Event => {
         interests: ['sailing', 'classical music'], email: 'james.wilson@cityhospital.org'
       },
       {
-        id: 'demo-guest-3', name: 'Olivia Chen', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-3', firstName: 'Olivia', lastName: 'Chen', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-4', type: 'partner', strength: 5 },
           { guestId: 'demo-guest-7', type: 'friend', strength: 3 },
@@ -342,7 +342,7 @@ const createDefaultEvent = (): Event => {
         interests: ['photography', 'hiking', 'cooking'], email: 'olivia.chen@figma.com'
       },
       {
-        id: 'demo-guest-4', name: 'Liam Chen', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-4', firstName: 'Liam', lastName: 'Chen', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-3', type: 'partner', strength: 5 },
         ],
@@ -351,7 +351,7 @@ const createDefaultEvent = (): Event => {
       },
       // Table 2 guests (6 of 10) - Work colleagues - NOTE: Sophia is separated from partner Noah for demo
       {
-        id: 'demo-guest-5', name: 'Sophia Martinez', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-5', firstName: 'Sophia', lastName: 'Martinez', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-6', type: 'partner', strength: 5 },
           { guestId: 'demo-guest-12', type: 'colleague', strength: 2 },
@@ -360,7 +360,7 @@ const createDefaultEvent = (): Event => {
         interests: ['yoga', 'reading', 'podcasts'], email: 'sophia.m@acme.com'
       },
       {
-        id: 'demo-guest-6', name: 'Noah Martinez', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-6', firstName: 'Noah', lastName: 'Martinez', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-5', type: 'partner', strength: 5 },
           { guestId: 'demo-guest-12', type: 'colleague', strength: 2 },
@@ -369,7 +369,7 @@ const createDefaultEvent = (): Event => {
         interests: ['tennis', 'investing'], email: 'noah@martinezconsulting.com'
       },
       {
-        id: 'demo-guest-7', name: 'Ava Johnson', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-7', firstName: 'Ava', lastName: 'Johnson', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-8', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-11', type: 'friend', strength: 3 },
@@ -379,7 +379,7 @@ const createDefaultEvent = (): Event => {
         interests: ['film', 'theater', 'writing'], email: 'ava.johnson@netflix.com'
       },
       {
-        id: 'demo-guest-8', name: 'Mason Lee', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-8', firstName: 'Mason', lastName: 'Lee', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-7', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-14', type: 'avoid', strength: 5 },
@@ -388,7 +388,7 @@ const createDefaultEvent = (): Event => {
         interests: ['running', 'art collecting'], email: 'mason.lee@gs.com'
       },
       {
-        id: 'demo-guest-9', name: 'Isabella Brown', tableId: table2Id, rsvpStatus: 'pending',
+        id: 'demo-guest-9', firstName: 'Isabella', lastName: 'Brown', tableId: table2Id, rsvpStatus: 'pending',
         relationships: [
           { guestId: 'demo-guest-10', type: 'avoid', strength: 5 },
         ],
@@ -396,7 +396,7 @@ const createDefaultEvent = (): Event => {
         interests: ['design', 'sustainable living', 'gardening'], email: 'isabella@brownarch.com'
       },
       {
-        id: 'demo-guest-10', name: 'Ethan Davis', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Family',
+        id: 'demo-guest-10', firstName: 'Ethan', lastName: 'Davis', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Family',
         relationships: [
           { guestId: 'demo-guest-13', type: 'family', strength: 4 },
           { guestId: 'demo-guest-9', type: 'avoid', strength: 5 },
@@ -406,7 +406,7 @@ const createDefaultEvent = (): Event => {
       },
       // Table 3 guests (8 of 8)
       {
-        id: 'demo-guest-11', name: 'Mia Thompson', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-11', firstName: 'Mia', lastName: 'Thompson', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-7', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-15', type: 'partner', strength: 5 },
@@ -415,7 +415,7 @@ const createDefaultEvent = (): Event => {
         interests: ['music', 'machine learning', 'skiing'], email: 'mia.t@spotify.com'
       },
       {
-        id: 'demo-guest-12', name: 'Lucas Garcia', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-12', firstName: 'Lucas', lastName: 'Garcia', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-5', type: 'colleague', strength: 2 },
           { guestId: 'demo-guest-6', type: 'colleague', strength: 2 },
@@ -425,7 +425,7 @@ const createDefaultEvent = (): Event => {
         interests: ['electric vehicles', 'robotics', 'camping'], email: 'lgarcia@tesla.com'
       },
       {
-        id: 'demo-guest-13', name: 'Charlotte White', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Family',
+        id: 'demo-guest-13', firstName: 'Charlotte', lastName: 'White', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Family',
         relationships: [
           { guestId: 'demo-guest-1', type: 'family', strength: 4 },
           { guestId: 'demo-guest-10', type: 'family', strength: 4 },
@@ -434,7 +434,7 @@ const createDefaultEvent = (): Event => {
         interests: ['philanthropy', 'art', 'travel'], email: 'charlotte@whitemedia.com'
       },
       {
-        id: 'demo-guest-14', name: 'Benjamin Taylor', tableId: table3Id, rsvpStatus: 'confirmed',
+        id: 'demo-guest-14', firstName: 'Benjamin', lastName: 'Taylor', tableId: table3Id, rsvpStatus: 'confirmed',
         relationships: [
           { guestId: 'demo-guest-8', type: 'avoid', strength: 5 },
         ],
@@ -442,7 +442,7 @@ const createDefaultEvent = (): Event => {
         interests: ['startups', 'golf', 'wine'], email: 'ben@taylorvc.com'
       },
       {
-        id: 'demo-guest-15', name: 'Daniel Thompson', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-15', firstName: 'Daniel', lastName: 'Thompson', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-11', type: 'partner', strength: 5 },
         ],
@@ -450,7 +450,7 @@ const createDefaultEvent = (): Event => {
         interests: ['hiking', 'photography', 'cooking'], email: 'daniel.t@google.com'
       },
       {
-        id: 'demo-guest-16', name: 'Sofia Garcia', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-16', firstName: 'Sofia', lastName: 'Garcia', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-12', type: 'partner', strength: 5 },
         ],
@@ -458,7 +458,7 @@ const createDefaultEvent = (): Event => {
         interests: ['design', 'yoga', 'painting'], email: 'sofia.g@apple.com'
       },
       {
-        id: 'demo-guest-17', name: 'Ryan Mitchell', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-17', firstName: 'Ryan', lastName: 'Mitchell', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-18', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-11', type: 'friend', strength: 3 },
@@ -467,7 +467,7 @@ const createDefaultEvent = (): Event => {
         interests: ['travel', 'rock climbing', 'craft beer'], email: 'ryan.m@airbnb.com'
       },
       {
-        id: 'demo-guest-18', name: 'Harper Reed', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-18', firstName: 'Harper', lastName: 'Reed', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-17', type: 'friend', strength: 3 },
         ],
@@ -591,9 +591,9 @@ export const useStore = create<AppState>()(
           event: { ...state.event, name },
         })),
 
-      setEventType: (type) =>
+      setEventType: (eventType) =>
         set((state) => ({
-          event: { ...state.event, type },
+          event: { ...state.event, eventType },
         })),
 
       // Table actions
@@ -815,7 +815,8 @@ export const useStore = create<AppState>()(
         const newId = uuidv4();
         const newGuest: Guest = {
           id: newId,
-          name: `Guest ${guestCount + 1}`,
+          firstName: `Guest`,
+          lastName: `${guestCount + 1}`,
           canvasX,
           canvasY,
           rsvpStatus: 'pending',
@@ -961,7 +962,8 @@ export const useStore = create<AppState>()(
               ...state.event.guests,
               ...guests.map((g) => ({
                 id: uuidv4(),
-                name: g.name || 'Unknown',
+                firstName: g.firstName || 'Unknown',
+                lastName: g.lastName || '',
                 relationships: [],
                 rsvpStatus: 'pending' as const,
                 ...g,
@@ -1614,7 +1616,7 @@ export const useStore = create<AppState>()(
             id: uuidv4(),
             name: demoEventMetadata.name,
             date: demoEventMetadata.date,
-            type: demoEventMetadata.type,
+            eventType: demoEventMetadata.eventType,
             tables: demoTables,
             guests: demoGuests,
             constraints: demoConstraints,
@@ -1859,15 +1861,39 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'seating-arrangement-storage',
-      version: 9, // Increment to add hasCompletedOnboarding
+      version: 10, // Increment for firstName/lastName split and eventType rename
       partialize: (state) => ({
         event: state.event,
         theme: state.theme,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
-      migrate: () => {
-        // Return fresh default state when version changes
-        return { event: createDefaultEvent() };
+      migrate: (persistedState: unknown, version: number) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const state = persistedState as any;
+
+        if (version < 10 && state?.event) {
+          // Migrate guests from 'name' to 'firstName'/'lastName'
+          if (state.event.guests) {
+            state.event.guests = state.event.guests.map((guest: { name?: string; firstName?: string; lastName?: string }) => {
+              if (guest.name && !guest.firstName) {
+                const nameParts = guest.name.trim().split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                const { name: _name, ...rest } = guest;
+                return { ...rest, firstName, lastName };
+              }
+              return guest;
+            });
+          }
+
+          // Migrate event 'type' to 'eventType'
+          if (state.event.type && !state.event.eventType) {
+            state.event.eventType = state.event.type;
+            delete state.event.type;
+          }
+        }
+
+        return state;
       },
     }
   )

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDrag } from '@use-gesture/react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
 import type { TableShape } from '../types';
 import './TablePropertiesPanel.css';
@@ -463,7 +464,7 @@ export function TablePropertiesPanel() {
             <label>Assigned Guests ({assignedGuests.length})</label>
             <ul>
               {assignedGuests.map((guest) => (
-                <li key={guest.id}>{guest.name}</li>
+                <li key={guest.id}>{getFullName(guest)}</li>
               ))}
             </ul>
           </div>

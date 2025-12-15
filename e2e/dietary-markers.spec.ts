@@ -5,7 +5,7 @@ async function enterApp(page: import('@playwright/test').Page) {
   // First set localStorage before the app hydrates
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 9 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 10 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.version = 9;
@@ -34,7 +34,7 @@ test.describe('Dietary & Accessibility Markers', () => {
     await page.evaluate(() => {
       localStorage.clear();
       // Re-set onboarding completion to skip wizard (zustand-persist v4 format)
-      const data = { state: { hasCompletedOnboarding: true }, version: 9 };
+      const data = { state: { hasCompletedOnboarding: true }, version: 10 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
     await page.reload();

@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { Guest } from '../types';
+import { getFullName, getInitials } from '../types';
 import { getGroupColor } from './groupColors';
 import { getDietaryIcons, ACCESSIBILITY_ICON } from '../constants/dietaryIcons';
 import './GuestChip.css';
@@ -23,12 +24,7 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
       }
     : undefined;
 
-  const initials = guest.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = getInitials(guest);
 
   const getStatusColor = () => {
     switch (guest.rsvpStatus) {
@@ -50,7 +46,7 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
 
   // Build tooltip with dietary/accessibility info
   const buildTooltip = () => {
-    const parts = [guest.name];
+    const parts = [getFullName(guest)];
     if (guest.company) parts.push(guest.company);
     if (guest.group) parts.push(`Group: ${guest.group}`);
     if (guest.dietaryRestrictions?.length) {
@@ -108,7 +104,7 @@ export function GuestChip({ guest, compact, isDragging, onClick }: GuestChipProp
         {initials}
       </div>
       <div className="guest-info">
-        <span className="guest-name">{guest.name}</span>
+        <span className="guest-name">{getFullName(guest)}</span>
         {guest.company && <span className="guest-company">{guest.company}</span>}
         <div className="guest-tags">
           {guest.group && (

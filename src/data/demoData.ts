@@ -8,17 +8,17 @@ export const demoTables: Table[] = [
 
 export const demoGuests: Guest[] = [
   // Assigned guests (5)
-  { id: 'g1', name: 'Alice Johnson', rsvpStatus: 'confirmed', tableId: 't1', relationships: [{ guestId: 'g2', type: 'partner', strength: 5 }] },
-  { id: 'g2', name: 'Bob Johnson', rsvpStatus: 'confirmed', tableId: 't1', relationships: [{ guestId: 'g1', type: 'partner', strength: 5 }] },
-  { id: 'g3', name: 'Carol Smith', rsvpStatus: 'confirmed', tableId: 't2', relationships: [] },
-  { id: 'g4', name: 'David Brown', rsvpStatus: 'confirmed', tableId: 't2', relationships: [{ guestId: 'g5', type: 'friend', strength: 3 }] },
-  { id: 'g5', name: 'Emma Davis', rsvpStatus: 'confirmed', tableId: 't3', relationships: [{ guestId: 'g4', type: 'friend', strength: 3 }] },
+  { id: 'g1', firstName: 'Alice', lastName: 'Johnson', rsvpStatus: 'confirmed', tableId: 't1', relationships: [{ guestId: 'g2', type: 'partner', strength: 5 }] },
+  { id: 'g2', firstName: 'Bob', lastName: 'Johnson', rsvpStatus: 'confirmed', tableId: 't1', relationships: [{ guestId: 'g1', type: 'partner', strength: 5 }] },
+  { id: 'g3', firstName: 'Carol', lastName: 'Smith', rsvpStatus: 'confirmed', tableId: 't2', relationships: [] },
+  { id: 'g4', firstName: 'David', lastName: 'Brown', rsvpStatus: 'confirmed', tableId: 't2', relationships: [{ guestId: 'g5', type: 'friend', strength: 3 }] },
+  { id: 'g5', firstName: 'Emma', lastName: 'Davis', rsvpStatus: 'confirmed', tableId: 't3', relationships: [{ guestId: 'g4', type: 'friend', strength: 3 }] },
   // Unassigned guests (5)
-  { id: 'g6', name: 'Frank Wilson', rsvpStatus: 'confirmed', relationships: [] },
-  { id: 'g7', name: 'Grace Lee', rsvpStatus: 'confirmed', relationships: [] },
-  { id: 'g8', name: 'Henry Taylor', rsvpStatus: 'confirmed', relationships: [] },
-  { id: 'g9', name: 'Ivy Martinez', rsvpStatus: 'confirmed', relationships: [] },
-  { id: 'g10', name: 'Jack Anderson', rsvpStatus: 'confirmed', relationships: [] },
+  { id: 'g6', firstName: 'Frank', lastName: 'Wilson', rsvpStatus: 'confirmed', relationships: [] },
+  { id: 'g7', firstName: 'Grace', lastName: 'Lee', rsvpStatus: 'confirmed', relationships: [] },
+  { id: 'g8', firstName: 'Henry', lastName: 'Taylor', rsvpStatus: 'confirmed', relationships: [] },
+  { id: 'g9', firstName: 'Ivy', lastName: 'Martinez', rsvpStatus: 'confirmed', relationships: [] },
+  { id: 'g10', firstName: 'Jack', lastName: 'Anderson', rsvpStatus: 'confirmed', relationships: [] },
 ];
 
 export const demoConstraints: Constraint[] = [];
@@ -28,5 +28,5 @@ export const demoSurveyQuestions: SurveyQuestion[] = [];
 export const demoEventMetadata = {
   name: 'Demo Event',
   date: '2025-06-15',
-  type: 'social' as const,
+  eventType: 'party' as const,
 };
