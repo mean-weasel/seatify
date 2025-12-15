@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TableCraft - V2 Warm Craft</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #f97066;
+      --color-primary-hover: #ef5a4e;
+      --color-secondary: #ffb088;
+      --color-bg: #fffcfa;
+      --color-bg-secondary: #fef7f3;
+      --color-bg-warm: #fff8f0;
+      --color-text: #3d2c24;
+      --color-text-secondary: #8b7355;
+      --color-border: #ede0d4;
+      --color-accent: #c67d5a;
+      --shadow-md: 0 4px 12px rgba(61, 44, 36, 0.08);
+      --shadow-lg: 0 8px 24px rgba(61, 44, 36, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+    }
+
+    /* ===== PAPER TEXTURE BACKGROUND ===== */
+    .landing-page {
+      background:
+        linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-warm) 100%);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Subtle paper grain overlay */
+    .landing-page::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== HERO WITH HAND-DRAWN ELEMENTS ===== */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      position: relative;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .logo {
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-table {
+      color: var(--color-text);
+    }
+
+    .logo-craft {
+      color: var(--color-primary);
+      font-family: 'Caveat', cursive;
+      font-size: 4rem;
+      font-weight: 600;
+    }
+
+    /* Hand-drawn underline */
+    .logo-wrapper::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 120px;
+      height: 8px;
+      transform: translateX(-50%);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 5 Q30 2, 60 5 T118 4' stroke='%23f97066' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+    }
+
+    .tagline {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin: 1.5rem 0 1rem;
+    }
+
+    .description {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      max-width: 480px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: white;
+      background: var(--color-primary);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow:
+        0 4px 0 var(--color-primary-hover),
+        0 8px 20px rgba(249, 112, 102, 0.25);
+      transition: all 0.15s ease;
+      position: relative;
+      top: 0;
+    }
+
+    .cta-button:hover {
+      top: 2px;
+      box-shadow:
+        0 2px 0 var(--color-primary-hover),
+        0 4px 12px rgba(249, 112, 102, 0.3);
+    }
+
+    /* ===== ORGANIC SECTION DIVIDER ===== */
+    .wave-divider {
+      width: 100%;
+      height: 60px;
+      margin: 2rem 0;
+    }
+
+    .wave-divider svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ===== FEATURES AS PAPER CARDS ===== */
+    .features {
+      padding: 2rem 0;
+    }
+
+    .features-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow:
+        0 1px 0 var(--color-border),
+        0 4px 12px rgba(61, 44, 36, 0.06);
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateX(8px);
+    }
+
+    /* Alternating offset */
+    .feature-card:nth-child(odd) {
+      margin-left: 2rem;
+    }
+    .feature-card:nth-child(even) {
+      margin-right: 2rem;
+    }
+
+    /* Corner fold effect */
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, transparent 50%, var(--color-bg-secondary) 50%);
+      border-bottom-left-radius: 8px;
+    }
+
+    .feature-icon-wrap {
+      width: 48px;
+      height: 48px;
+      background: var(--color-bg-warm);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--color-accent);
+    }
+
+    .feature-content h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.375rem;
+    }
+
+    .feature-content p {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== USE CASES AS TAGS ===== */
+    .use-cases {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 2rem 0;
+    }
+
+    .use-case-tag {
+      padding: 0.5rem 1rem;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* ===== DEMO ===== */
+    .demo-section {
+      padding: 2rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .demo-box {
+      width: 100%;
+      max-width: 450px;
+      height: 180px;
+      background: white;
+      border: 2px solid var(--color-border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ===== COMING SOON ===== */
+    .coming-soon {
+      padding: 2rem 0;
+    }
+
+    .coming-soon-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .coming-soon-header h2 {
+      font-family: 'Caveat', cursive;
+      font-size: 1.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .coming-soon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .coming-soon-card {
+      background: var(--color-bg-secondary);
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px dashed var(--color-border);
+    }
+
+    .coming-soon-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .coming-soon-card h3::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--color-secondary);
+      border-radius: 50%;
+    }
+
+    .coming-soon-card p {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ===== EMAIL CAPTURE ===== */
+    .email-capture {
+      padding: 3rem 0;
+      text-align: center;
+      background: white;
+      border-radius: 20px;
+      margin: 2rem 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .email-capture h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .email-input {
+      padding: 0.875rem 1.25rem;
+      font-size: 1rem;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      width: 260px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .email-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .subscribe-button {
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: var(--color-accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .subscribe-button:hover {
+      background: var(--color-primary);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .trust-line {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .feature-card:nth-child(odd),
+      .feature-card:nth-child(even) {
+        margin-left: 0;
+        margin-right: 0;
+      }
+      .logo { font-size: 2.5rem; }
+      .logo-craft { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-page">
+    <div class="container">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="logo-wrapper">
+          <h1 class="logo">
+            <span class="logo-table">Table</span><span class="logo-craft">Craft</span>
+          </h1>
+        </div>
+        <p class="tagline">Event Seating Made Simple</p>
+        <p class="description">
+          Design floor plans, manage guest lists, and let smart optimization handle the tricky seating decisions.
+        </p>
+        <button class="cta-button">Start Planning Free</button>
+      </section>
+
+      <!-- Wave Divider -->
+      <div class="wave-divider">
+        <svg viewBox="0 0 900 60" preserveAspectRatio="none">
+          <path d="M0 30 Q225 0, 450 30 T900 30" stroke="#ede0d4" stroke-width="1" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Features -->
+      <section class="features">
+        <div class="features-stack">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+            <div class="feature-content">
+              <h3>Smart Seating</h3>
+              <p>Keep partners together, separate people who shouldn't sit near each other. The optimizer handles the relationship math.</p>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <div class="feature-content">
+              <h3>Visual Floor Plans</h3>
+              <p>Drag-and-drop tables in any shape. Add venue elements like stages, bars, and dance floors.</p>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                <path d="M12 18h.01"/>
+              </svg>
+            </div>
+            <div class="feature-content">
+              <h3>Works Everywhere</h3>
+              <p>Phone, tablet, or desktop. Your data stays in your browser — private and always available.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Use Cases -->
+      <div class="use-cases">
+        <span class="use-case-tag">Weddings</span>
+        <span class="use-case-tag">Corporate Dinners</span>
+        <span class="use-case-tag">Galas</span>
+        <span class="use-case-tag">Team Offsites</span>
+        <span class="use-case-tag">Private Parties</span>
+      </div>
+
+      <!-- Demo -->
+      <section class="demo-section">
+        <div class="demo-box">[Animated Demo Here]</div>
+      </section>
+
+      <!-- Coming Soon -->
+      <section class="coming-soon">
+        <div class="coming-soon-header">
+          <h2>Coming Soon...</h2>
+        </div>
+        <div class="coming-soon-grid">
+          <div class="coming-soon-card">
+            <h3>AI-Powered Seating</h3>
+            <p>Advanced algorithms that learn guest relationships and preferences to suggest optimal arrangements.</p>
+          </div>
+          <div class="coming-soon-card">
+            <h3>Guest Import & RSVP</h3>
+            <p>Upload your guest list from a spreadsheet and track responses as they come in.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Email Capture -->
+      <section class="email-capture">
+        <h2>Stay in the loop</h2>
+        <form class="email-form">
+          <input type="email" class="email-input" placeholder="your@email.com">
+          <button type="submit" class="subscribe-button">Subscribe</button>
+        </form>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div>What's New · v0.2.0</div>
+        <div class="trust-line">Your data stays private — stored locally in your browser, not our servers.</div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
