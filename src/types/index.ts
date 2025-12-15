@@ -14,7 +14,8 @@ export interface Relationship {
 
 export interface Guest {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email?: string;
 
   // Profile data (from survey or LinkedIn)
@@ -103,11 +104,13 @@ export interface SurveyResponse {
   answer: string | string[];
 }
 
+export type EventType = 'wedding' | 'corporate' | 'gala' | 'party' | 'other';
+
 export interface Event {
   id: string;
   name: string;
   date?: string;
-  type: 'wedding' | 'corporate' | 'social' | 'other';
+  eventType: EventType;
   tables: Table[];
   guests: Guest[];
   constraints: Constraint[];
@@ -147,4 +150,16 @@ export interface ConstraintViolation {
   description: string;
   guestIds: string[];
   tableIds: string[];
+}
+
+// Helper function to get full name from firstName + lastName
+export function getFullName(guest: Pick<Guest, 'firstName' | 'lastName'>): string {
+  return `${guest.firstName} ${guest.lastName}`.trim();
+}
+
+// Helper function to get initials from guest name
+export function getInitials(guest: Pick<Guest, 'firstName' | 'lastName'>): string {
+  const firstInitial = guest.firstName ? guest.firstName.charAt(0).toUpperCase() : '';
+  const lastInitial = guest.lastName ? guest.lastName.charAt(0).toUpperCase() : '';
+  return `${firstInitial}${lastInitial}` || '?';
 }

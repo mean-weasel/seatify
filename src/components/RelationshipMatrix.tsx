@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import type { RelationshipType } from '../types';
 import './RelationshipMatrix.css';
 
@@ -57,7 +58,7 @@ export function RelationshipMatrix() {
       }
 
       // Within same table (or both unassigned), sort by name
-      return a.name.localeCompare(b.name);
+      return getFullName(a).localeCompare(getFullName(b));
     });
   }, [confirmedGuests, event.tables]);
 
@@ -143,9 +144,9 @@ export function RelationshipMatrix() {
                 <div
                   key={guest.id}
                   className={`matrix-col-header ${isBoundary ? 'table-boundary' : ''}`}
-                  title={`${guest.name}${tableName ? ` (${tableName})` : ' (Unassigned)'}`}
+                  title={`${getFullName(guest)}${tableName ? ` (${tableName})` : ' (Unassigned)'}`}
                 >
-                  {getInitials(guest.name)}
+                  {getInitials(getFullName(guest))}
                 </div>
               );
             })}
@@ -160,9 +161,9 @@ export function RelationshipMatrix() {
               <div key={rowGuest.id} className={`matrix-row ${isRowBoundary ? 'table-boundary' : ''}`}>
                 <div
                   className="matrix-row-header"
-                  title={`${rowGuest.name}${rowTableName ? ` (${rowTableName})` : ' (Unassigned)'}`}
+                  title={`${getFullName(rowGuest)}${rowTableName ? ` (${rowTableName})` : ' (Unassigned)'}`}
                 >
-                  <span className="row-name">{rowGuest.name}</span>
+                  <span className="row-name">{getFullName(rowGuest)}</span>
                   {rowTableName && <span className="row-table">{rowTableName}</span>}
                 </div>
                 {sortedGuests.map((colGuest, colIdx) => {
@@ -182,7 +183,7 @@ export function RelationshipMatrix() {
                         backgroundColor: typeInfo?.color || 'transparent',
                       }}
                       onClick={() => handleCellClick(rowGuest.id, colGuest.id)}
-                      title={isDisabled ? '' : `${rowGuest.name} → ${colGuest.name}`}
+                      title={isDisabled ? '' : `${getFullName(rowGuest)} → ${getFullName(colGuest)}`}
                     >
                       {isDisabled ? '—' : typeInfo?.short || ''}
                     </div>
@@ -199,9 +200,9 @@ export function RelationshipMatrix() {
         <div className="cell-dropdown-overlay" onClick={() => setSelectedCell(null)}>
           <div className="cell-dropdown" onClick={(e) => e.stopPropagation()}>
             <h4>
-              {event.guests.find((g) => g.id === selectedCell.from)?.name}
+              {getFullName(event.guests.find((g) => g.id === selectedCell.from)!)}
               {' ↔ '}
-              {event.guests.find((g) => g.id === selectedCell.to)?.name}
+              {getFullName(event.guests.find((g) => g.id === selectedCell.to)!)}
             </h4>
             <div className="dropdown-options">
               {RELATIONSHIP_TYPES.map((type) => (

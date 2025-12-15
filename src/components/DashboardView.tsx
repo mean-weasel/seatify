@@ -51,8 +51,8 @@ export function DashboardView() {
             <div className="event-meta">
               <select
                 className="event-type-select"
-                value={event.type}
-                onChange={(e) => setEventType(e.target.value as typeof event.type)}
+                value={event.eventType}
+                onChange={(e) => setEventType(e.target.value as typeof event.eventType)}
               >
                 <option value="wedding">Wedding</option>
                 <option value="corporate">Corporate</option>

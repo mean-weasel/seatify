@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { getGroupColor } from './groupColors';
 import { getDietaryIcons, ACCESSIBILITY_ICON } from '../constants/dietaryIcons';
 import type { Guest } from '../types';
+import { getFullName, getInitials } from '../types';
 import './CanvasGuest.css';
 
 interface CanvasGuestProps {
@@ -19,12 +20,7 @@ export function CanvasGuest({ guest, isSelected, isNearTable, isNewlyAdded }: Ca
     data: { type: 'canvas-guest', guest },
   });
 
-  const initials = guest.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = getInitials(guest);
 
   const groupColor = getGroupColor(guest.group);
 
@@ -39,7 +35,7 @@ export function CanvasGuest({ guest, isSelected, isNearTable, isNewlyAdded }: Ca
 
   // Build tooltip
   const buildTooltip = () => {
-    const parts = [guest.name];
+    const parts = [getFullName(guest)];
     if (guest.group) parts.push(`Group: ${guest.group}`);
     if (guest.dietaryRestrictions?.length) {
       parts.push(`Diet: ${guest.dietaryRestrictions.join(', ')}`);
@@ -104,7 +100,7 @@ export function CanvasGuest({ guest, isSelected, isNearTable, isNewlyAdded }: Ca
       <span className="status-dot" style={{ backgroundColor: getStatusColor() }} />
       {hasDietary && <span className="dietary-icon">{dietaryIcons[0]}</span>}
       {hasAccessibility && <span className="accessibility-icon">{ACCESSIBILITY_ICON}</span>}
-      <div className="canvas-guest-label">{guest.name}</div>
+      <div className="canvas-guest-label">{getFullName(guest)}</div>
     </div>
   );
 }

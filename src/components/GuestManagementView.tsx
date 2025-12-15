@@ -5,6 +5,7 @@ import { RelationshipMatrix } from './RelationshipMatrix';
 import { MainToolbar } from './MainToolbar';
 import { EmptyState } from './EmptyState';
 import type { Guest } from '../types';
+import { getFullName } from '../types';
 import './GuestManagementView.css';
 
 type SortColumn = 'name' | 'group' | 'rsvpStatus' | 'table';
@@ -52,7 +53,7 @@ export function GuestManagementView() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       guests = guests.filter(g =>
-        g.name.toLowerCase().includes(query) ||
+        getFullName(g).toLowerCase().includes(query) ||
         g.email?.toLowerCase().includes(query) ||
         g.company?.toLowerCase().includes(query) ||
         g.group?.toLowerCase().includes(query)
@@ -78,8 +79,8 @@ export function GuestManagementView() {
 
       switch (sortColumn) {
         case 'name':
-          aVal = a.name;
-          bVal = b.name;
+          aVal = getFullName(a);
+          bVal = getFullName(b);
           break;
         case 'group':
           aVal = a.group || '';
@@ -309,10 +310,10 @@ export function GuestManagementView() {
                     <td>
                       <div className="guest-name-cell">
                         <div className="guest-avatar">
-                          {guest.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          {getFullName(guest).split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
                         <div>
-                          <span className="guest-name">{guest.name}</span>
+                          <span className="guest-name">{getFullName(guest)}</span>
                           {guest.company && (
                             <span className="guest-company">{guest.company}</span>
                           )}
@@ -349,7 +350,7 @@ export function GuestManagementView() {
                         <button
                           className="action-icon-btn danger"
                           onClick={() => {
-                            if (confirm(`Delete ${guest.name}?`)) {
+                            if (confirm(`Delete ${getFullName(guest)}?`)) {
                               removeGuest(guest.id);
                             }
                           }}
@@ -374,9 +375,9 @@ export function GuestManagementView() {
             </div>
             <div className="detail-content">
               <div className="detail-avatar">
-                {selectedGuestData.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {getFullName(selectedGuestData).split(' ').map(n => n[0]).join('').slice(0, 2)}
               </div>
-              <h2>{selectedGuestData.name}</h2>
+              <h2>{getFullName(selectedGuestData)}</h2>
               {selectedGuestData.email && (
                 <p className="detail-email">{selectedGuestData.email}</p>
               )}
@@ -423,7 +424,7 @@ export function GuestManagementView() {
                       const relatedGuest = event.guests.find(g => g.id === rel.guestId);
                       return relatedGuest ? (
                         <div key={rel.guestId} className={`relationship-item ${rel.type}`}>
-                          <span className="rel-name">{relatedGuest.name}</span>
+                          <span className="rel-name">{getFullName(relatedGuest)}</span>
                           <span className="rel-type">{rel.type}</span>
                         </div>
                       ) : null;

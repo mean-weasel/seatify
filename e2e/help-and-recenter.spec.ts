@@ -5,7 +5,7 @@ async function enterApp(page: import('@playwright/test').Page) {
   // First set localStorage before the app hydrates
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 9 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 10 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.version = 9;

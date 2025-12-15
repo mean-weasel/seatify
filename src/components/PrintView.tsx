@@ -1,4 +1,5 @@
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import './PrintView.css';
 
 interface PrintViewProps {
@@ -88,7 +89,7 @@ export function PrintView({ onClose }: PrintViewProps) {
                     <ul>
                       {guests.map((guest) => (
                         <li key={guest.id}>
-                          {guest.name}
+                          {getFullName(guest)}
                           {guest.dietaryRestrictions && guest.dietaryRestrictions.length > 0 && (
                             <span className="dietary-badge">
                               {guest.dietaryRestrictions[0]}
@@ -114,7 +115,7 @@ export function PrintView({ onClose }: PrintViewProps) {
             <h2>Unassigned Guests ({unassignedGuests.length})</h2>
             <ul className="unassigned-list">
               {unassignedGuests.map((guest) => (
-                <li key={guest.id}>{guest.name}</li>
+                <li key={guest.id}>{getFullName(guest)}</li>
               ))}
             </ul>
           </section>
@@ -129,7 +130,7 @@ export function PrintView({ onClose }: PrintViewProps) {
                 .reduce((acc, guest) => {
                   guest.dietaryRestrictions?.forEach((diet) => {
                     if (!acc.has(diet)) acc.set(diet, []);
-                    acc.get(diet)!.push(guest.name);
+                    acc.get(diet)!.push(getFullName(guest));
                   });
                   return acc;
                 }, new Map<string, string[]>())

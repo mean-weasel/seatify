@@ -24,6 +24,7 @@ import { MainToolbar } from './MainToolbar';
 import { GridControls } from './GridControls';
 import { RelationshipMatrix } from './RelationshipMatrix';
 import type { Table, AlignmentGuide, Guest } from '../types';
+import { getFullName, getInitials } from '../types';
 import './Canvas.css';
 
 const SNAP_THRESHOLD = 80; // pixels in canvas coordinates
@@ -906,7 +907,7 @@ export function Canvas() {
         label: 'Delete Guest',
         icon: '🗑',
         onClick: () => {
-          if (confirm(`Delete ${guest.name}?`)) {
+          if (confirm(`Delete ${getFullName(guest)}?`)) {
             pushHistory('Delete guest');
             removeGuest(guest.id);
           }
@@ -1137,12 +1138,7 @@ export function Canvas() {
               <div className="canvas-guest-overlay">
                 <div className="canvas-guest-circle">
                   <span className="initials">
-                    {draggedGuest.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2)}
+                    {getInitials(draggedGuest)}
                   </span>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
 import { ViewToggle } from './ViewToggle';
 import { showToast } from './toastStore';
@@ -33,7 +34,7 @@ export function MainToolbar({ children, onAddGuest, showRelationships, onToggleR
     guestCount: event.guests.length,
     canOptimize,
     hasSnapshot,
-    guestsWithRelationships: event.guests.filter(g => g.relationships.length > 0).map(g => ({ name: g.name, relCount: g.relationships.length }))
+    guestsWithRelationships: event.guests.filter(g => g.relationships.length > 0).map(g => ({ name: getFullName(g), relCount: g.relationships.length }))
   });
 
   // Handle optimize seating
@@ -86,7 +87,8 @@ export function MainToolbar({ children, onAddGuest, showRelationships, onToggleR
     } else {
       const guestNumber = event.guests.length + 1;
       addGuest({
-        name: `Guest ${guestNumber}`,
+        firstName: `Guest`,
+        lastName: `${guestNumber}`,
         group: undefined,
       });
     }

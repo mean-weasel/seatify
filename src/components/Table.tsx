@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { getGroupColor } from './groupColors';
 import { DIETARY_ICONS, getDietaryIcon, ACCESSIBILITY_ICON } from '../constants/dietaryIcons';
 import type { Table, Guest } from '../types';
+import { getFullName, getInitials } from '../types';
 import './Table.css';
 
 interface TableComponentProps {
@@ -52,12 +53,7 @@ function SeatGuest({ guest, seatPosition, tablePosition, isSwapTarget }: SeatGue
     },
   });
 
-  const initials = guest.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = getInitials(guest);
 
   const getStatusColor = () => {
     switch (guest.rsvpStatus) {
@@ -83,7 +79,7 @@ function SeatGuest({ guest, seatPosition, tablePosition, isSwapTarget }: SeatGue
   const groupColor = getGroupColor(guest.group);
 
   // Build tooltip
-  const tooltipParts = [guest.name];
+  const tooltipParts = [getFullName(guest)];
   if (guest.group) tooltipParts.push(`Group: ${guest.group}`);
   if (hasDietary) tooltipParts.push(`Diet: ${guest.dietaryRestrictions!.join(', ')}`);
   if (hasAccessibility) tooltipParts.push(`Accessibility: ${guest.accessibilityNeeds!.join(', ')}`);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
 import './CanvasSearch.css';
 
 interface SearchResult {
@@ -87,7 +88,7 @@ export function CanvasSearch() {
     type ScoredResult = SearchResult & { score: number };
     const guestResults: ScoredResult[] = event.guests
       .map((guest): ScoredResult => {
-        const nameScore = fuzzyMatch(query, guest.name);
+        const nameScore = fuzzyMatch(query, getFullName(guest));
         const groupScore = guest.group ? fuzzyMatch(query, guest.group) * 0.8 : 0;
         const score = Math.max(nameScore, groupScore);
 
@@ -109,7 +110,7 @@ export function CanvasSearch() {
         return {
           type: 'guest',
           id: guest.id,
-          name: guest.name,
+          name: getFullName(guest),
           subtitle: tableName,
           x,
           y,

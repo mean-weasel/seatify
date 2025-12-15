@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { DIETARY_OPTIONS, ACCESSIBILITY_OPTIONS } from '../constants/dietaryIcons';
 import type { Guest, RelationshipType } from '../types';
+import { getFullName } from '../types';
 import './GuestForm.css';
 
 interface GuestFormProps {
@@ -22,13 +23,14 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
   const { event, addGuest, updateGuest, removeGuest, addRelationship, removeRelationship, assignGuestToTable } = useStore();
   const existingGuest = guestId ? event.guests.find((g) => g.id === guestId) : null;
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const firstNameInputRef = useRef<HTMLInputElement>(null);
   const [showSuccessFlash, setShowSuccessFlash] = useState(false);
 
   const getInitialFormData = () => {
     if (existingGuest) {
       return {
-        name: existingGuest.name,
+        firstName: existingGuest.firstName,
+        lastName: existingGuest.lastName,
         email: existingGuest.email || '',
         company: existingGuest.company || '',
         jobTitle: existingGuest.jobTitle || '',
@@ -42,7 +44,8 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
       };
     }
     return {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       company: '',
       jobTitle: '',
@@ -64,10 +67,10 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
     strength: 3,
   });
 
-  // Auto-focus name field on mount
+  // Auto-focus first name field on mount
   useEffect(() => {
     const timer = setTimeout(() => {
-      nameInputRef.current?.focus();
+      firstNameInputRef.current?.focus();
     }, 100);
     return () => clearTimeout(timer);
   }, []);
@@ -75,7 +78,8 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
   const handleSubmit = (e: React.FormEvent, addAnother = false) => {
     e.preventDefault();
     const guestData = {
-      name: formData.name,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email || undefined,
       company: formData.company || undefined,
       jobTitle: formData.jobTitle || undefined,
@@ -98,7 +102,8 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
         // Reset form for next guest, keep group for convenience
         const currentGroup = formData.group;
         setFormData({
-          name: '',
+          firstName: '',
+          lastName: '',
           email: '',
           company: '',
           jobTitle: '',
@@ -113,8 +118,8 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
         // Show success flash
         setShowSuccessFlash(true);
         setTimeout(() => setShowSuccessFlash(false), 300);
-        // Focus name field
-        setTimeout(() => nameInputRef.current?.focus(), 50);
+        // Focus first name field
+        setTimeout(() => firstNameInputRef.current?.focus(), 50);
       } else {
         onClose();
       }
@@ -122,7 +127,7 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
   };
 
   const handleDelete = () => {
-    if (existingGuest && confirm(`Delete ${existingGuest.name}?`)) {
+    if (existingGuest && confirm(`Delete ${getFullName(existingGuest)}?`)) {
       removeGuest(existingGuest.id);
       onClose();
     }
@@ -168,15 +173,26 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
             <h3>Basic Info</h3>
             <div className="form-row">
               <label>
-                Name *
+                First Name *
                 <input
-                  ref={nameInputRef}
+                  ref={firstNameInputRef}
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   required
                 />
               </label>
+              <label>
+                Last Name *
+                <input
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
+            <div className="form-row">
               <label>
                 Email
                 <input
@@ -185,8 +201,6 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </label>
-            </div>
-            <div className="form-row">
               <label>
                 Group
                 <input
@@ -202,6 +216,8 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
                   ))}
                 </datalist>
               </label>
+            </div>
+            <div className="form-row">
               <label>
                 RSVP Status
                 <select
@@ -325,7 +341,7 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
                         <span className={`rel-type ${rel.type}`}>
                           {relationshipTypes.find((t) => t.value === rel.type)?.label}
                         </span>
-                        <span className="rel-name">{targetGuest?.name}</span>
+                        <span className="rel-name">{targetGuest ? getFullName(targetGuest) : 'Unknown'}</span>
                         <span className="rel-strength">{'★'.repeat(rel.strength)}</span>
                         <button
                           type="button"
@@ -349,7 +365,7 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
                     <option value="">Select guest...</option>
                     {otherGuests.map((g) => (
                       <option key={g.id} value={g.id}>
-                        {g.name}
+                        {getFullName(g)}
                       </option>
                     ))}
                   </select>

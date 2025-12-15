@@ -4,6 +4,7 @@ import { useIsMobile } from '../hooks/useResponsive';
 import { GuestChip } from './GuestChip';
 import { GuestForm } from './GuestForm';
 import { GroupLegend } from './GroupLegend';
+import { getFullName } from '../types';
 import './Sidebar.css';
 
 export function Sidebar() {
@@ -27,7 +28,7 @@ export function Sidebar() {
 
   const filteredGuests = event.guests.filter((guest) => {
     const matchesSearch =
-      guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getFullName(guest).toLowerCase().includes(searchTerm.toLowerCase()) ||
       guest.company?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGroup = filterGroup === 'all' || guest.group === filterGroup;
     const matchesStatus = filterStatus === 'all' || guest.rsvpStatus === filterStatus;

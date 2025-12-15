@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import type { Guest, Table, Constraint } from '../types';
+import { getFullName } from '../types';
 import './OptimizeView.css';
 
 interface OptimizationResult {
@@ -249,7 +250,7 @@ export function OptimizeView() {
                       )}
                       <div className="table-guests">
                         {guestsAtTable.slice(0, 8).map(g => (
-                          <div key={g.id} className="mini-avatar" title={g.name} />
+                          <div key={g.id} className="mini-avatar" title={getFullName(g)} />
                         ))}
                       </div>
                     </div>
@@ -305,7 +306,7 @@ export function OptimizeView() {
                   className={`chip ${newConstraint.guestIds.includes(guest.id) ? 'selected' : ''}`}
                   onClick={() => toggleGuestInConstraint(guest.id)}
                 >
-                  {guest.name}
+                  {getFullName(guest)}
                 </button>
               ))}
             </div>
@@ -336,7 +337,7 @@ export function OptimizeView() {
                 <div className="constraint-guests">
                   {constraint.guestIds.map((id) => {
                     const guest = event.guests.find((g) => g.id === id);
-                    return <span key={id} className="guest-name">{guest?.name}</span>;
+                    return <span key={id} className="guest-name">{guest ? getFullName(guest) : ''}</span>;
                   })}
                 </div>
                 <button
