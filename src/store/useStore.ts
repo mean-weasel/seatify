@@ -1879,7 +1879,8 @@ export const useStore = create<AppState>()(
                 const nameParts = guest.name.trim().split(' ');
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
-                const { name: _name, ...rest } = guest;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { name: _, ...rest } = guest;
                 return { ...rest, firstName, lastName };
               }
               return guest;
