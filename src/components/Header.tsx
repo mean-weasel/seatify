@@ -50,7 +50,10 @@ export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
           onClick={onLogoClick}
           style={{ cursor: onLogoClick ? 'pointer' : 'default' }}
           title="Back to home"
-        >TableCraft</h1>
+        >
+          <span className="logo-table">Table</span>
+          <span className="logo-craft">Craft</span>
+        </h1>
         <span className="version-badge">v{version}</span>
         <UpdatesButton variant="header" />
         {onStartTour && (

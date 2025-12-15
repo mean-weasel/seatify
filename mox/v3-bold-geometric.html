@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TableCraft - V3 Bold Geometric</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #f97066;
+      --color-secondary: #ffb088;
+      --color-accent: #1a1412;
+      --color-bg: #fffcfa;
+      --color-bg-dark: #1a1412;
+      --color-text: #1a1412;
+      --color-text-light: #fffcfa;
+      --color-text-secondary: #6b5c52;
+      --color-border: #ede0d4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== GEOMETRIC BACKGROUND ===== */
+    .landing-page {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Large geometric shapes */
+    .geo-shape {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .geo-shape.circle {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      opacity: 0.08;
+      top: -150px;
+      right: -100px;
+    }
+
+    .geo-shape.square {
+      width: 200px;
+      height: 200px;
+      background: var(--color-accent);
+      opacity: 0.04;
+      bottom: 10%;
+      left: -50px;
+      transform: rotate(15deg);
+    }
+
+    .geo-shape.oval {
+      width: 300px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid var(--color-border);
+      bottom: 30%;
+      right: 5%;
+    }
+
+    /* ===== HERO - BOLD SPLIT ===== */
+    .hero {
+      min-height: 70vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content {
+      padding: 4rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-visual {
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .hero-visual::after {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .logo {
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .logo-highlight {
+      color: var(--color-primary);
+    }
+
+    .tagline {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .description {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      max-width: 400px;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      background: var(--color-accent);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cta-button:hover {
+      background: var(--color-primary);
+      transform: translateX(8px);
+    }
+
+    .cta-button svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .cta-button:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* ===== FEATURES - BOLD BLOCKS ===== */
+    .features {
+      padding: 4rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .features-header h2 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--color-text-secondary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feature-block {
+      padding: 2.5rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .feature-block:hover {
+      background: var(--color-accent);
+      color: var(--color-text-light);
+      border-color: var(--color-accent);
+    }
+
+    .feature-block:hover .feature-icon {
+      color: var(--color-primary);
+    }
+
+    .feature-block:hover p {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .feature-number {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--color-border);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .feature-block:hover .feature-number {
+      color: rgba(255,255,255,0.2);
+    }
+
+    .feature-block h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-block p {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== USE CASES - MARQUEE STYLE ===== */
+    .use-cases {
+      background: var(--color-accent);
+      color: var(--color-text-light);
+      padding: 1.5rem 0;
+      overflow: hidden;
+    }
+
+    .use-cases-track {
+      display: flex;
+      gap: 3rem;
+      animation: scroll 20s linear infinite;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .use-cases span {
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      opacity: 0.8;
+    }
+
+    .use-cases span::after {
+      content: '—';
+      margin-left: 3rem;
+      opacity: 0.3;
+    }
+
+    /* ===== DEMO ===== */
+    .demo-section {
+      padding: 4rem 2rem;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .demo-box {
+      width: 100%;
+      max-width: 600px;
+      height: 250px;
+      background: var(--color-bg);
+      border: 2px solid var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ===== COMING SOON ===== */
+    .coming-soon {
+      padding: 4rem 2rem;
+      background: var(--color-bg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .coming-soon-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .coming-soon-header h2 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--color-text-secondary);
+    }
+
+    .coming-soon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--color-border);
+    }
+
+    .coming-soon-card {
+      background: var(--color-bg);
+      padding: 2rem;
+    }
+
+    .coming-soon-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .coming-soon-card p {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ===== EMAIL CAPTURE ===== */
+    .email-capture {
+      padding: 4rem 2rem;
+      background: var(--color-primary);
+      position: relative;
+      z-index: 1;
+    }
+
+    .email-inner {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .email-capture h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 0;
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      border: none;
+      font-family: inherit;
+    }
+
+    .email-input:focus {
+      outline: none;
+    }
+
+    .subscribe-button {
+      padding: 1rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: white;
+      background: var(--color-accent);
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+    }
+
+    .subscribe-button:hover {
+      background: #2d2420;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--color-accent);
+      color: var(--color-text-light);
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.875rem;
+    }
+
+    .footer-version {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .trust-line {
+      opacity: 0.6;
+      font-size: 0.8rem;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .hero-visual {
+        height: 300px;
+        order: -1;
+      }
+      .hero-content {
+        padding: 3rem 2rem;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .coming-soon-grid {
+        grid-template-columns: 1fr;
+      }
+      .logo { font-size: 3rem; }
+      .email-form {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-page">
+    <!-- Geometric shapes -->
+    <div class="geo-shape circle"></div>
+    <div class="geo-shape square"></div>
+    <div class="geo-shape oval"></div>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="logo">Table<span class="logo-highlight">Craft</span></h1>
+        <p class="tagline">Event Seating Made Simple</p>
+        <p class="description">
+          Design floor plans, manage guest lists, and let smart optimization handle the tricky seating decisions.
+        </p>
+        <button class="cta-button">
+          Start Planning Free
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="hero-visual"></div>
+    </section>
+
+    <!-- Use Cases Marquee -->
+    <div class="use-cases">
+      <div class="use-cases-track">
+        <span>Weddings</span>
+        <span>Corporate Dinners</span>
+        <span>Galas</span>
+        <span>Team Offsites</span>
+        <span>Private Parties</span>
+        <span>Weddings</span>
+        <span>Corporate Dinners</span>
+        <span>Galas</span>
+        <span>Team Offsites</span>
+        <span>Private Parties</span>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="features-header">
+        <h2>How It Works</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-block">
+          <div class="feature-number">01</div>
+          <h3>Smart Seating</h3>
+          <p>Keep partners together, separate people who shouldn't sit near each other. The optimizer handles the relationship math.</p>
+        </div>
+        <div class="feature-block">
+          <div class="feature-number">02</div>
+          <h3>Visual Floor Plans</h3>
+          <p>Drag-and-drop tables in any shape. Add venue elements like stages, bars, and dance floors.</p>
+        </div>
+        <div class="feature-block">
+          <div class="feature-number">03</div>
+          <h3>Works Everywhere</h3>
+          <p>Phone, tablet, or desktop. Your data stays in your browser — private and always available.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="demo-section">
+      <div class="demo-box">[Animated Demo Here]</div>
+    </section>
+
+    <!-- Coming Soon -->
+    <section class="coming-soon">
+      <div class="coming-soon-header">
+        <h2>Coming Soon</h2>
+      </div>
+      <div class="coming-soon-grid">
+        <div class="coming-soon-card">
+          <h3>AI-Powered Seating</h3>
+          <p>Advanced algorithms that learn guest relationships and preferences to suggest optimal arrangements.</p>
+        </div>
+        <div class="coming-soon-card">
+          <h3>Guest Import & RSVP</h3>
+          <p>Upload your guest list from a spreadsheet and track responses as they come in.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Email Capture -->
+    <section class="email-capture">
+      <div class="email-inner">
+        <h2>Stay in the loop</h2>
+        <form class="email-form">
+          <input type="email" class="email-input" placeholder="your@email.com">
+          <button type="submit" class="subscribe-button">Subscribe</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-version">What's New · v0.2.0</div>
+      <div class="trust-line">Your data stays private — stored locally in your browser, not our servers.</div>
+    </footer>
+  </div>
+</body>
+</html>

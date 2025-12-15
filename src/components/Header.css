@@ -32,15 +32,46 @@
 .logo {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-extrabold);
-  color: var(--color-primary);
   margin: 0;
   letter-spacing: var(--letter-spacing-tight);
   transition: all var(--duration-normal) var(--ease-bounce);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+/* Hand-drawn underline */
+.logo::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 70px;
+  height: 6px;
+  transform: translateX(-50%);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 70 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4 Q17 1, 35 4 T68 3' stroke='%23f97066' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  opacity: 0.8;
 }
 
 .logo:hover {
   transform: scale(1.02);
-  color: var(--color-primary-hover);
+}
+
+.logo:hover::after {
+  opacity: 1;
+}
+
+.header .logo-table {
+  color: var(--color-text);
+}
+
+.header .logo-craft {
+  color: var(--color-primary);
+  font-family: 'Caveat', cursive;
+  font-size: 1.15em;
+  font-weight: 600;
+  vertical-align: baseline;
 }
 
 .version-badge {
