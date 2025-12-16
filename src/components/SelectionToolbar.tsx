@@ -28,9 +28,16 @@ export function SelectionToolbar() {
   };
 
   const handleDelete = () => {
-    const confirmMsg = selectedGuestCount > 0
-      ? `Delete ${selectedGuestCount} guest${selectedGuestCount > 1 ? 's' : ''}?`
-      : `Delete ${selectedTableCount} table${selectedTableCount > 1 ? 's' : ''}? All guests will be unassigned.`;
+    let confirmMsg: string;
+
+    if (selectedGuestCount > 0 && selectedTableCount > 0) {
+      // Both guests and tables selected
+      confirmMsg = `Delete ${selectedGuestCount} guest${selectedGuestCount > 1 ? 's' : ''} and ${selectedTableCount} table${selectedTableCount > 1 ? 's' : ''}? Other guests seated at deleted tables will be unassigned.`;
+    } else if (selectedGuestCount > 0) {
+      confirmMsg = `Delete ${selectedGuestCount} guest${selectedGuestCount > 1 ? 's' : ''}?`;
+    } else {
+      confirmMsg = `Delete ${selectedTableCount} table${selectedTableCount > 1 ? 's' : ''}? Seated guests will be unassigned.`;
+    }
 
     if (confirm(confirmMsg)) {
       pushHistory('Batch delete');

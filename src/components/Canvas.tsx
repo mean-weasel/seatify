@@ -220,6 +220,82 @@ function getSeatPositionsForTable(table: Table, capacity: number): { x: number; 
   return positions;
 }
 
+// Find all guests (both unassigned and seated) that intersect with a selection rectangle
+function findGuestsInSelectionRect(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  guests: Guest[],
+  tables: Table[]
+): string[] {
+  // Normalize the selection rectangle (handle any drag direction)
+  const selectionRect = {
+    x: Math.min(start.x, end.x),
+    y: Math.min(start.y, end.y),
+    width: Math.abs(end.x - start.x),
+    height: Math.abs(end.y - start.y),
+  };
+
+  // Guest chip approximate size (circular, ~40px diameter)
+  const guestSize = 40;
+
+  // Pre-compute seat positions for all tables
+  const tableSeatPositions = new Map<string, { x: number; y: number }[]>();
+  const tableGuestIndices = new Map<string, Map<string, number>>();
+
+  for (const table of tables) {
+    const positions = getSeatPositionsForTable(table, table.capacity);
+    tableSeatPositions.set(table.id, positions);
+
+    // Build index map for guests at this table
+    const seatedGuests = guests.filter(g => g.tableId === table.id);
+    const indexMap = new Map<string, number>();
+    seatedGuests.forEach((guest, idx) => {
+      const seatIdx = guest.seatIndex ?? idx;
+      indexMap.set(guest.id, seatIdx);
+    });
+    tableGuestIndices.set(table.id, indexMap);
+  }
+
+  // Find all guests that intersect with selection
+  return guests
+    .filter(guest => {
+      let guestX: number | undefined;
+      let guestY: number | undefined;
+
+      if (guest.tableId) {
+        // Seated guest - calculate position from table seat
+        const positions = tableSeatPositions.get(guest.tableId);
+        const indexMap = tableGuestIndices.get(guest.tableId);
+        if (positions && indexMap) {
+          const seatIndex = indexMap.get(guest.id) ?? 0;
+          const seatPos = positions[seatIndex] || positions[0];
+          if (seatPos) {
+            guestX = seatPos.x;
+            guestY = seatPos.y;
+          }
+        }
+      } else if (guest.canvasX !== undefined && guest.canvasY !== undefined) {
+        // Unassigned guest on canvas
+        guestX = guest.canvasX;
+        guestY = guest.canvasY;
+      }
+
+      if (guestX === undefined || guestY === undefined) {
+        return false;
+      }
+
+      // Check if guest chip intersects with selection rectangle
+      const guestRect = {
+        x: guestX - guestSize / 2,
+        y: guestY - guestSize / 2,
+        width: guestSize,
+        height: guestSize,
+      };
+      return rectanglesIntersect(selectionRect, guestRect);
+    })
+    .map(guest => guest.id);
+}
+
 // Find a nearby seated guest for swapping
 function findNearbySeatedGuest(
   x: number,
@@ -288,8 +364,7 @@ export function Canvas() {
     toggleTableSelection,
     toggleGuestSelection,
     setEditingGuest,
-    selectMultipleTables,
-    clearTableSelection,
+    selectMultipleItems,
     panToPosition,
     newlyAddedGuestId,
     clearNewlyAddedGuest,
@@ -594,9 +669,17 @@ export function Canvas() {
 
     if (isMarqueeSelecting && marqueeStart && marqueeEnd) {
       // Find tables that intersect with the selection rectangle
-      const selectedIds = findTablesInSelectionRect(
+      const selectedTableIds = findTablesInSelectionRect(
         marqueeStart,
         marqueeEnd,
+        event.tables
+      );
+
+      // Find guests (both seated and unassigned) that intersect with the selection rectangle
+      const selectedGuestIds = findGuestsInSelectionRect(
+        marqueeStart,
+        marqueeEnd,
+        event.guests,
         event.tables
       );
 
@@ -610,15 +693,12 @@ export function Canvas() {
 
         if (marqueeModifier === 'add') {
           // Add to existing selection (Shift+drag)
-          const combined = [...new Set([...canvas.selectedTableIds, ...selectedIds])];
-          selectMultipleTables(combined);
+          const combinedTables = [...new Set([...canvas.selectedTableIds, ...selectedTableIds])];
+          const combinedGuests = [...new Set([...canvas.selectedGuestIds, ...selectedGuestIds])];
+          selectMultipleItems(combinedTables, combinedGuests);
         } else {
-          // Replace selection
-          if (selectedIds.length > 0) {
-            selectMultipleTables(selectedIds);
-          } else {
-            clearTableSelection();
-          }
+          // Replace selection with items in marquee
+          selectMultipleItems(selectedTableIds, selectedGuestIds);
         }
       }
 
@@ -629,8 +709,8 @@ export function Canvas() {
     }
   }, [
     isPanning, isMarqueeSelecting, marqueeStart, marqueeEnd,
-    marqueeModifier, event.tables, canvas.selectedTableIds,
-    selectMultipleTables, clearTableSelection
+    marqueeModifier, event.tables, event.guests, canvas.selectedTableIds, canvas.selectedGuestIds,
+    selectMultipleItems
   ]);
 
   const handleDragStart = (dragEvent: DragStartEvent) => {
