@@ -5,6 +5,7 @@ const MOBILE_VIEWPORT = { width: 393, height: 852 };
 
 // Helper to enter the app from landing page on mobile
 async function enterAppMobile(page: import('@playwright/test').Page) {
+  // Set viewport first - this should work with setViewportSize before goto
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
@@ -17,11 +18,14 @@ async function enterAppMobile(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.click('button:has-text("Start Planning")');
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
-  // Dispatch resize event to ensure React hooks detect the correct viewport
-  // This is needed because in CI the browser may initialize with a different viewport
-  await page.evaluate(() => window.dispatchEvent(new Event('resize')));
-  // Small wait for React to re-render with the correct breakpoint
-  await page.waitForTimeout(100);
+
+  // Re-apply viewport after page load to trigger proper resize detection in React
+  // This is necessary because CI chromium may have different timing than local
+  await page.setViewportSize({ width: MOBILE_VIEWPORT.width + 1, height: MOBILE_VIEWPORT.height });
+  await page.setViewportSize(MOBILE_VIEWPORT);
+
+  // Wait for the mobile toolbar to appear (React needs to re-render)
+  await expect(page.locator('.hamburger-btn')).toBeVisible({ timeout: 5000 });
 }
 
 // Helper to enter app on desktop
@@ -38,9 +42,6 @@ async function enterAppDesktop(page: import('@playwright/test').Page) {
   await page.goto('/');
   await page.click('button:has-text("Start Planning")');
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
-  // Dispatch resize event to ensure React hooks detect the correct viewport
-  await page.evaluate(() => window.dispatchEvent(new Event('resize')));
-  await page.waitForTimeout(100);
 }
 
 test.describe('Mobile Toolbar Menu - Visibility', () => {
