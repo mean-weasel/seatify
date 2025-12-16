@@ -198,6 +198,7 @@ interface AppState extends OnboardingState {
   toggleGuestSelection: (id: string) => void;
   addGuestToSelection: (id: string) => void;
   selectMultipleGuests: (ids: string[]) => void;
+  selectMultipleItems: (tableIds: string[], guestIds: string[]) => void;
   clearGuestSelection: () => void;
   clearAllSelection: () => void;
 
@@ -1214,6 +1215,16 @@ export const useStore = create<AppState>()(
             ...state.canvas,
             selectedGuestIds: ids,
             selectedTableIds: [],
+            selectedVenueElementId: null,
+          },
+        })),
+
+      selectMultipleItems: (tableIds, guestIds) =>
+        set((state) => ({
+          canvas: {
+            ...state.canvas,
+            selectedTableIds: tableIds,
+            selectedGuestIds: guestIds,
             selectedVenueElementId: null,
           },
         })),
