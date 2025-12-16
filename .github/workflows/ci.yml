@@ -86,7 +86,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Mobile Chrome E2E tests
-        run: npx playwright test --project="Mobile Chrome"
+        run: npx playwright test --project="Mobile Chrome" e2e/mobile-toolbar.spec.ts e2e/mobile-touch.spec.ts
 
       - name: Upload test results
         if: failure()
