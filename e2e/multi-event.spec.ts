@@ -292,20 +292,20 @@ test.describe('Multi-Event Management', () => {
       // Add a table to Event A
       await page.locator('.add-dropdown button').first().click();
       await page.locator('.dropdown-menu button:has-text("Round")').click();
-      await expect(page.locator('.table-element')).toHaveCount(1);
+      await expect(page.locator('.table-component')).toHaveCount(1);
 
       // Go back and create Event B
       await page.click('.back-to-events-btn');
       await createEvent(page, 'Event B');
       // Event B should have no tables
-      await expect(page.locator('.table-element')).toHaveCount(0);
+      await expect(page.locator('.table-component')).toHaveCount(0);
 
       // Go back to Event A
       await page.click('.back-to-events-btn');
       await page.locator('.event-card:has-text("Event A")').click();
       await expect(page.locator('.canvas')).toBeVisible();
       // Event A should still have 1 table
-      await expect(page.locator('.table-element')).toHaveCount(1);
+      await expect(page.locator('.table-component')).toHaveCount(1);
     });
 
     test('switching between events preserves each event data', async ({ page }) => {
