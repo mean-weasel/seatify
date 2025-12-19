@@ -26,12 +26,17 @@ export async function enterApp(page: Page): Promise<void> {
   });
   await page.goto('/');
   await page.click('button:has-text("Start Planning Free")');
+
+  // Wait for navigation to events page (URL-based routing)
+  await page.waitForURL(/\/#\/events/);
   await expect(page.locator('.header')).toBeVisible({ timeout: 5000 });
 
   // Click on first event to enter it (if event list view is shown)
   const eventCard = page.locator('.event-card').first();
   if (await eventCard.isVisible({ timeout: 3000 }).catch(() => false)) {
     await eventCard.click();
+    // Wait for URL to change to event canvas view
+    await page.waitForURL(/\/#\/events\/[^/]+\/canvas/);
     // Wait for canvas to load (indicates we're inside an event)
     await expect(page.locator('.canvas')).toBeVisible({ timeout: 5000 });
   }
@@ -119,11 +124,11 @@ export async function switchView(page: Page, view: 'canvas' | 'guests'): Promise
       await page.locator('.bottom-nav-item:has-text("Guests")').click();
     }
   } else {
-    // Desktop: use toolbar buttons
+    // Desktop: use toolbar buttons (button text is now "Canvas" and "Guests")
     if (view === 'canvas') {
-      await page.click('button:has-text("Canvas")');
+      await page.click('button.toggle-option:has-text("Canvas")');
     } else {
-      await page.click('button:has-text("Guest List")');
+      await page.click('button.toggle-option:has-text("Guests")');
     }
   }
   await page.waitForTimeout(300);

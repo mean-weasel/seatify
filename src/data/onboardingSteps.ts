@@ -8,6 +8,7 @@ export interface OnboardingStep {
   requiredView?: 'event-list' | 'dashboard' | 'canvas' | 'guests';
   highlightPadding?: number;    // Extra padding around highlighted element
   action?: 'click-event-card';  // Special action to perform before moving to next step
+  tourId?: string;              // Optional: identifies which tour this step belongs to
 }
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
@@ -41,12 +42,33 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: 'event-card',
     target: '.event-card',
     title: 'Enter an Event',
-    description: 'Click any event card to open it and start planning the seating arrangement. Let\'s go inside this event now!',
+    description: 'Click any event card to open it and start planning. Let\'s go inside this event now!',
     placement: 'right',
     requiredView: 'event-list',
     highlightPadding: 8,
     action: 'click-event-card',
   },
+  // Dashboard steps (after entering event, before canvas)
+  {
+    id: 'dashboard-overview',
+    target: '.stats-overview',
+    targetFallback: '.dashboard-grid',
+    title: 'Event Overview',
+    description: 'Your dashboard shows key stats at a glance - guest counts, RSVP status, and seating progress.',
+    placement: 'bottom',
+    requiredView: 'dashboard',
+    highlightPadding: 12,
+  },
+  {
+    id: 'quick-actions',
+    target: '.quick-actions',
+    title: 'Quick Actions',
+    description: 'Jump to common tasks: add tables, manage guests, or export your event data.',
+    placement: 'left',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+  },
+  // Canvas steps
   {
     id: 'canvas-overview',
     target: '.canvas-container',
@@ -82,7 +104,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     target: '.view-toggle',
     targetFallback: '.view-toggle-container',
     title: 'Switch Views',
-    description: 'Toggle between Canvas view for visual arrangement and Guest List view for detailed management.',
+    description: 'Use Dashboard, Canvas, and Guests views to manage different aspects of your event.',
     placement: 'bottom',
     requiredView: 'canvas',
     highlightPadding: 8,
@@ -92,7 +114,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     target: '.toolbar-btn.primary',
     targetFallback: '.main-toolbar',
     title: 'Smart Optimization',
-    description: 'Once you set up guest relationships, click Optimize to automatically arrange seating. Partners stay together, conflicts are separated.',
+    description: 'Set up guest relationships, then click Optimize to auto-arrange seating. Partners stay together, conflicts stay apart.',
     placement: 'bottom',
     requiredView: 'canvas',
     highlightPadding: 8,
@@ -104,5 +126,47 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: "Press ? anytime to see keyboard shortcuts. You can restart this tour from the header.",
     placement: 'bottom',
     highlightPadding: 12,
+  },
+];
+
+// QR Code mini-tour (optional, triggered separately)
+export const QR_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'qr-intro',
+    target: null,
+    title: 'QR Codes for Your Tables',
+    description: 'Generate QR codes that guests can scan to see who\'s at their table. Perfect for table cards and place settings!',
+    placement: 'center',
+    tourId: 'qr',
+  },
+  {
+    id: 'qr-print-all',
+    target: '.qr-print-btn',
+    targetFallback: '.tables-summary',
+    title: 'Print All QR Codes',
+    description: 'Click here to generate printable QR codes for every table at once. Great for bulk printing.',
+    placement: 'bottom',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+    tourId: 'qr',
+  },
+  {
+    id: 'qr-single-table',
+    target: '.table-component',
+    targetFallback: '.canvas',
+    title: 'Individual Table QR',
+    description: 'Right-click any table on the canvas to generate its QR code. You can copy the link or download the QR image.',
+    placement: 'right',
+    requiredView: 'canvas',
+    highlightPadding: 12,
+    tourId: 'qr',
+  },
+  {
+    id: 'qr-done',
+    target: null,
+    title: 'Ready to Print!',
+    description: 'When guests scan a QR code, they\'ll see a beautiful page with their table name and fellow guests. Try it out!',
+    placement: 'center',
+    tourId: 'qr',
   },
 ];

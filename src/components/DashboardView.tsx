@@ -1,6 +1,18 @@
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { AnimatedCounter } from './AnimatedCounter';
 import { EmptyState } from './EmptyState';
+import { QRCodePrintView } from './QRCodePrintView';
+import { PDFPreviewModal, type PlaceCardOptions, type TableCardOptions } from './PDFPreviewModal';
+import { OnboardingWizard } from './OnboardingWizard';
+import { QR_TOUR_STEPS } from '../data/onboardingSteps';
+import {
+  downloadTableCards,
+  downloadPlaceCards,
+  previewTableCards,
+  previewPlaceCards
+} from '../utils/pdfUtils';
+import { showToast } from './toastStore';
 import './DashboardView.css';
 
 export function DashboardView() {
@@ -11,6 +23,18 @@ export function DashboardView() {
     setEventType,
     exportEvent
   } = useStore();
+  const [showQRPrintView, setShowQRPrintView] = useState(false);
+  const [showQRTour, setShowQRTour] = useState(false);
+  const [isGeneratingTableCards, setIsGeneratingTableCards] = useState(false);
+  const [isGeneratingPlaceCards, setIsGeneratingPlaceCards] = useState(false);
+
+  // PDF Preview state
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'table' | 'place'>('table');
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const [currentPlaceOptions, setCurrentPlaceOptions] = useState<PlaceCardOptions | undefined>();
+  const [currentTableOptions, setCurrentTableOptions] = useState<TableCardOptions | undefined>();
 
   // Computed statistics from real data
   const totalGuests = event.guests.length;
@@ -32,6 +56,170 @@ export function DashboardView() {
     a.download = `${event.name.replace(/\s+/g, '-').toLowerCase()}-seating.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handlePreviewTableCards = async () => {
+    if (totalTables === 0) {
+      showToast('Add tables first to preview table cards', 'warning');
+      return;
+    }
+
+    setPreviewType('table');
+    setShowPreviewModal(true);
+    setIsGeneratingPreview(true);
+
+    try {
+      const url = await previewTableCards(event);
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error('Failed to generate preview:', error);
+      showToast('Failed to generate preview. Please try again.', 'error');
+      setShowPreviewModal(false);
+    } finally {
+      setIsGeneratingPreview(false);
+    }
+  };
+
+  const handlePreviewPlaceCards = async () => {
+    const seatedConfirmed = event.guests.filter(
+      g => g.tableId && g.rsvpStatus === 'confirmed'
+    ).length;
+
+    if (seatedConfirmed === 0) {
+      showToast('Assign confirmed guests to tables first', 'warning');
+      return;
+    }
+
+    setPreviewType('place');
+    setShowPreviewModal(true);
+    setIsGeneratingPreview(true);
+
+    try {
+      const url = await previewPlaceCards(event);
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error('Failed to generate preview:', error);
+      showToast('Failed to generate preview. Please try again.', 'error');
+      setShowPreviewModal(false);
+    } finally {
+      setIsGeneratingPreview(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    // Clean up blob URL
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setShowPreviewModal(false);
+    setCurrentPlaceOptions(undefined);
+    setCurrentTableOptions(undefined);
+  };
+
+  const handleOptionsChange = async (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => {
+    // Store current options for download
+    if (placeOptions) setCurrentPlaceOptions(placeOptions);
+    if (tableOptions) setCurrentTableOptions(tableOptions);
+
+    // Clean up old blob URL
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setIsGeneratingPreview(true);
+    try {
+      let url: string | null = null;
+      if (previewType === 'table' && tableOptions) {
+        url = await previewTableCards(event, {
+          fontSize: tableOptions.fontSize,
+          fontFamily: tableOptions.fontFamily,
+          showGuestCount: tableOptions.showGuestCount,
+          showEventName: tableOptions.showEventName,
+          colorTheme: tableOptions.colorTheme,
+          cardSize: tableOptions.cardSize,
+        });
+      } else if (previewType === 'place' && placeOptions) {
+        url = await previewPlaceCards(event, {
+          includeTableName: placeOptions.includeTableName,
+          includeDietary: placeOptions.includeDietary,
+          fontSize: placeOptions.fontSize,
+          fontFamily: placeOptions.fontFamily,
+          colorTheme: placeOptions.colorTheme,
+          cardSize: placeOptions.cardSize,
+        });
+      }
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error('Failed to regenerate preview:', error);
+    } finally {
+      setIsGeneratingPreview(false);
+    }
+  };
+
+  const handleDownloadFromPreview = (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => {
+    if (previewType === 'table') {
+      // Use passed options or stored options
+      handleDownloadTableCardsWithOptions(tableOptions ?? currentTableOptions);
+    } else {
+      // Use passed options or stored options
+      handleDownloadPlaceCardsWithOptions(placeOptions ?? currentPlaceOptions);
+    }
+    handleClosePreview();
+  };
+
+  const handleDownloadTableCardsWithOptions = async (options?: TableCardOptions) => {
+    if (totalTables === 0) {
+      showToast('Add tables first to generate table cards', 'warning');
+      return;
+    }
+
+    setIsGeneratingTableCards(true);
+    try {
+      await downloadTableCards(event, {
+        fontSize: options?.fontSize ?? 'medium',
+        fontFamily: options?.fontFamily ?? 'helvetica',
+        showGuestCount: options?.showGuestCount ?? true,
+        showEventName: options?.showEventName ?? true,
+        colorTheme: options?.colorTheme ?? 'classic',
+        cardSize: options?.cardSize ?? 'standard',
+      });
+      showToast('Table cards PDF downloaded', 'success');
+    } catch (error) {
+      console.error('Failed to generate table cards:', error);
+      showToast('Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      setIsGeneratingTableCards(false);
+    }
+  };
+
+  const handleDownloadPlaceCardsWithOptions = async (options?: PlaceCardOptions) => {
+    const seatedConfirmed = event.guests.filter(
+      g => g.tableId && g.rsvpStatus === 'confirmed'
+    ).length;
+
+    if (seatedConfirmed === 0) {
+      showToast('Assign confirmed guests to tables first', 'warning');
+      return;
+    }
+
+    setIsGeneratingPlaceCards(true);
+    try {
+      await downloadPlaceCards(event, {
+        includeTableName: options?.includeTableName ?? true,
+        includeDietary: options?.includeDietary ?? true,
+        fontSize: options?.fontSize ?? 'medium',
+        fontFamily: options?.fontFamily ?? 'helvetica',
+        colorTheme: options?.colorTheme ?? 'classic',
+        cardSize: options?.cardSize ?? 'standard',
+      });
+      showToast('Place cards PDF downloaded', 'success');
+    } catch (error) {
+      console.error('Failed to generate place cards:', error);
+      showToast('Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      setIsGeneratingPlaceCards(false);
+    }
   };
 
   return (
@@ -164,9 +352,90 @@ export function DashboardView() {
           </div>
         </div>
 
+        {/* Print Materials */}
+        <div className="dashboard-card print-materials">
+          <h3>Print Materials</h3>
+          <p className="print-materials-description">
+            Generate printable PDFs for your event
+          </p>
+          <div className="print-materials-grid">
+            <button
+              className="print-material-btn"
+              onClick={handlePreviewTableCards}
+              disabled={totalTables === 0 || isGeneratingTableCards}
+            >
+              <div className="print-material-icon">
+                {isGeneratingTableCards ? (
+                  <div className="btn-loading-spinner" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M12 8v8M8 12h8" />
+                  </svg>
+                )}
+              </div>
+              <div className="print-material-info">
+                <span className="print-material-title">
+                  {isGeneratingTableCards ? 'Loading preview...' : 'Table Cards'}
+                </span>
+                <span className="print-material-desc">Tent cards for each table</span>
+              </div>
+              <span className="print-material-count">{totalTables} cards</span>
+            </button>
+            <button
+              className="print-material-btn"
+              onClick={handlePreviewPlaceCards}
+              disabled={assignedGuests === 0 || confirmedGuests === 0 || isGeneratingPlaceCards}
+            >
+              <div className="print-material-icon">
+                {isGeneratingPlaceCards ? (
+                  <div className="btn-loading-spinner" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                )}
+              </div>
+              <div className="print-material-info">
+                <span className="print-material-title">
+                  {isGeneratingPlaceCards ? 'Loading preview...' : 'Place Cards'}
+                </span>
+                <span className="print-material-desc">Name cards for seated guests</span>
+              </div>
+              <span className="print-material-count">
+                {event.guests.filter(g => g.tableId && g.rsvpStatus === 'confirmed').length} cards
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Table Summary */}
         <div className="dashboard-card tables-summary">
-          <h3>Tables</h3>
+          <div className="card-header-with-action">
+            <h3>Tables</h3>
+            {event.tables.length > 0 && (
+              <div className="tables-header-actions">
+                <button
+                  className="qr-print-btn"
+                  onClick={() => setShowQRPrintView(true)}
+                  title="Print all table QR codes"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z" />
+                  </svg>
+                  Print QR Codes
+                </button>
+                <button
+                  className="qr-help-btn"
+                  onClick={() => setShowQRTour(true)}
+                  title="Learn about QR codes"
+                >
+                  ?
+                </button>
+              </div>
+            )}
+          </div>
           {event.tables.length === 0 ? (
             <EmptyState
               variant="tables"
@@ -201,6 +470,31 @@ export function DashboardView() {
           )}
         </div>
       </div>
+
+      {/* QR Code Print View */}
+      {showQRPrintView && (
+        <QRCodePrintView onClose={() => setShowQRPrintView(false)} />
+      )}
+
+      {/* PDF Preview Modal */}
+      <PDFPreviewModal
+        isOpen={showPreviewModal}
+        onClose={handleClosePreview}
+        pdfUrl={previewUrl}
+        title={previewType === 'table' ? 'Table Cards Preview' : 'Place Cards Preview'}
+        onDownload={handleDownloadFromPreview}
+        isGenerating={isGeneratingPreview}
+        type={previewType}
+        onOptionsChange={handleOptionsChange}
+      />
+
+      {/* QR Code Tour */}
+      <OnboardingWizard
+        isOpen={showQRTour}
+        onClose={() => setShowQRTour(false)}
+        onComplete={() => setShowQRTour(false)}
+        customSteps={QR_TOUR_STEPS}
+      />
     </div>
   );
 }
