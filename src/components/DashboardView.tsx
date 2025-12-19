@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { AnimatedCounter } from './AnimatedCounter';
 import { EmptyState } from './EmptyState';
+import { QRCodePrintView } from './QRCodePrintView';
+import { downloadTableCards, downloadPlaceCards } from '../utils/pdfUtils';
+import { showToast } from './toastStore';
 import './DashboardView.css';
 
 export function DashboardView() {
@@ -11,6 +15,9 @@ export function DashboardView() {
     setEventType,
     exportEvent
   } = useStore();
+  const [showQRPrintView, setShowQRPrintView] = useState(false);
+  const [isGeneratingTableCards, setIsGeneratingTableCards] = useState(false);
+  const [isGeneratingPlaceCards, setIsGeneratingPlaceCards] = useState(false);
 
   // Computed statistics from real data
   const totalGuests = event.guests.length;
@@ -32,6 +39,46 @@ export function DashboardView() {
     a.download = `${event.name.replace(/\s+/g, '-').toLowerCase()}-seating.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadTableCards = async () => {
+    if (totalTables === 0) {
+      showToast('Add tables first to generate table cards', 'warning');
+      return;
+    }
+
+    setIsGeneratingTableCards(true);
+    try {
+      await downloadTableCards(event);
+      showToast('Table cards PDF downloaded', 'success');
+    } catch (error) {
+      console.error('Failed to generate table cards:', error);
+      showToast('Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      setIsGeneratingTableCards(false);
+    }
+  };
+
+  const handleDownloadPlaceCards = async () => {
+    const seatedConfirmed = event.guests.filter(
+      g => g.tableId && g.rsvpStatus === 'confirmed'
+    ).length;
+
+    if (seatedConfirmed === 0) {
+      showToast('Assign confirmed guests to tables first', 'warning');
+      return;
+    }
+
+    setIsGeneratingPlaceCards(true);
+    try {
+      await downloadPlaceCards(event);
+      showToast('Place cards PDF downloaded', 'success');
+    } catch (error) {
+      console.error('Failed to generate place cards:', error);
+      showToast('Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      setIsGeneratingPlaceCards(false);
+    }
   };
 
   return (
@@ -164,9 +211,81 @@ export function DashboardView() {
           </div>
         </div>
 
+        {/* Print Materials */}
+        <div className="dashboard-card print-materials">
+          <h3>Print Materials</h3>
+          <p className="print-materials-description">
+            Generate printable PDFs for your event
+          </p>
+          <div className="print-materials-grid">
+            <button
+              className="print-material-btn"
+              onClick={handleDownloadTableCards}
+              disabled={totalTables === 0 || isGeneratingTableCards}
+            >
+              <div className="print-material-icon">
+                {isGeneratingTableCards ? (
+                  <div className="btn-loading-spinner" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M12 8v8M8 12h8" />
+                  </svg>
+                )}
+              </div>
+              <div className="print-material-info">
+                <span className="print-material-title">
+                  {isGeneratingTableCards ? 'Generating...' : 'Table Cards'}
+                </span>
+                <span className="print-material-desc">Tent cards for each table</span>
+              </div>
+              <span className="print-material-count">{totalTables} cards</span>
+            </button>
+            <button
+              className="print-material-btn"
+              onClick={handleDownloadPlaceCards}
+              disabled={assignedGuests === 0 || confirmedGuests === 0 || isGeneratingPlaceCards}
+            >
+              <div className="print-material-icon">
+                {isGeneratingPlaceCards ? (
+                  <div className="btn-loading-spinner" />
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                )}
+              </div>
+              <div className="print-material-info">
+                <span className="print-material-title">
+                  {isGeneratingPlaceCards ? 'Generating...' : 'Place Cards'}
+                </span>
+                <span className="print-material-desc">Name cards for seated guests</span>
+              </div>
+              <span className="print-material-count">
+                {event.guests.filter(g => g.tableId && g.rsvpStatus === 'confirmed').length} cards
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Table Summary */}
         <div className="dashboard-card tables-summary">
-          <h3>Tables</h3>
+          <div className="card-header-with-action">
+            <h3>Tables</h3>
+            {event.tables.length > 0 && (
+              <button
+                className="qr-print-btn"
+                onClick={() => setShowQRPrintView(true)}
+                title="Print all table QR codes"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z" />
+                </svg>
+                Print QR Codes
+              </button>
+            )}
+          </div>
           {event.tables.length === 0 ? (
             <EmptyState
               variant="tables"
@@ -201,6 +320,11 @@ export function DashboardView() {
           )}
         </div>
       </div>
+
+      {/* QR Code Print View */}
+      {showQRPrintView && (
+        <QRCodePrintView onClose={() => setShowQRPrintView(false)} />
+      )}
     </div>
   );
 }

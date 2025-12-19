@@ -1,0 +1,357 @@
+import type { Event, Table, Guest } from '../types';
+
+// Type for jsPDF instance (needed since we're dynamically importing)
+type jsPDFInstance = InstanceType<typeof import('jspdf').jsPDF>;
+
+// Cached module reference to avoid re-loading
+let jsPDFModule: typeof import('jspdf') | null = null;
+
+/**
+ * Lazily load jsPDF module (cached after first load)
+ */
+async function loadJsPDF(): Promise<typeof import('jspdf')> {
+  if (jsPDFModule) {
+    return jsPDFModule;
+  }
+  jsPDFModule = await import('jspdf');
+  return jsPDFModule;
+}
+
+// Card dimensions in mm (jsPDF uses mm by default)
+const TABLE_CARD = {
+  width: 101.6, // 4 inches
+  height: 76.2, // 3 inches (folded)
+  margin: 10,
+};
+
+const PLACE_CARD = {
+  width: 88.9, // 3.5 inches
+  height: 50.8, // 2 inches
+  margin: 5,
+};
+
+// Colors
+const COLORS = {
+  primary: '#F97066',
+  text: '#1a1a1a',
+  textLight: '#666666',
+  border: '#e5e5e5',
+};
+
+/**
+ * Generate PDF with table tent cards
+ * Each card is designed to fold in half and stand up
+ */
+export async function generateTableCardsPDF(event: Event, tables: Table[]): Promise<jsPDFInstance> {
+  const { jsPDF } = await loadJsPDF();
+
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'letter',
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Calculate cards per page (2 columns, 2 rows)
+  const cardsPerRow = 2;
+  const cardsPerCol = 2;
+  const cardsPerPage = cardsPerRow * cardsPerCol;
+
+  // Calculate spacing
+  const totalCardWidth = TABLE_CARD.width * cardsPerRow;
+  const totalCardHeight = TABLE_CARD.height * cardsPerCol;
+  const xOffset = (pageWidth - totalCardWidth) / 2;
+  const yOffset = (pageHeight - totalCardHeight) / 2;
+
+  tables.forEach((table, index) => {
+    // Add new page if needed (not for first card)
+    if (index > 0 && index % cardsPerPage === 0) {
+      doc.addPage();
+    }
+
+    const positionOnPage = index % cardsPerPage;
+    const col = positionOnPage % cardsPerRow;
+    const row = Math.floor(positionOnPage / cardsPerRow);
+
+    const x = xOffset + col * TABLE_CARD.width;
+    const y = yOffset + row * TABLE_CARD.height;
+
+    drawTableCard(doc, table, event, x, y);
+  });
+
+  return doc;
+}
+
+/**
+ * Draw a single table card
+ */
+function drawTableCard(
+  doc: jsPDFInstance,
+  table: Table,
+  event: Event,
+  x: number,
+  y: number
+): void {
+  const { width, height, margin } = TABLE_CARD;
+
+  // Draw card border (dashed for cutting guide)
+  doc.setDrawColor(COLORS.border);
+  doc.setLineDashPattern([2, 2], 0);
+  doc.rect(x, y, width, height);
+
+  // Draw fold line (center horizontal)
+  const foldY = y + height / 2;
+  doc.setLineDashPattern([1, 1], 0);
+  doc.line(x + margin, foldY, x + width - margin, foldY);
+  doc.setLineDashPattern([], 0);
+
+  // Get guest count for this table
+  const guestCount = event.guests.filter(g => g.tableId === table.id).length;
+
+  // === TOP HALF (visible when folded, upside down for printing) ===
+  // This will be the back when folded, so we draw it upside down
+  doc.saveGraphicsState();
+
+  // Draw table name (large, centered) - TOP HALF
+  doc.setFontSize(28);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(COLORS.text);
+
+  const topCenterY = y + height / 4;
+  doc.text(table.name, x + width / 2, topCenterY, {
+    align: 'center',
+    baseline: 'middle'
+  });
+
+  // Draw capacity info below name - TOP HALF
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(COLORS.textLight);
+  doc.text(
+    `${guestCount} / ${table.capacity} guests`,
+    x + width / 2,
+    topCenterY + 12,
+    { align: 'center' }
+  );
+
+  doc.restoreGraphicsState();
+
+  // === BOTTOM HALF (front when folded) ===
+  const bottomCenterY = y + height * 3 / 4;
+
+  // Draw table name (large, centered)
+  doc.setFontSize(28);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(COLORS.text);
+  doc.text(table.name, x + width / 2, bottomCenterY, {
+    align: 'center',
+    baseline: 'middle'
+  });
+
+  // Draw event name (small, at bottom)
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(COLORS.textLight);
+  doc.text(event.name, x + width / 2, y + height - margin, {
+    align: 'center'
+  });
+}
+
+/**
+ * Generate PDF with place cards for guests
+ */
+export async function generatePlaceCardsPDF(
+  event: Event,
+  guests: Guest[],
+  options: {
+    includeTableName?: boolean;
+    includeDietary?: boolean;
+  } = {}
+): Promise<jsPDFInstance> {
+  const { includeTableName = true, includeDietary = true } = options;
+
+  const { jsPDF } = await loadJsPDF();
+
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'letter',
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Calculate cards per page (3 columns, 4 rows)
+  const cardsPerRow = 3;
+  const cardsPerCol = 4;
+  const cardsPerPage = cardsPerRow * cardsPerCol;
+
+  // Calculate spacing
+  const gapX = 5;
+  const gapY = 5;
+  const totalCardWidth = PLACE_CARD.width * cardsPerRow + gapX * (cardsPerRow - 1);
+  const totalCardHeight = PLACE_CARD.height * cardsPerCol + gapY * (cardsPerCol - 1);
+  const xOffset = (pageWidth - totalCardWidth) / 2;
+  const yOffset = (pageHeight - totalCardHeight) / 2;
+
+  // Sort guests by table, then by name
+  const sortedGuests = [...guests].sort((a, b) => {
+    const tableA = event.tables.find(t => t.id === a.tableId)?.name || '';
+    const tableB = event.tables.find(t => t.id === b.tableId)?.name || '';
+    if (tableA !== tableB) return tableA.localeCompare(tableB);
+    return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+  });
+
+  sortedGuests.forEach((guest, index) => {
+    // Add new page if needed (not for first card)
+    if (index > 0 && index % cardsPerPage === 0) {
+      doc.addPage();
+    }
+
+    const positionOnPage = index % cardsPerPage;
+    const col = positionOnPage % cardsPerRow;
+    const row = Math.floor(positionOnPage / cardsPerRow);
+
+    const x = xOffset + col * (PLACE_CARD.width + gapX);
+    const y = yOffset + row * (PLACE_CARD.height + gapY);
+
+    const table = event.tables.find(t => t.id === guest.tableId);
+    drawPlaceCard(doc, guest, table, event, x, y, { includeTableName, includeDietary });
+  });
+
+  return doc;
+}
+
+/**
+ * Draw a single place card
+ */
+function drawPlaceCard(
+  doc: jsPDFInstance,
+  guest: Guest,
+  table: Table | undefined,
+  event: Event,
+  x: number,
+  y: number,
+  options: { includeTableName: boolean; includeDietary: boolean }
+): void {
+  const { width, height, margin } = PLACE_CARD;
+
+  // Draw card border
+  doc.setDrawColor(COLORS.border);
+  doc.setLineDashPattern([2, 2], 0);
+  doc.rect(x, y, width, height);
+  doc.setLineDashPattern([], 0);
+
+  // Draw decorative line at top
+  doc.setDrawColor(COLORS.primary);
+  doc.setLineWidth(1);
+  doc.line(x + margin, y + margin, x + width - margin, y + margin);
+  doc.setLineWidth(0.2);
+
+  // Guest name (large, centered)
+  const guestName = `${guest.firstName} ${guest.lastName}`.trim();
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(COLORS.text);
+
+  const nameY = y + height / 2 - (options.includeTableName ? 4 : 0);
+  doc.text(guestName, x + width / 2, nameY, {
+    align: 'center',
+    baseline: 'middle'
+  });
+
+  // Table name (if assigned and option enabled)
+  if (options.includeTableName && table) {
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(COLORS.textLight);
+    doc.text(table.name, x + width / 2, nameY + 8, { align: 'center' });
+  }
+
+  // Dietary/accessibility icons (bottom right)
+  if (options.includeDietary) {
+    const indicators: string[] = [];
+
+    if (guest.dietaryRestrictions?.length) {
+      // Add dietary indicator
+      indicators.push(...guest.dietaryRestrictions.map(d => getDietarySymbol(d)));
+    }
+
+    if (guest.accessibilityNeeds?.length) {
+      indicators.push('\u267F'); // Wheelchair symbol
+    }
+
+    if (indicators.length > 0) {
+      doc.setFontSize(8);
+      doc.setTextColor(COLORS.textLight);
+      doc.text(
+        indicators.join(' '),
+        x + width - margin,
+        y + height - margin,
+        { align: 'right' }
+      );
+    }
+  }
+
+  // Event name (small, bottom left)
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(COLORS.textLight);
+  doc.text(event.name, x + margin, y + height - margin);
+}
+
+/**
+ * Get symbol for dietary restriction
+ */
+function getDietarySymbol(restriction: string): string {
+  const symbols: Record<string, string> = {
+    vegetarian: '\u{1F331}', // Seedling
+    vegan: '\u{1F33F}', // Herb
+    'gluten-free': 'GF',
+    'dairy-free': 'DF',
+    'nut-free': 'NF',
+    halal: '\u{262A}', // Star and crescent
+    kosher: '\u{2721}', // Star of David
+    pescatarian: '\u{1F41F}', // Fish
+  };
+  return symbols[restriction.toLowerCase()] || restriction.charAt(0).toUpperCase();
+}
+
+/**
+ * Download PDF with given filename
+ */
+export function downloadPDF(doc: jsPDFInstance, filename: string): void {
+  doc.save(`${filename}.pdf`);
+}
+
+/**
+ * Generate and download table cards PDF
+ */
+export async function downloadTableCards(event: Event): Promise<void> {
+  if (event.tables.length === 0) return;
+
+  const doc = await generateTableCardsPDF(event, event.tables);
+  const filename = `${event.name.replace(/\s+/g, '-').toLowerCase()}-table-cards`;
+  downloadPDF(doc, filename);
+}
+
+/**
+ * Generate and download place cards PDF
+ */
+export async function downloadPlaceCards(
+  event: Event,
+  options?: { includeTableName?: boolean; includeDietary?: boolean }
+): Promise<void> {
+  // Only include confirmed guests with table assignments
+  const guests = event.guests.filter(
+    g => g.tableId && g.rsvpStatus === 'confirmed'
+  );
+
+  if (guests.length === 0) return;
+
+  const doc = await generatePlaceCardsPDF(event, guests, options);
+  const filename = `${event.name.replace(/\s+/g, '-').toLowerCase()}-place-cards`;
+  downloadPDF(doc, filename);
+}
