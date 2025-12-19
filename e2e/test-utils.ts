@@ -123,7 +123,7 @@ export async function switchView(page: Page, view: 'canvas' | 'guests'): Promise
     if (view === 'canvas') {
       await page.click('button:has-text("Canvas")');
     } else {
-      await page.click('button:has-text("Guest List")');
+      await page.click('button:has-text("Guests")');
     }
   }
   await page.waitForTimeout(300);
