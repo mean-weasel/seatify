@@ -298,7 +298,7 @@ test.describe('PDF Customization Options', () => {
     await expect(page.locator('.pdf-preview-btn.options')).toBeVisible();
   });
 
-  test('table cards preview does not show options button', async ({ page }) => {
+  test('table cards preview shows options button', async ({ page }) => {
     // Click the table cards preview button
     const tableCardsRow = page.locator('.print-material-row').first();
     await tableCardsRow.locator('.print-material-preview-btn').click();
@@ -306,8 +306,77 @@ test.describe('PDF Customization Options', () => {
     // Wait for modal
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Options button should not be visible for table cards
-    await expect(page.locator('.pdf-preview-btn.options')).not.toBeVisible();
+    // Options button should be visible for table cards
+    await expect(page.locator('.pdf-preview-btn.options')).toBeVisible();
+  });
+
+  test('table cards options panel has guest count checkbox', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check for guest count checkbox
+    const guestCountCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show guest count' });
+    await expect(guestCountCheckbox).toBeVisible();
+    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+  });
+
+  test('table cards options panel has event name checkbox', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check for event name checkbox
+    const eventNameCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show event name' });
+    await expect(eventNameCheckbox).toBeVisible();
+    await expect(eventNameCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+  });
+
+  test('table cards options panel has font size options', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check for font size options
+    await expect(page.locator('.pdf-option-title').filter({ hasText: 'Font Size' })).toBeVisible();
+    await expect(page.locator('.pdf-font-label').filter({ hasText: 'Small' })).toBeVisible();
+    await expect(page.locator('.pdf-font-label').filter({ hasText: 'Medium' })).toBeVisible();
+    await expect(page.locator('.pdf-font-label').filter({ hasText: 'Large' })).toBeVisible();
+  });
+
+  test('table card options can be toggled', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Uncheck guest count
+    const guestCountCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show guest count' });
+    await guestCountCheckbox.click();
+    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).not.toBeChecked();
+
+    // Re-check guest count
+    await guestCountCheckbox.click();
+    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).toBeChecked();
   });
 
   test('clicking options button shows options panel', async ({ page }) => {

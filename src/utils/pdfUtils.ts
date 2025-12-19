@@ -42,7 +42,13 @@ const COLORS = {
  * Generate PDF with table tent cards
  * Each card is designed to fold in half and stand up
  */
-export async function generateTableCardsPDF(event: Event, tables: Table[]): Promise<jsPDFInstance> {
+export async function generateTableCardsPDF(
+  event: Event,
+  tables: Table[],
+  options: TableCardPDFOptions = {}
+): Promise<jsPDFInstance> {
+  const { fontSize = 'medium', showGuestCount = true, showEventName = true } = options;
+  const fontSizes = TABLE_CARD_FONT_SIZES[fontSize];
   const { jsPDF } = await loadJsPDF();
 
   const doc = new jsPDF({
@@ -78,7 +84,7 @@ export async function generateTableCardsPDF(event: Event, tables: Table[]): Prom
     const x = xOffset + col * TABLE_CARD.width;
     const y = yOffset + row * TABLE_CARD.height;
 
-    drawTableCard(doc, table, event, x, y);
+    drawTableCard(doc, table, event, x, y, { fontSizes, showGuestCount, showEventName });
   });
 
   return doc;
@@ -92,9 +98,15 @@ function drawTableCard(
   table: Table,
   event: Event,
   x: number,
-  y: number
+  y: number,
+  options: {
+    fontSizes: typeof TABLE_CARD_FONT_SIZES['medium'];
+    showGuestCount: boolean;
+    showEventName: boolean;
+  }
 ): void {
   const { width, height, margin } = TABLE_CARD;
+  const { fontSizes, showGuestCount, showEventName } = options;
 
   // Draw card border (dashed for cutting guide)
   doc.setDrawColor(COLORS.border);
@@ -115,7 +127,7 @@ function drawTableCard(
   doc.saveGraphicsState();
 
   // Draw table name (large, centered) - TOP HALF
-  doc.setFontSize(28);
+  doc.setFontSize(fontSizes.tableName);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(COLORS.text);
 
@@ -125,16 +137,18 @@ function drawTableCard(
     baseline: 'middle'
   });
 
-  // Draw capacity info below name - TOP HALF
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(COLORS.textLight);
-  doc.text(
-    `${guestCount} / ${table.capacity} guests`,
-    x + width / 2,
-    topCenterY + 12,
-    { align: 'center' }
-  );
+  // Draw capacity info below name - TOP HALF (conditional)
+  if (showGuestCount) {
+    doc.setFontSize(fontSizes.guestCount);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(COLORS.textLight);
+    doc.text(
+      `${guestCount} / ${table.capacity} guests`,
+      x + width / 2,
+      topCenterY + 12,
+      { align: 'center' }
+    );
+  }
 
   doc.restoreGraphicsState();
 
@@ -142,7 +156,7 @@ function drawTableCard(
   const bottomCenterY = y + height * 3 / 4;
 
   // Draw table name (large, centered)
-  doc.setFontSize(28);
+  doc.setFontSize(fontSizes.tableName);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(COLORS.text);
   doc.text(table.name, x + width / 2, bottomCenterY, {
@@ -150,17 +164,19 @@ function drawTableCard(
     baseline: 'middle'
   });
 
-  // Draw event name (small, at bottom)
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(COLORS.textLight);
-  doc.text(event.name, x + width / 2, y + height - margin, {
-    align: 'center'
-  });
+  // Draw event name (small, at bottom) - conditional
+  if (showEventName) {
+    doc.setFontSize(fontSizes.eventName);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(COLORS.textLight);
+    doc.text(event.name, x + width / 2, y + height - margin, {
+      align: 'center'
+    });
+  }
 }
 
-// Font size configurations
-const FONT_SIZES = {
+// Font size configurations for place cards
+const PLACE_CARD_FONT_SIZES = {
   small: {
     guestName: 12,
     tableName: 9,
@@ -181,7 +197,32 @@ const FONT_SIZES = {
   },
 };
 
+// Font size configurations for table cards
+const TABLE_CARD_FONT_SIZES = {
+  small: {
+    tableName: 22,
+    guestCount: 10,
+    eventName: 7,
+  },
+  medium: {
+    tableName: 28,
+    guestCount: 12,
+    eventName: 9,
+  },
+  large: {
+    tableName: 34,
+    guestCount: 14,
+    eventName: 11,
+  },
+};
+
 export type FontSize = 'small' | 'medium' | 'large';
+
+export interface TableCardPDFOptions {
+  fontSize?: FontSize;
+  showGuestCount?: boolean;
+  showEventName?: boolean;
+}
 
 export interface PlaceCardPDFOptions {
   includeTableName?: boolean;
@@ -199,6 +240,7 @@ export async function generatePlaceCardsPDF(
 ): Promise<jsPDFInstance> {
   const { includeTableName = true, includeDietary = true, fontSize = 'medium' } = options;
 
+  const fontSizes = PLACE_CARD_FONT_SIZES[fontSize];
   const { jsPDF } = await loadJsPDF();
 
   const doc = new jsPDF({
@@ -245,7 +287,7 @@ export async function generatePlaceCardsPDF(
     const y = yOffset + row * (PLACE_CARD.height + gapY);
 
     const table = event.tables.find(t => t.id === guest.tableId);
-    drawPlaceCard(doc, guest, table, event, x, y, { includeTableName, includeDietary, fontSize });
+    drawPlaceCard(doc, guest, table, event, x, y, { includeTableName, includeDietary, fontSizes });
   });
 
   return doc;
@@ -261,10 +303,10 @@ function drawPlaceCard(
   event: Event,
   x: number,
   y: number,
-  options: { includeTableName: boolean; includeDietary: boolean; fontSize: FontSize }
+  options: { includeTableName: boolean; includeDietary: boolean; fontSizes: typeof PLACE_CARD_FONT_SIZES['medium'] }
 ): void {
   const { width, height, margin } = PLACE_CARD;
-  const fontSizes = FONT_SIZES[options.fontSize];
+  const { fontSizes } = options;
 
   // Draw card border
   doc.setDrawColor(COLORS.border);
@@ -371,10 +413,13 @@ export function getPDFDataUrl(doc: jsPDFInstance): string {
 /**
  * Generate table cards PDF and return as blob URL for preview
  */
-export async function previewTableCards(event: Event): Promise<string | null> {
+export async function previewTableCards(
+  event: Event,
+  options?: TableCardPDFOptions
+): Promise<string | null> {
   if (event.tables.length === 0) return null;
 
-  const doc = await generateTableCardsPDF(event, event.tables);
+  const doc = await generateTableCardsPDF(event, event.tables, options);
   const blob = getPDFBlob(doc);
   return URL.createObjectURL(blob);
 }
@@ -401,10 +446,13 @@ export async function previewPlaceCards(
 /**
  * Generate and download table cards PDF
  */
-export async function downloadTableCards(event: Event): Promise<void> {
+export async function downloadTableCards(
+  event: Event,
+  options?: TableCardPDFOptions
+): Promise<void> {
   if (event.tables.length === 0) return;
 
-  const doc = await generateTableCardsPDF(event, event.tables);
+  const doc = await generateTableCardsPDF(event, event.tables, options);
   const filename = `${event.name.replace(/\s+/g, '-').toLowerCase()}-table-cards`;
   downloadPDF(doc, filename);
 }

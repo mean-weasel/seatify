@@ -7,21 +7,33 @@ export interface PlaceCardOptions {
   fontSize: 'small' | 'medium' | 'large';
 }
 
+export interface TableCardOptions {
+  fontSize: 'small' | 'medium' | 'large';
+  showGuestCount: boolean;
+  showEventName: boolean;
+}
+
 interface PDFPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   pdfUrl: string | null;
   title: string;
-  onDownload: (options?: PlaceCardOptions) => void;
+  onDownload: (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => void;
   isGenerating?: boolean;
   type: 'table' | 'place';
-  onOptionsChange?: (options: PlaceCardOptions) => void;
+  onOptionsChange?: (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => void;
 }
 
-const defaultOptions: PlaceCardOptions = {
+const defaultPlaceOptions: PlaceCardOptions = {
   includeTableName: true,
   includeDietary: true,
   fontSize: 'medium',
+};
+
+const defaultTableOptions: TableCardOptions = {
+  fontSize: 'medium',
+  showGuestCount: true,
+  showEventName: true,
 };
 
 export function PDFPreviewModal({
@@ -35,7 +47,8 @@ export function PDFPreviewModal({
   onOptionsChange,
 }: PDFPreviewModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [options, setOptions] = useState<PlaceCardOptions>(defaultOptions);
+  const [placeOptions, setPlaceOptions] = useState<PlaceCardOptions>(defaultPlaceOptions);
+  const [tableOptions, setTableOptions] = useState<TableCardOptions>(defaultTableOptions);
   const [showOptions, setShowOptions] = useState(false);
 
   // Close on escape key
@@ -69,7 +82,8 @@ export function PDFPreviewModal({
   // Reset options when modal opens
   useEffect(() => {
     if (isOpen) {
-      setOptions(defaultOptions);
+      setPlaceOptions(defaultPlaceOptions);
+      setTableOptions(defaultTableOptions);
       setShowOptions(false);
     }
   }, [isOpen]);
@@ -82,17 +96,26 @@ export function PDFPreviewModal({
     }
   };
 
-  const handleOptionChange = <K extends keyof PlaceCardOptions>(
+  const handlePlaceOptionChange = <K extends keyof PlaceCardOptions>(
     key: K,
     value: PlaceCardOptions[K]
   ) => {
-    const newOptions = { ...options, [key]: value };
-    setOptions(newOptions);
-    onOptionsChange?.(newOptions);
+    const newOptions = { ...placeOptions, [key]: value };
+    setPlaceOptions(newOptions);
+    onOptionsChange?.(newOptions, undefined);
+  };
+
+  const handleTableOptionChange = <K extends keyof TableCardOptions>(
+    key: K,
+    value: TableCardOptions[K]
+  ) => {
+    const newOptions = { ...tableOptions, [key]: value };
+    setTableOptions(newOptions);
+    onOptionsChange?.(undefined, newOptions);
   };
 
   const handleDownload = () => {
-    onDownload(type === 'place' ? options : undefined);
+    onDownload(type === 'place' ? placeOptions : undefined, type === 'table' ? tableOptions : undefined);
   };
 
   return (
@@ -101,18 +124,16 @@ export function PDFPreviewModal({
         <div className="pdf-preview-header">
           <h2>{title}</h2>
           <div className="pdf-preview-actions">
-            {type === 'place' && (
-              <button
-                className={`pdf-preview-btn options ${showOptions ? 'active' : ''}`}
-                onClick={() => setShowOptions(!showOptions)}
-                title="Customize options"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </button>
-            )}
+            <button
+              className={`pdf-preview-btn options ${showOptions ? 'active' : ''}`}
+              onClick={() => setShowOptions(!showOptions)}
+              title="Customize options"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
             <button
               className="pdf-preview-btn download"
               onClick={handleDownload}
@@ -134,27 +155,52 @@ export function PDFPreviewModal({
           </div>
         </div>
 
-        {/* Options Panel for Place Cards */}
-        {type === 'place' && showOptions && (
+        {/* Options Panel */}
+        {showOptions && (
           <div className="pdf-options-panel">
-            <div className="pdf-option-group">
-              <label className="pdf-option-label">
-                <input
-                  type="checkbox"
-                  checked={options.includeTableName}
-                  onChange={(e) => handleOptionChange('includeTableName', e.target.checked)}
-                />
-                <span>Show table name</span>
-              </label>
-              <label className="pdf-option-label">
-                <input
-                  type="checkbox"
-                  checked={options.includeDietary}
-                  onChange={(e) => handleOptionChange('includeDietary', e.target.checked)}
-                />
-                <span>Show dietary icons</span>
-              </label>
-            </div>
+            {/* Place card specific options */}
+            {type === 'place' && (
+              <div className="pdf-option-group">
+                <label className="pdf-option-label">
+                  <input
+                    type="checkbox"
+                    checked={placeOptions.includeTableName}
+                    onChange={(e) => handlePlaceOptionChange('includeTableName', e.target.checked)}
+                  />
+                  <span>Show table name</span>
+                </label>
+                <label className="pdf-option-label">
+                  <input
+                    type="checkbox"
+                    checked={placeOptions.includeDietary}
+                    onChange={(e) => handlePlaceOptionChange('includeDietary', e.target.checked)}
+                  />
+                  <span>Show dietary icons</span>
+                </label>
+              </div>
+            )}
+            {/* Table card specific options */}
+            {type === 'table' && (
+              <div className="pdf-option-group">
+                <label className="pdf-option-label">
+                  <input
+                    type="checkbox"
+                    checked={tableOptions.showGuestCount}
+                    onChange={(e) => handleTableOptionChange('showGuestCount', e.target.checked)}
+                  />
+                  <span>Show guest count</span>
+                </label>
+                <label className="pdf-option-label">
+                  <input
+                    type="checkbox"
+                    checked={tableOptions.showEventName}
+                    onChange={(e) => handleTableOptionChange('showEventName', e.target.checked)}
+                  />
+                  <span>Show event name</span>
+                </label>
+              </div>
+            )}
+            {/* Font size - shared between both types */}
             <div className="pdf-option-group">
               <span className="pdf-option-title">Font Size</span>
               <div className="pdf-font-size-options">
@@ -164,8 +210,11 @@ export function PDFPreviewModal({
                       type="radio"
                       name="fontSize"
                       value={size}
-                      checked={options.fontSize === size}
-                      onChange={() => handleOptionChange('fontSize', size)}
+                      checked={type === 'place' ? placeOptions.fontSize === size : tableOptions.fontSize === size}
+                      onChange={() => type === 'place'
+                        ? handlePlaceOptionChange('fontSize', size)
+                        : handleTableOptionChange('fontSize', size)
+                      }
                     />
                     <span className={`pdf-font-label pdf-font-${size}`}>
                       {size.charAt(0).toUpperCase() + size.slice(1)}

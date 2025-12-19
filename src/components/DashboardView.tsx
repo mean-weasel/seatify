@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { AnimatedCounter } from './AnimatedCounter';
 import { EmptyState } from './EmptyState';
 import { QRCodePrintView } from './QRCodePrintView';
-import { PDFPreviewModal, type PlaceCardOptions } from './PDFPreviewModal';
+import { PDFPreviewModal, type PlaceCardOptions, type TableCardOptions } from './PDFPreviewModal';
 import {
   downloadTableCards,
   downloadPlaceCards,
@@ -150,14 +150,35 @@ export function DashboardView() {
     setShowPreviewModal(false);
   };
 
-  const handleDownloadFromPreview = (options?: PlaceCardOptions) => {
+  const handleDownloadFromPreview = (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => {
     if (previewType === 'table') {
-      handleDownloadTableCards();
+      handleDownloadTableCardsWithOptions(tableOptions);
     } else {
-      // Convert PlaceCardOptions to PlaceCardPDFOptions format
-      handleDownloadPlaceCardsWithOptions(options);
+      handleDownloadPlaceCardsWithOptions(placeOptions);
     }
     handleClosePreview();
+  };
+
+  const handleDownloadTableCardsWithOptions = async (options?: TableCardOptions) => {
+    if (totalTables === 0) {
+      showToast('Add tables first to generate table cards', 'warning');
+      return;
+    }
+
+    setIsGeneratingTableCards(true);
+    try {
+      await downloadTableCards(event, {
+        fontSize: options?.fontSize ?? 'medium',
+        showGuestCount: options?.showGuestCount ?? true,
+        showEventName: options?.showEventName ?? true,
+      });
+      showToast('Table cards PDF downloaded', 'success');
+    } catch (error) {
+      console.error('Failed to generate table cards:', error);
+      showToast('Failed to generate PDF. Please try again.', 'error');
+    } finally {
+      setIsGeneratingTableCards(false);
+    }
   };
 
   const handleDownloadPlaceCardsWithOptions = async (options?: PlaceCardOptions) => {
