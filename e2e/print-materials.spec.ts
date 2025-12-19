@@ -488,4 +488,80 @@ test.describe('PDF Customization Options', () => {
     // Button should now be active
     await expect(page.locator('.pdf-preview-btn.options.active')).toBeVisible();
   });
+
+  test('options panel has font style options', async ({ page }) => {
+    // Open place cards preview
+    const placeCardsRow = page.locator('.print-material-row').last();
+    await placeCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check for font style options
+    await expect(page.locator('.pdf-option-title').filter({ hasText: 'Font Style' })).toBeVisible();
+    await expect(page.getByText('Sans-serif', { exact: true })).toBeVisible();
+    await expect(page.getByText('Serif', { exact: true })).toBeVisible();
+    await expect(page.getByText('Monospace', { exact: true })).toBeVisible();
+  });
+
+  test('sans-serif font style is selected by default', async ({ page }) => {
+    // Open place cards preview
+    const placeCardsRow = page.locator('.print-material-row').last();
+    await placeCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check that sans-serif is selected (helvetica is default)
+    const sansSerifOption = page.locator('.pdf-font-option').filter({ hasText: 'Sans-serif' });
+    await expect(sansSerifOption.locator('input[type="radio"]')).toBeChecked();
+  });
+
+  test('can select different font styles', async ({ page }) => {
+    // Open place cards preview
+    const placeCardsRow = page.locator('.print-material-row').last();
+    await placeCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Select Serif (use exact text match to avoid matching 'Sans-serif')
+    const serifLabel = page.getByText('Serif', { exact: true });
+    await serifLabel.click();
+    const serifRadio = page.locator('input[name="fontFamily"][value="times"]');
+    await expect(serifRadio).toBeChecked();
+
+    // Select Monospace
+    const monospaceLabel = page.getByText('Monospace', { exact: true });
+    await monospaceLabel.click();
+    const monospaceRadio = page.locator('input[name="fontFamily"][value="courier"]');
+    await expect(monospaceRadio).toBeChecked();
+
+    // Sans-serif should no longer be checked
+    const sansSerifRadio = page.locator('input[name="fontFamily"][value="helvetica"]');
+    await expect(sansSerifRadio).not.toBeChecked();
+  });
+
+  test('table cards preview has font style options', async ({ page }) => {
+    // Open table cards preview
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Open options panel
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
+
+    // Check for font style options
+    await expect(page.locator('.pdf-option-title').filter({ hasText: 'Font Style' })).toBeVisible();
+    await expect(page.getByText('Sans-serif', { exact: true })).toBeVisible();
+    await expect(page.getByText('Serif', { exact: true })).toBeVisible();
+    await expect(page.getByText('Monospace', { exact: true })).toBeVisible();
+  });
 });

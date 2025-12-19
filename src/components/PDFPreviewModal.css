@@ -204,6 +204,18 @@
   font-size: var(--font-size-base);
 }
 
+.pdf-font-family-helvetica {
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.pdf-font-family-times {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.pdf-font-family-courier {
+  font-family: 'Courier New', Courier, monospace;
+}
+
 .pdf-options-note {
   font-size: var(--font-size-xs);
   color: var(--color-text-light);

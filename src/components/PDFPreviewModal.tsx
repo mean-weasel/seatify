@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import './PDFPreviewModal.css';
 
+export type FontFamily = 'helvetica' | 'times' | 'courier';
+
 export interface PlaceCardOptions {
   includeTableName: boolean;
   includeDietary: boolean;
   fontSize: 'small' | 'medium' | 'large';
+  fontFamily: FontFamily;
 }
 
 export interface TableCardOptions {
   fontSize: 'small' | 'medium' | 'large';
+  fontFamily: FontFamily;
   showGuestCount: boolean;
   showEventName: boolean;
 }
@@ -28,10 +32,12 @@ const defaultPlaceOptions: PlaceCardOptions = {
   includeTableName: true,
   includeDietary: true,
   fontSize: 'medium',
+  fontFamily: 'helvetica',
 };
 
 const defaultTableOptions: TableCardOptions = {
   fontSize: 'medium',
+  fontFamily: 'helvetica',
   showGuestCount: true,
   showEventName: true,
 };
@@ -218,6 +224,33 @@ export function PDFPreviewModal({
                     />
                     <span className={`pdf-font-label pdf-font-${size}`}>
                       {size.charAt(0).toUpperCase() + size.slice(1)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* Font family - shared between both types */}
+            <div className="pdf-option-group">
+              <span className="pdf-option-title">Font Style</span>
+              <div className="pdf-font-size-options">
+                {([
+                  { value: 'helvetica', label: 'Sans-serif' },
+                  { value: 'times', label: 'Serif' },
+                  { value: 'courier', label: 'Monospace' },
+                ] as const).map((font) => (
+                  <label key={font.value} className="pdf-font-option">
+                    <input
+                      type="radio"
+                      name="fontFamily"
+                      value={font.value}
+                      checked={type === 'place' ? placeOptions.fontFamily === font.value : tableOptions.fontFamily === font.value}
+                      onChange={() => type === 'place'
+                        ? handlePlaceOptionChange('fontFamily', font.value)
+                        : handleTableOptionChange('fontFamily', font.value)
+                      }
+                    />
+                    <span className={`pdf-font-label pdf-font-family-${font.value}`}>
+                      {font.label}
                     </span>
                   </label>
                 ))}

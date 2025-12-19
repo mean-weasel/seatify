@@ -47,7 +47,7 @@ export async function generateTableCardsPDF(
   tables: Table[],
   options: TableCardPDFOptions = {}
 ): Promise<jsPDFInstance> {
-  const { fontSize = 'medium', showGuestCount = true, showEventName = true } = options;
+  const { fontSize = 'medium', fontFamily = 'helvetica', showGuestCount = true, showEventName = true } = options;
   const fontSizes = TABLE_CARD_FONT_SIZES[fontSize];
   const { jsPDF } = await loadJsPDF();
 
@@ -84,7 +84,7 @@ export async function generateTableCardsPDF(
     const x = xOffset + col * TABLE_CARD.width;
     const y = yOffset + row * TABLE_CARD.height;
 
-    drawTableCard(doc, table, event, x, y, { fontSizes, showGuestCount, showEventName });
+    drawTableCard(doc, table, event, x, y, { fontSizes, fontFamily, showGuestCount, showEventName });
   });
 
   return doc;
@@ -101,12 +101,13 @@ function drawTableCard(
   y: number,
   options: {
     fontSizes: typeof TABLE_CARD_FONT_SIZES['medium'];
+    fontFamily: FontFamily;
     showGuestCount: boolean;
     showEventName: boolean;
   }
 ): void {
   const { width, height, margin } = TABLE_CARD;
-  const { fontSizes, showGuestCount, showEventName } = options;
+  const { fontSizes, fontFamily, showGuestCount, showEventName } = options;
 
   // Draw card border (dashed for cutting guide)
   doc.setDrawColor(COLORS.border);
@@ -128,7 +129,7 @@ function drawTableCard(
 
   // Draw table name (large, centered) - TOP HALF
   doc.setFontSize(fontSizes.tableName);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(fontFamily, 'bold');
   doc.setTextColor(COLORS.text);
 
   const topCenterY = y + height / 4;
@@ -140,7 +141,7 @@ function drawTableCard(
   // Draw capacity info below name - TOP HALF (conditional)
   if (showGuestCount) {
     doc.setFontSize(fontSizes.guestCount);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(fontFamily, 'normal');
     doc.setTextColor(COLORS.textLight);
     doc.text(
       `${guestCount} / ${table.capacity} guests`,
@@ -157,7 +158,7 @@ function drawTableCard(
 
   // Draw table name (large, centered)
   doc.setFontSize(fontSizes.tableName);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(fontFamily, 'bold');
   doc.setTextColor(COLORS.text);
   doc.text(table.name, x + width / 2, bottomCenterY, {
     align: 'center',
@@ -167,7 +168,7 @@ function drawTableCard(
   // Draw event name (small, at bottom) - conditional
   if (showEventName) {
     doc.setFontSize(fontSizes.eventName);
-    doc.setFont('helvetica', 'italic');
+    doc.setFont(fontFamily, 'italic');
     doc.setTextColor(COLORS.textLight);
     doc.text(event.name, x + width / 2, y + height - margin, {
       align: 'center'
@@ -217,9 +218,11 @@ const TABLE_CARD_FONT_SIZES = {
 };
 
 export type FontSize = 'small' | 'medium' | 'large';
+export type FontFamily = 'helvetica' | 'times' | 'courier';
 
 export interface TableCardPDFOptions {
   fontSize?: FontSize;
+  fontFamily?: FontFamily;
   showGuestCount?: boolean;
   showEventName?: boolean;
 }
@@ -228,6 +231,7 @@ export interface PlaceCardPDFOptions {
   includeTableName?: boolean;
   includeDietary?: boolean;
   fontSize?: FontSize;
+  fontFamily?: FontFamily;
 }
 
 /**
@@ -238,7 +242,7 @@ export async function generatePlaceCardsPDF(
   guests: Guest[],
   options: PlaceCardPDFOptions = {}
 ): Promise<jsPDFInstance> {
-  const { includeTableName = true, includeDietary = true, fontSize = 'medium' } = options;
+  const { includeTableName = true, includeDietary = true, fontSize = 'medium', fontFamily = 'helvetica' } = options;
 
   const fontSizes = PLACE_CARD_FONT_SIZES[fontSize];
   const { jsPDF } = await loadJsPDF();
@@ -287,7 +291,7 @@ export async function generatePlaceCardsPDF(
     const y = yOffset + row * (PLACE_CARD.height + gapY);
 
     const table = event.tables.find(t => t.id === guest.tableId);
-    drawPlaceCard(doc, guest, table, event, x, y, { includeTableName, includeDietary, fontSizes });
+    drawPlaceCard(doc, guest, table, event, x, y, { includeTableName, includeDietary, fontSizes, fontFamily });
   });
 
   return doc;
@@ -303,10 +307,10 @@ function drawPlaceCard(
   event: Event,
   x: number,
   y: number,
-  options: { includeTableName: boolean; includeDietary: boolean; fontSizes: typeof PLACE_CARD_FONT_SIZES['medium'] }
+  options: { includeTableName: boolean; includeDietary: boolean; fontSizes: typeof PLACE_CARD_FONT_SIZES['medium']; fontFamily: FontFamily }
 ): void {
   const { width, height, margin } = PLACE_CARD;
-  const { fontSizes } = options;
+  const { fontSizes, fontFamily } = options;
 
   // Draw card border
   doc.setDrawColor(COLORS.border);
@@ -323,7 +327,7 @@ function drawPlaceCard(
   // Guest name (large, centered)
   const guestName = `${guest.firstName} ${guest.lastName}`.trim();
   doc.setFontSize(fontSizes.guestName);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(fontFamily, 'bold');
   doc.setTextColor(COLORS.text);
 
   const nameY = y + height / 2 - (options.includeTableName ? 4 : 0);
@@ -335,7 +339,7 @@ function drawPlaceCard(
   // Table name (if assigned and option enabled)
   if (options.includeTableName && table) {
     doc.setFontSize(fontSizes.tableName);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(fontFamily, 'normal');
     doc.setTextColor(COLORS.textLight);
     doc.text(table.name, x + width / 2, nameY + 8, { align: 'center' });
   }
@@ -367,7 +371,7 @@ function drawPlaceCard(
 
   // Event name (small, bottom left)
   doc.setFontSize(fontSizes.eventName);
-  doc.setFont('helvetica', 'italic');
+  doc.setFont(fontFamily, 'italic');
   doc.setTextColor(COLORS.textLight);
   doc.text(event.name, x + margin, y + height - margin);
 }
