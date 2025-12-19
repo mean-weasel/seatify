@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { QRTableData } from '../types';
 import { decodeTableData, getGuestCountText } from '../utils/qrCodeUtils';
@@ -7,38 +7,22 @@ import './QRTableInfoPage.css';
 export function QRTableInfoPage() {
   const { encodedData } = useParams<{ encodedData: string }>();
   const navigate = useNavigate();
-  const [tableData, setTableData] = useState<QRTableData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (encodedData) {
-      const data = decodeTableData(encodedData);
-      if (data) {
-        setTableData(data);
-      } else {
-        setError(true);
-      }
-    } else {
-      setError(true);
+  // Decode table data synchronously using useMemo
+  const { tableData, error } = useMemo(() => {
+    if (!encodedData) {
+      return { tableData: null, error: true };
     }
-    setIsLoading(false);
+    const data = decodeTableData(encodedData);
+    if (data) {
+      return { tableData: data as QRTableData, error: false };
+    }
+    return { tableData: null, error: true };
   }, [encodedData]);
 
   const handleNavigateToApp = () => {
     navigate('/events');
   };
-
-  if (isLoading) {
-    return (
-      <div className="qr-info-page">
-        <div className="qr-info-loading">
-          <div className="loading-spinner" />
-          <p>Loading table information...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error || !tableData) {
     return (

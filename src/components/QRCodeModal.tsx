@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import QRCode from 'react-qr-code';
 import { useStore } from '../store/useStore';
 import type { Table, Guest } from '../types';
@@ -19,18 +19,26 @@ export function QRCodeModal({ tableId, onClose }: QRCodeModalProps) {
   const qrRef = useRef<HTMLDivElement>(null);
   const { event } = useStore();
 
-  const table = event?.tables.find((t: Table) => t.id === tableId);
+  const table = useMemo(
+    () => event?.tables.find((t: Table) => t.id === tableId),
+    [event?.tables, tableId]
+  );
 
-  if (!event || !table) {
-    return null;
-  }
+  const qrUrl = useMemo(
+    () => (event && table ? generateTableQRUrl(event, table) : ''),
+    [event, table]
+  );
 
-  const qrUrl = generateTableQRUrl(event, table);
-  const guestCount = event.guests.filter(
-    (g: Guest) => g.tableId === tableId && g.rsvpStatus === 'confirmed'
-  ).length;
+  const guestCount = useMemo(
+    () =>
+      event?.guests.filter(
+        (g: Guest) => g.tableId === tableId && g.rsvpStatus === 'confirmed'
+      ).length ?? 0,
+    [event?.guests, tableId]
+  );
 
   const handleDownload = useCallback(async () => {
+    if (!table) return;
     const svgElement = qrRef.current?.querySelector('svg');
     if (svgElement) {
       try {
@@ -40,9 +48,10 @@ export function QRCodeModal({ tableId, onClose }: QRCodeModalProps) {
         showToast('Failed to download QR code', 'error');
       }
     }
-  }, [table.name]);
+  }, [table]);
 
   const handleCopyUrl = useCallback(async () => {
+    if (!qrUrl) return;
     const success = await copyToClipboard(qrUrl);
     if (success) {
       showToast('URL copied to clipboard', 'success');
@@ -52,6 +61,7 @@ export function QRCodeModal({ tableId, onClose }: QRCodeModalProps) {
   }, [qrUrl]);
 
   const handlePrint = useCallback(() => {
+    if (!table || !event) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       showToast('Unable to open print window', 'error');
@@ -130,13 +140,21 @@ export function QRCodeModal({ tableId, onClose }: QRCodeModalProps) {
     printWindow.onload = () => {
       printWindow.print();
     };
-  }, [table.name, event.name, event.date]);
+  }, [table, event]);
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  // Early return after all hooks
+  if (!event || !table) {
+    return null;
+  }
 
   return (
     <div className="modal-overlay qr-modal-overlay" onClick={handleOverlayClick}>
