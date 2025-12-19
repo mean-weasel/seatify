@@ -30,6 +30,8 @@ export function DashboardView() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<'table' | 'place'>('table');
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const [currentPlaceOptions, setCurrentPlaceOptions] = useState<PlaceCardOptions | undefined>();
+  const [currentTableOptions, setCurrentTableOptions] = useState<TableCardOptions | undefined>();
 
   // Computed statistics from real data
   const totalGuests = event.guests.length;
@@ -148,13 +150,57 @@ export function DashboardView() {
     }
     setPreviewUrl(null);
     setShowPreviewModal(false);
+    setCurrentPlaceOptions(undefined);
+    setCurrentTableOptions(undefined);
+  };
+
+  const handleOptionsChange = async (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => {
+    // Store current options for download
+    if (placeOptions) setCurrentPlaceOptions(placeOptions);
+    if (tableOptions) setCurrentTableOptions(tableOptions);
+
+    // Clean up old blob URL
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setIsGeneratingPreview(true);
+    try {
+      let url: string | null = null;
+      if (previewType === 'table' && tableOptions) {
+        url = await previewTableCards(event, {
+          fontSize: tableOptions.fontSize,
+          fontFamily: tableOptions.fontFamily,
+          showGuestCount: tableOptions.showGuestCount,
+          showEventName: tableOptions.showEventName,
+          colorTheme: tableOptions.colorTheme,
+          cardSize: tableOptions.cardSize,
+        });
+      } else if (previewType === 'place' && placeOptions) {
+        url = await previewPlaceCards(event, {
+          includeTableName: placeOptions.includeTableName,
+          includeDietary: placeOptions.includeDietary,
+          fontSize: placeOptions.fontSize,
+          fontFamily: placeOptions.fontFamily,
+          colorTheme: placeOptions.colorTheme,
+          cardSize: placeOptions.cardSize,
+        });
+      }
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error('Failed to regenerate preview:', error);
+    } finally {
+      setIsGeneratingPreview(false);
+    }
   };
 
   const handleDownloadFromPreview = (placeOptions?: PlaceCardOptions, tableOptions?: TableCardOptions) => {
     if (previewType === 'table') {
-      handleDownloadTableCardsWithOptions(tableOptions);
+      // Use passed options or stored options
+      handleDownloadTableCardsWithOptions(tableOptions ?? currentTableOptions);
     } else {
-      handleDownloadPlaceCardsWithOptions(placeOptions);
+      // Use passed options or stored options
+      handleDownloadPlaceCardsWithOptions(placeOptions ?? currentPlaceOptions);
     }
     handleClosePreview();
   };
@@ -169,8 +215,11 @@ export function DashboardView() {
     try {
       await downloadTableCards(event, {
         fontSize: options?.fontSize ?? 'medium',
+        fontFamily: options?.fontFamily ?? 'helvetica',
         showGuestCount: options?.showGuestCount ?? true,
         showEventName: options?.showEventName ?? true,
+        colorTheme: options?.colorTheme ?? 'classic',
+        cardSize: options?.cardSize ?? 'standard',
       });
       showToast('Table cards PDF downloaded', 'success');
     } catch (error) {
@@ -197,6 +246,9 @@ export function DashboardView() {
         includeTableName: options?.includeTableName ?? true,
         includeDietary: options?.includeDietary ?? true,
         fontSize: options?.fontSize ?? 'medium',
+        fontFamily: options?.fontFamily ?? 'helvetica',
+        colorTheme: options?.colorTheme ?? 'classic',
+        cardSize: options?.cardSize ?? 'standard',
       });
       showToast('Place cards PDF downloaded', 'success');
     } catch (error) {
@@ -487,6 +539,7 @@ export function DashboardView() {
         onDownload={handleDownloadFromPreview}
         isGenerating={isGeneratingPreview}
         type={previewType}
+        onOptionsChange={handleOptionsChange}
       />
     </div>
   );

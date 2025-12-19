@@ -81,7 +81,7 @@ export function PDFPreviewModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [placeOptions, setPlaceOptions] = useState<PlaceCardOptions>(defaultPlaceOptions);
   const [tableOptions, setTableOptions] = useState<TableCardOptions>(defaultTableOptions);
-  const [showOptions, setShowOptions] = useState(false);
+  const [showOptions, setShowOptions] = useState(true); // Open by default so users see options
 
   // Close on escape key
   useEffect(() => {
@@ -116,7 +116,7 @@ export function PDFPreviewModal({
     if (isOpen) {
       setPlaceOptions(defaultPlaceOptions);
       setTableOptions(defaultTableOptions);
-      setShowOptions(false);
+      setShowOptions(true); // Keep options visible by default
     }
   }, [isOpen]);
 

@@ -316,8 +316,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for guest count checkbox
@@ -332,8 +331,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for event name checkbox
@@ -348,8 +346,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for font size options
@@ -365,8 +362,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Uncheck guest count
@@ -379,7 +375,7 @@ test.describe('PDF Customization Options', () => {
     await expect(guestCountCheckbox.locator('input[type="checkbox"]')).toBeChecked();
   });
 
-  test('clicking options button shows options panel', async ({ page }) => {
+  test('options panel is visible by default', async ({ page }) => {
     // Click the place cards preview button
     const placeCardsRow = page.locator('.print-material-row').last();
     await placeCardsRow.locator('.print-material-preview-btn').click();
@@ -387,10 +383,7 @@ test.describe('PDF Customization Options', () => {
     // Wait for modal
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Click options button
-    await page.locator('.pdf-preview-btn.options').click();
-
-    // Options panel should be visible
+    // Options panel should be visible by default (no click needed)
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
   });
 
@@ -400,8 +393,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for table name checkbox
@@ -416,8 +408,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for dietary icons checkbox
@@ -432,8 +423,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for font size options
@@ -449,8 +439,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check that medium is selected
@@ -458,19 +447,22 @@ test.describe('PDF Customization Options', () => {
     await expect(mediumOption.locator('input[type="radio"]')).toBeChecked();
   });
 
-  test('can toggle options button to show/hide panel', async ({ page }) => {
+  test('can toggle options button to hide/show panel', async ({ page }) => {
     // Open place cards preview
     const placeCardsRow = page.locator('.print-material-row').last();
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Close options panel by clicking again
+    // Close options panel by clicking
     await page.locator('.pdf-preview-btn.options').click();
     await expect(page.locator('.pdf-options-panel')).not.toBeVisible();
+
+    // Re-open options panel by clicking again
+    await page.locator('.pdf-preview-btn.options').click();
+    await expect(page.locator('.pdf-options-panel')).toBeVisible();
   });
 
   test('options button shows active state when panel is open', async ({ page }) => {
@@ -479,14 +471,14 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Button should not be active initially
-    await expect(page.locator('.pdf-preview-btn.options.active')).not.toBeVisible();
+    // Button should be active initially (panel is open by default)
+    await expect(page.locator('.pdf-preview-btn.options.active')).toBeVisible();
 
-    // Open options panel
+    // Close options panel
     await page.locator('.pdf-preview-btn.options').click();
 
-    // Button should now be active
-    await expect(page.locator('.pdf-preview-btn.options.active')).toBeVisible();
+    // Button should no longer be active
+    await expect(page.locator('.pdf-preview-btn.options.active')).not.toBeVisible();
   });
 
   test('options panel has font style options', async ({ page }) => {
@@ -495,8 +487,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for font style options
@@ -512,8 +503,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check that sans-serif is selected (helvetica is default)
@@ -527,8 +517,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Select Serif (use exact text match to avoid matching 'Sans-serif')
@@ -554,8 +543,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for font style options
@@ -571,8 +559,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for color theme options
@@ -590,8 +577,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check that classic is selected by default
@@ -605,8 +591,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Select Elegant theme
@@ -632,8 +617,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for color theme options
@@ -648,8 +632,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for card size options (use .pdf-size-label class to distinguish from font size)
@@ -665,8 +648,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check that standard is selected by default
@@ -680,8 +662,7 @@ test.describe('PDF Customization Options', () => {
     await placeCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Select Compact size (use .pdf-size-label to distinguish from other labels)
@@ -707,8 +688,7 @@ test.describe('PDF Customization Options', () => {
     await tableCardsRow.locator('.print-material-preview-btn').click();
     await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
 
-    // Open options panel
-    await page.locator('.pdf-preview-btn.options').click();
+    // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
     // Check for card size options (use .pdf-size-label class to distinguish from font size)
