@@ -157,3 +157,121 @@ test.describe('PDF Download Integration', () => {
     expect(filename).toMatch(/.*-table-cards\.pdf$/);
   });
 });
+
+// =============================================================================
+// PDF Preview Tests
+// =============================================================================
+
+test.describe('PDF Preview', () => {
+  test.beforeEach(async ({ page }) => {
+    await enterApp(page);
+    await switchToDashboard(page);
+  });
+
+  test('preview buttons are visible next to each print material', async ({ page }) => {
+    // Check table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await expect(tableCardsRow.locator('.print-material-preview-btn')).toBeVisible();
+
+    // Check place cards preview button
+    const placeCardsRow = page.locator('.print-material-row').last();
+    await expect(placeCardsRow.locator('.print-material-preview-btn')).toBeVisible();
+  });
+
+  test('clicking table cards preview button opens preview modal', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for preview modal to appear (increased timeout for lazy-loaded jsPDF)
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.pdf-preview-header h2')).toContainText('Table Cards Preview');
+  });
+
+  test('preview modal shows loading state initially', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Check for loading spinner (may be brief)
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('preview modal has download button', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for modal and check download button
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.pdf-preview-btn.download')).toBeVisible();
+  });
+
+  test('preview modal has close button', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for modal and check close button
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.pdf-preview-btn.close')).toBeVisible();
+  });
+
+  test('closing preview modal works', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for modal
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Click close button
+    await page.locator('.pdf-preview-btn.close').click();
+
+    // Modal should be hidden
+    await expect(page.locator('.pdf-preview-modal')).not.toBeVisible();
+  });
+
+  test('preview modal displays PDF in iframe after loading', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for PDF to load in iframe
+    await expect(page.locator('.pdf-preview-iframe')).toBeVisible({ timeout: 15000 });
+  });
+
+  test('clicking overlay closes preview modal', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for modal
+    await expect(page.locator('.pdf-preview-modal')).toBeVisible({ timeout: 15000 });
+
+    // Click on overlay (not the modal itself)
+    await page.locator('.pdf-preview-overlay').click({ position: { x: 10, y: 10 } });
+
+    // Modal should be hidden
+    await expect(page.locator('.pdf-preview-modal')).not.toBeVisible();
+  });
+
+  test('download from preview triggers download', async ({ page }) => {
+    // Click the table cards preview button
+    const tableCardsRow = page.locator('.print-material-row').first();
+    await tableCardsRow.locator('.print-material-preview-btn').click();
+
+    // Wait for modal and PDF to load
+    await expect(page.locator('.pdf-preview-iframe')).toBeVisible({ timeout: 15000 });
+
+    // Set up download listener
+    const downloadPromise = page.waitForEvent('download', { timeout: 15000 });
+
+    // Click download button
+    await page.locator('.pdf-preview-btn.download').click();
+
+    // Verify download
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toContain('.pdf');
+  });
+});

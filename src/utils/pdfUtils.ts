@@ -327,6 +327,50 @@ export function downloadPDF(doc: jsPDFInstance, filename: string): void {
 }
 
 /**
+ * Get PDF as blob for preview
+ */
+export function getPDFBlob(doc: jsPDFInstance): Blob {
+  return doc.output('blob');
+}
+
+/**
+ * Get PDF as data URL for preview in iframe
+ */
+export function getPDFDataUrl(doc: jsPDFInstance): string {
+  return doc.output('dataurlstring');
+}
+
+/**
+ * Generate table cards PDF and return as blob URL for preview
+ */
+export async function previewTableCards(event: Event): Promise<string | null> {
+  if (event.tables.length === 0) return null;
+
+  const doc = await generateTableCardsPDF(event, event.tables);
+  const blob = getPDFBlob(doc);
+  return URL.createObjectURL(blob);
+}
+
+/**
+ * Generate place cards PDF and return as blob URL for preview
+ */
+export async function previewPlaceCards(
+  event: Event,
+  options?: { includeTableName?: boolean; includeDietary?: boolean }
+): Promise<string | null> {
+  // Only include confirmed guests with table assignments
+  const guests = event.guests.filter(
+    g => g.tableId && g.rsvpStatus === 'confirmed'
+  );
+
+  if (guests.length === 0) return null;
+
+  const doc = await generatePlaceCardsPDF(event, guests, options);
+  const blob = getPDFBlob(doc);
+  return URL.createObjectURL(blob);
+}
+
+/**
  * Generate and download table cards PDF
  */
 export async function downloadTableCards(event: Event): Promise<void> {
