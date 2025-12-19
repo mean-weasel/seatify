@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from '../store/useStore';
-import { ONBOARDING_STEPS } from '../data/onboardingSteps';
+import { ONBOARDING_STEPS, type OnboardingStep } from '../data/onboardingSteps';
 import './OnboardingWizard.css';
 
 // Helper to perform step actions
@@ -22,19 +22,24 @@ interface OnboardingWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  customSteps?: OnboardingStep[];  // Optional custom steps for mini-tours
+  tourTitle?: string;              // Optional title shown in progress area
 }
 
-export function OnboardingWizard({ isOpen, onClose, onComplete }: OnboardingWizardProps) {
+export function OnboardingWizard({ isOpen, onClose, onComplete, customSteps }: OnboardingWizardProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const { activeView, setActiveView, sidebarOpen, toggleSidebar } = useStore();
 
+  // Use custom steps if provided, otherwise use default onboarding steps
+  const baseSteps = customSteps || ONBOARDING_STEPS;
+
   // Filter steps for mobile - skip sidebar step since it's an overlay on mobile
   const steps = isMobile
-    ? ONBOARDING_STEPS.filter(step => step.id !== 'sidebar')
-    : ONBOARDING_STEPS;
+    ? baseSteps.filter(step => step.id !== 'sidebar')
+    : baseSteps;
 
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
@@ -49,6 +54,13 @@ export function OnboardingWizard({ isOpen, onClose, onComplete }: OnboardingWiza
     action: currentStep.action,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [currentStepIndex, isMobile]);
+
+  // Reset step index when tour changes or reopens
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStepIndex(0);
+    }
+  }, [isOpen, customSteps]);
 
   // Track viewport size for mobile detection
   useEffect(() => {

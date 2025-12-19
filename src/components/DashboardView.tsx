@@ -3,10 +3,13 @@ import { useStore } from '../store/useStore';
 import { AnimatedCounter } from './AnimatedCounter';
 import { EmptyState } from './EmptyState';
 import { QRCodePrintView } from './QRCodePrintView';
+import { OnboardingWizard } from './OnboardingWizard';
+import { QR_TOUR_STEPS } from '../data/onboardingSteps';
 import './DashboardView.css';
 
 export function DashboardView() {
   const [showQRPrint, setShowQRPrint] = useState(false);
+  const [showQRTour, setShowQRTour] = useState(false);
   const {
     event,
     setActiveView,
@@ -172,12 +175,21 @@ export function DashboardView() {
           <div className="tables-header">
             <h3>Tables</h3>
             {event.tables.length > 0 && (
-              <button
-                className="qr-print-btn"
-                onClick={() => setShowQRPrint(true)}
-              >
-                🖨️ Print QR Codes
-              </button>
+              <div className="tables-header-actions">
+                <button
+                  className="qr-print-btn"
+                  onClick={() => setShowQRPrint(true)}
+                >
+                  🖨️ Print QR Codes
+                </button>
+                <button
+                  className="qr-help-btn"
+                  onClick={() => setShowQRTour(true)}
+                  title="Learn about QR codes"
+                >
+                  ?
+                </button>
+              </div>
             )}
           </div>
           {event.tables.length === 0 ? (
@@ -219,6 +231,14 @@ export function DashboardView() {
       {showQRPrint && (
         <QRCodePrintView onClose={() => setShowQRPrint(false)} />
       )}
+
+      {/* QR Code Tour */}
+      <OnboardingWizard
+        isOpen={showQRTour}
+        onClose={() => setShowQRTour(false)}
+        onComplete={() => setShowQRTour(false)}
+        customSteps={QR_TOUR_STEPS}
+      />
     </div>
   );
 }
