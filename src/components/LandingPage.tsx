@@ -82,8 +82,8 @@ export function LandingPage() {
         <section className="hero-section">
           <div className="logo-wrapper">
             <h1 className="landing-logo">
-              <span className="logo-table">Table</span>
-              <span className="logo-craft">Craft</span>
+              <span className="logo-seat">Seat</span>
+              <span className="logo-ify">ify</span>
               <span className="sr-only"> - Free Seating Chart Maker & Wedding Seating Plan Generator</span>
             </h1>
           </div>
