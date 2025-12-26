@@ -1,8 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ToastContainer } from './components/Toast';
 import { showToast } from './components/toastStore';
 import { AppRouter } from './router';
 import { useStore } from './store/useStore';
+import { EmailCaptureModal } from './components/EmailCaptureModal';
+import {
+  shouldShowEmailCapture,
+  markTriggerShown,
+  hasReachedGuestMilestone,
+  markAsSubscribed,
+  trackDismissal,
+} from './utils/emailCaptureManager';
 import './App.css';
 
 function App() {
@@ -24,6 +32,38 @@ function App() {
     toggleSidebar,
     event,
   } = useStore();
+
+  // Email capture modal state
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [emailCaptureSource, setEmailCaptureSource] = useState<'landing' | 'value_moment' | 'export_prompt'>('value_moment');
+  const previousGuestCount = useRef(0);
+
+  // Monitor guest count for milestone trigger (5+ guests)
+  useEffect(() => {
+    const currentCount = event.guests.length;
+    const wasBelow = previousGuestCount.current < 5;
+    const isNowAtOrAbove = currentCount >= 5;
+
+    if (wasBelow && isNowAtOrAbove && hasReachedGuestMilestone(currentCount)) {
+      if (shouldShowEmailCapture('guestMilestone')) {
+        markTriggerShown('guestMilestone');
+        setEmailCaptureSource('value_moment');
+        // Small delay to let the guest addition complete visually
+        setTimeout(() => setShowEmailCapture(true), 500);
+      }
+    }
+
+    previousGuestCount.current = currentCount;
+  }, [event.guests.length]);
+
+  const handleEmailCaptureClose = (subscribed = false) => {
+    if (subscribed) {
+      markAsSubscribed();
+    } else {
+      trackDismissal();
+    }
+    setShowEmailCapture(false);
+  };
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -165,6 +205,13 @@ function App() {
     <>
       <AppRouter />
       <ToastContainer />
+      {showEmailCapture && (
+        <EmailCaptureModal
+          onClose={() => handleEmailCaptureClose(false)}
+          onSuccess={() => handleEmailCaptureClose(true)}
+          source={emailCaptureSource}
+        />
+      )}
     </>
   );
 }
