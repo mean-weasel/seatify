@@ -23,6 +23,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  validate-sitemap:
+    name: Validate Sitemap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate sitemap.xml
+        run: node scripts/validate-sitemap.js
+
   lint-and-build:
     runs-on: ubuntu-latest
     steps:
@@ -102,7 +117,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Mobile Chrome E2E tests
-        run: npx playwright test --project="Mobile Chrome" e2e/mobile-toolbar.spec.ts e2e/mobile-touch.spec.ts
+        run: npx playwright test --project="Mobile Chrome" e2e/mobile-toolbar.spec.ts e2e/mobile-touch.spec.ts e2e/mobile-settings.spec.ts
 
       - name: Upload test results
         if: failure()
