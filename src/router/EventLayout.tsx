@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Outlet, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useStore } from '../store/useStore';
@@ -8,6 +8,8 @@ import { OnboardingWizard } from '../components/OnboardingWizard';
 import { EmailCaptureModal } from '../components/EmailCaptureModal';
 import { showToast } from '../components/toastStore';
 import { MobileMenuProvider, useMobileMenu } from '../contexts/MobileMenuContext';
+import { TOUR_REGISTRY, type TourId } from '../data/tourRegistry';
+import { QUICK_START_STEPS } from '../data/onboardingSteps';
 
 /**
  * Layout wrapper for event-related routes.
@@ -30,10 +32,42 @@ export function EventLayout() {
     setEditingGuest,
     hasCompletedOnboarding,
     setOnboardingComplete,
+    activeTourId,
+    setActiveTour,
+    markTourComplete,
   } = useStore();
 
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Get current tour steps based on active tour
+  const currentTourSteps = activeTourId ? TOUR_REGISTRY[activeTourId]?.steps : QUICK_START_STEPS;
+
+  // Start a specific tour
+  const startTour = useCallback((tourId: TourId) => {
+    const tour = TOUR_REGISTRY[tourId];
+    if (!tour) return;
+
+    // Navigate to the required view if needed (both URL and state)
+    if (tour.startingView && tour.startingView !== 'event-list') {
+      // If we have an event, navigate to the correct view within that event
+      if (currentEventId) {
+        navigate(`/events/${currentEventId}/${tour.startingView}`);
+        setActiveView(tour.startingView);
+
+        // Delay showing the tour to allow navigation to complete
+        setActiveTour(tourId);
+        setTimeout(() => {
+          setShowOnboarding(true);
+        }, 100);
+        return;
+      }
+      setActiveView(tour.startingView);
+    }
+
+    setActiveTour(tourId);
+    setShowOnboarding(true);
+  }, [setActiveView, setActiveTour, currentEventId, navigate]);
 
   // Keyboard shortcut for ? to show help modal and Escape to close
   useEffect(() => {
@@ -88,13 +122,37 @@ export function EventLayout() {
     }
   }, [location.pathname, setActiveView]);
 
-  // Auto-show onboarding for first-time users
+  // Check for pending tour from landing page deep-links
   useEffect(() => {
-    if (!hasCompletedOnboarding) {
-      const timer = setTimeout(() => setShowOnboarding(true), 500);
+    const pendingTour = sessionStorage.getItem('pendingTour') as TourId | null;
+    if (pendingTour && TOUR_REGISTRY[pendingTour]) {
+      sessionStorage.removeItem('pendingTour');
+      const timer = setTimeout(() => startTour(pendingTour), 500);
       return () => clearTimeout(timer);
     }
-  }, [hasCompletedOnboarding]);
+  }, [startTour]);
+
+  // Listen for startTour events from ContextualHelpButton
+  useEffect(() => {
+    const handleStartTourEvent = (e: CustomEvent<{ tourId: TourId }>) => {
+      if (e.detail.tourId && TOUR_REGISTRY[e.detail.tourId]) {
+        startTour(e.detail.tourId);
+      }
+    };
+    window.addEventListener('startTour', handleStartTourEvent as EventListener);
+    return () => window.removeEventListener('startTour', handleStartTourEvent as EventListener);
+  }, [startTour]);
+
+  // Auto-show Quick Start tour for first-time users
+  useEffect(() => {
+    if (!hasCompletedOnboarding) {
+      const timer = setTimeout(() => {
+        setActiveTour('quick-start');
+        setShowOnboarding(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasCompletedOnboarding, setActiveTour]);
 
   const handleLogoClick = () => {
     navigate('/');
@@ -103,7 +161,7 @@ export function EventLayout() {
   return (
     <MobileMenuProvider
       onShowHelp={() => setShowShortcutsHelp(true)}
-      onStartTour={() => setShowOnboarding(true)}
+      onStartTour={startTour}
     >
       <EventLayoutContent
         handleLogoClick={handleLogoClick}
@@ -115,6 +173,11 @@ export function EventLayout() {
         setEditingGuest={setEditingGuest}
         hasCompletedOnboarding={hasCompletedOnboarding}
         setOnboardingComplete={setOnboardingComplete}
+        currentTourSteps={currentTourSteps}
+        activeTourId={activeTourId}
+        setActiveTour={setActiveTour}
+        markTourComplete={markTourComplete}
+        startTour={startTour}
       />
     </MobileMenuProvider>
   );
@@ -131,6 +194,11 @@ function EventLayoutContent({
   setEditingGuest,
   hasCompletedOnboarding,
   setOnboardingComplete,
+  currentTourSteps,
+  activeTourId,
+  setActiveTour,
+  markTourComplete,
+  startTour,
 }: {
   handleLogoClick: () => void;
   setShowShortcutsHelp: (show: boolean) => void;
@@ -141,6 +209,11 @@ function EventLayoutContent({
   setEditingGuest: (id: string | null) => void;
   hasCompletedOnboarding: boolean;
   setOnboardingComplete: () => void;
+  currentTourSteps: typeof QUICK_START_STEPS;
+  activeTourId: TourId | null;
+  setActiveTour: (tourId: TourId | null) => void;
+  markTourComplete: (tourId: TourId) => void;
+  startTour: (tourId: TourId) => void;
 }) {
   const { showEmailCapture, handleEmailCaptureClose } = useMobileMenu();
 
@@ -149,7 +222,7 @@ function EventLayoutContent({
       <Header
         onLogoClick={handleLogoClick}
         onShowHelp={() => setShowShortcutsHelp(true)}
-        onStartTour={() => setShowOnboarding(true)}
+        onStartTour={startTour}
       />
       <div className="main-content view-visible">
         <Outlet />
@@ -239,14 +312,22 @@ function EventLayoutContent({
         isOpen={showOnboarding}
         onClose={() => {
           setShowOnboarding(false);
+          setActiveTour(null);
           if (!hasCompletedOnboarding) {
             setOnboardingComplete();
           }
         }}
         onComplete={() => {
+          if (activeTourId) {
+            markTourComplete(activeTourId);
+          }
           setOnboardingComplete();
-          showToast('Tour complete! Press ? anytime for help.', 'success');
+          setActiveTour(null);
+          const tourTitle = activeTourId ? TOUR_REGISTRY[activeTourId]?.title || 'Tour' : 'Tour';
+          showToast(`${tourTitle} complete! Check the Learn menu for more tours.`, 'success');
         }}
+        customSteps={currentTourSteps}
+        tourTitle={activeTourId ? TOUR_REGISTRY[activeTourId]?.title : undefined}
       />
 
       {/* Email Capture Modal (triggered from mobile menu) */}

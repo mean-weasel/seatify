@@ -146,11 +146,16 @@
   color: white;
 }
 
-/* Tour Button */
-.tour-btn {
+/* Learn Button and Dropdown */
+.learn-dropdown-container {
+  position: relative;
+}
+
+.learn-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
   padding: 0.25rem 0.625rem;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
@@ -162,10 +167,103 @@
   transition: all var(--duration-normal) var(--ease-bounce);
 }
 
-.tour-btn:hover {
+.learn-btn:hover {
   background: var(--color-secondary);
   border-color: var(--color-secondary);
   color: white;
+}
+
+.learn-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.learn-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.learn-dropdown-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.learn-dropdown-item.completed {
+  opacity: 0.7;
+}
+
+.tour-icon {
+  font-size: 1.125rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tour-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.tour-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.tour-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.tour-check {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.learn-dropdown-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.5rem 0;
+}
+
+.learn-dropdown-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem 0.25rem;
 }
 
 /* Help Button */
@@ -553,7 +651,7 @@
   .version-badge,
   .updates-btn--header,
   .subscribe-btn,
-  .tour-btn,
+  .learn-dropdown-container,
   .help-btn,
   .theme-btn {
     display: none;

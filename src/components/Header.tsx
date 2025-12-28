@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -10,19 +10,39 @@ import {
   markAsSubscribed,
   trackDismissal,
 } from '../utils/emailCaptureManager';
+import { getToursByCategory, type TourId } from '../data/tourRegistry';
 import './Header.css';
 
 interface HeaderProps {
   onLogoClick?: () => void;
   onShowHelp?: () => void;
-  onStartTour?: () => void;
+  onStartTour?: (tourId: TourId) => void;
 }
 
 export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
   const navigate = useNavigate();
   const { eventId } = useParams<{ eventId?: string }>();
-  const { event, setEventName, theme, cycleTheme, currentEventId } = useStore();
+  const { event, setEventName, theme, cycleTheme, currentEventId, isTourComplete } = useStore();
   const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [showLearnDropdown, setShowLearnDropdown] = useState(false);
+  const learnDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get tours by category
+  const gettingStartedTours = getToursByCategory('getting-started');
+  const featureTours = getToursByCategory('features');
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (learnDropdownRef.current && !learnDropdownRef.current.contains(event.target as Node)) {
+        setShowLearnDropdown(false);
+      }
+    }
+    if (showLearnDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLearnDropdown]);
 
   // Check if user has already subscribed (don't show button if so)
   const canShowEmailButton = shouldShowEmailCapture('guestMilestone') ||
@@ -104,13 +124,59 @@ export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
           </button>
         )}
         {onStartTour && (
-          <button
-            className="tour-btn"
-            onClick={onStartTour}
-            title="Take a tour of Seatify"
-          >
-            Tour
-          </button>
+          <div className="learn-dropdown-container" ref={learnDropdownRef}>
+            <button
+              className="learn-btn"
+              onClick={() => setShowLearnDropdown(!showLearnDropdown)}
+              title="Take tours to learn Seatify"
+            >
+              Learn ▾
+            </button>
+            {showLearnDropdown && (
+              <div className="learn-dropdown">
+                {gettingStartedTours.map(tour => (
+                  <button
+                    key={tour.id}
+                    className={`learn-dropdown-item ${isTourComplete(tour.id) ? 'completed' : ''}`}
+                    onClick={() => {
+                      setShowLearnDropdown(false);
+                      onStartTour(tour.id);
+                    }}
+                  >
+                    <span className="tour-icon">{tour.icon}</span>
+                    <span className="tour-info">
+                      <span className="tour-title">{tour.title}</span>
+                      <span className="tour-time">{tour.estimatedTime}</span>
+                    </span>
+                    {isTourComplete(tour.id) && <span className="tour-check">✓</span>}
+                  </button>
+                ))}
+                {featureTours.length > 0 && (
+                  <>
+                    <div className="learn-dropdown-divider" />
+                    <div className="learn-dropdown-section-title">Feature Tours</div>
+                    {featureTours.map(tour => (
+                      <button
+                        key={tour.id}
+                        className={`learn-dropdown-item ${isTourComplete(tour.id) ? 'completed' : ''}`}
+                        onClick={() => {
+                          setShowLearnDropdown(false);
+                          onStartTour(tour.id);
+                        }}
+                      >
+                        <span className="tour-icon">{tour.icon}</span>
+                        <span className="tour-info">
+                          <span className="tour-title">{tour.title}</span>
+                          <span className="tour-time">{tour.estimatedTime}</span>
+                        </span>
+                        {isTourComplete(tour.id) && <span className="tour-check">✓</span>}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         )}
         {onShowHelp && (
           <button
