@@ -114,12 +114,15 @@ test.describe('Mobile Settings - Theme Cycling', () => {
 });
 
 test.describe('Mobile Settings - Tour Integration', () => {
-  test('Take a Tour starts onboarding wizard', async ({ page }) => {
+  test('Browse Tours menu starts onboarding wizard', async ({ page }) => {
     await enterAppMobile(page);
     await openMobileMenu(page);
 
-    // Click Take a Tour
-    await page.locator('.menu-item:has-text("Take a Tour")').click();
+    // Click Browse Tours to open the submenu
+    await page.locator('.menu-item:has-text("Browse Tours")').click();
+
+    // Click Quick Start tour
+    await page.locator('.menu-item.tour-item:has-text("Quick Start")').click();
 
     // Onboarding wizard should appear
     await expect(page.locator('.onboarding-tooltip')).toBeVisible({ timeout: 3000 });
