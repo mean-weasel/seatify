@@ -224,6 +224,10 @@ test.describe('Import Wizard - Full Import Flow', () => {
     // Navigate to Guest List view
     await switchView(page, 'guests');
 
+    // Wait for guest table to be visible and stable
+    await expect(page.locator('.guest-table tbody')).toBeVisible();
+    await page.waitForTimeout(300); // Wait for data to fully render
+
     // Count existing guests
     const initialGuestRows = await page.locator('.guest-table tbody tr').count();
 
