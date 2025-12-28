@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { ONBOARDING_STEPS, type OnboardingStep } from '../data/onboardingSteps';
 import { trackOnboardingStep } from '../utils/analytics';
@@ -31,8 +32,10 @@ export function OnboardingWizard({ isOpen, onClose, onComplete, customSteps }: O
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [isNavigating, setIsNavigating] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const { activeView, setActiveView, sidebarOpen, toggleSidebar } = useStore();
+  const navigate = useNavigate();
+  const { activeView, setActiveView, sidebarOpen, toggleSidebar, currentEventId } = useStore();
 
   // Use custom steps if provided, otherwise use default onboarding steps
   const baseSteps = customSteps || ONBOARDING_STEPS;
@@ -91,19 +94,45 @@ export function OnboardingWizard({ isOpen, onClose, onComplete, customSteps }: O
     }
   }, [stepProps]);
 
-  // Navigate to required view
+  // Navigate to required view with proper handling for view transitions
   useEffect(() => {
     if (!isOpen) return;
 
-    if (stepProps.requiredView && activeView !== stepProps.requiredView) {
-      setActiveView(stepProps.requiredView);
+    const requiredView = stepProps.requiredView;
+
+    // Check if we need to navigate to a different view
+    if (requiredView && activeView !== requiredView) {
+      // Set navigating state to show loading/transition
+      setIsNavigating(true);
+
+      // Navigate via router if we have an event ID
+      if (currentEventId && requiredView !== 'event-list') {
+        navigate(`/events/${currentEventId}/${requiredView}`);
+      }
+      setActiveView(requiredView);
     }
 
     // Ensure sidebar is open for sidebar step
     if (stepProps.id === 'sidebar' && !sidebarOpen) {
       toggleSidebar();
     }
-  }, [stepProps, activeView, setActiveView, isOpen, sidebarOpen, toggleSidebar]);
+  }, [stepProps.requiredView, stepProps.id, activeView, setActiveView, isOpen, sidebarOpen, toggleSidebar, currentEventId, navigate]);
+
+  // Clear navigating state when we've arrived at the correct view
+  useEffect(() => {
+    if (!isOpen || !isNavigating) return;
+
+    const requiredView = stepProps.requiredView;
+
+    // If we're navigating and we've arrived at the required view (or no specific view required)
+    if (!requiredView || activeView === requiredView) {
+      // Give DOM time to settle after view change
+      const timer = setTimeout(() => {
+        setIsNavigating(false);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isNavigating, activeView, stepProps.requiredView]);
 
   // Update rect on step change and resize
   useEffect(() => {
@@ -157,9 +186,50 @@ export function OnboardingWizard({ isOpen, onClose, onComplete, customSteps }: O
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isLastStep, isFirstStep, handleComplete, handleSkip, stepProps.action, setActiveView]);
+  }, [isOpen, isLastStep, isFirstStep, handleComplete, handleSkip, stepProps.action, setActiveView, currentStepIndex, steps.length]);
 
   if (!isOpen) return null;
+
+  // During view transitions, show a centered loading state to prevent flickering
+  if (isNavigating) {
+    return createPortal(
+      <div className="onboarding-overlay">
+        <div className="onboarding-backdrop" />
+        <div
+          className="onboarding-tooltip onboarding-tooltip--center"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="onboarding-tooltip-content">
+            <h3>{currentStep.title}</h3>
+            <p>Loading view...</p>
+          </div>
+          <div className="onboarding-tooltip-footer">
+            <div className="onboarding-progress">
+              {steps.map((_, index) => (
+                <span
+                  key={index}
+                  className={`onboarding-dot ${index === currentStepIndex ? 'active' : ''} ${
+                    index < currentStepIndex ? 'completed' : ''
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="onboarding-nav">
+              <button className="onboarding-btn onboarding-btn--skip" onClick={handleSkip}>
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   // Calculate tooltip position
   const getTooltipPosition = (): React.CSSProperties => {

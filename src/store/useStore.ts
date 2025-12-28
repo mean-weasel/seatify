@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Guest, Table, Constraint, Event, CanvasState, TableShape, SurveyQuestion, SurveyResponse, CanvasPreferences, AlignmentGuide, ConstraintViolation, VenueElement, VenueElementType } from '../types';
 import { demoTables, demoGuests, demoConstraints, demoSurveyQuestions, demoEventMetadata } from '../data/demoData';
 import { trackEventCreated, trackTableAdded, trackGuestAdded, trackOptimizerRun, trackGuestsImported, trackFunnelStep, trackMilestone } from '../utils/analytics';
+import type { TourId } from '../data/tourRegistry';
 
 // Helper function to detect constraint violations
 function detectConstraintViolations(event: Event): ConstraintViolation[] {
@@ -89,8 +90,13 @@ type Theme = 'light' | 'dark' | 'system';
 // Onboarding state
 interface OnboardingState {
   hasCompletedOnboarding: boolean;
+  completedTours: Set<TourId>;
+  activeTourId: TourId | null;
   setOnboardingComplete: () => void;
   resetOnboarding: () => void;
+  markTourComplete: (tourId: TourId) => void;
+  isTourComplete: (tourId: TourId) => boolean;
+  setActiveTour: (tourId: TourId | null) => void;
 }
 
 interface AppState extends OnboardingState {
@@ -655,10 +661,19 @@ export const useStore = create<AppState>()(
       newlyAddedTableId: null,
       preOptimizationSnapshot: null,
       hasCompletedOnboarding: false,
+      completedTours: new Set<TourId>(),
+      activeTourId: null,
 
       // Onboarding actions
       setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
-      resetOnboarding: () => set({ hasCompletedOnboarding: false }),
+      resetOnboarding: () => set({ hasCompletedOnboarding: false, completedTours: new Set<TourId>() }),
+      markTourComplete: (tourId) => set((state) => {
+        const newCompletedTours = new Set(state.completedTours);
+        newCompletedTours.add(tourId);
+        return { completedTours: newCompletedTours };
+      }),
+      isTourComplete: (tourId) => get().completedTours.has(tourId),
+      setActiveTour: (tourId) => set({ activeTourId: tourId }),
 
       // Event Management actions (multi-event)
       createEvent: (data) => {
@@ -2087,13 +2102,15 @@ export const useStore = create<AppState>()(
     },
     {
       name: 'seating-arrangement-storage',
-      version: 11, // Increment for multi-event support
+      version: 12, // Increment for tour tracking
       partialize: (state) => ({
         events: state.events,
         currentEventId: state.currentEventId,
         theme: state.theme,
         eventListViewMode: state.eventListViewMode,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
+        // Serialize Set as array for persistence
+        completedTours: Array.from(state.completedTours),
       }),
       onRehydrateStorage: () => (state) => {
         // After rehydration, compute `event` from `events` and `currentEventId`
@@ -2105,6 +2122,16 @@ export const useStore = create<AppState>()(
           // Ensure currentEventId is set
           if (!state.currentEventId) {
             state.currentEventId = currentEvent.id;
+          }
+        }
+        // Convert completedTours array back to Set
+        if (state) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const tours = (state as any).completedTours;
+          if (Array.isArray(tours)) {
+            state.completedTours = new Set(tours as TourId[]);
+          } else if (!state.completedTours) {
+            state.completedTours = new Set<TourId>();
           }
         }
       },
@@ -2153,6 +2180,13 @@ export const useStore = create<AppState>()(
             state.currentEventId = state.event.id;
             // Remove old event property (will be computed from events)
             delete state.event;
+          }
+        }
+
+        // Migration for v11 → v12: add completedTours
+        if (version < 12) {
+          if (!state.completedTours) {
+            state.completedTours = [];
           }
         }
 

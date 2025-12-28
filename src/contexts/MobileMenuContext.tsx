@@ -4,10 +4,11 @@ import {
   markAsSubscribed,
   trackDismissal,
 } from '../utils/emailCaptureManager';
+import type { TourId } from '../data/tourRegistry';
 
 interface MobileMenuContextValue {
   onShowHelp: () => void;
-  onStartTour: () => void;
+  onStartTour: (tourId: TourId) => void;
   onSubscribe: () => void;
   canShowEmailButton: boolean;
   showEmailCapture: boolean;
@@ -20,7 +21,7 @@ const MobileMenuContext = createContext<MobileMenuContextValue | null>(null);
 interface MobileMenuProviderProps {
   children: React.ReactNode;
   onShowHelp: () => void;
-  onStartTour: () => void;
+  onStartTour: (tourId: TourId) => void;
 }
 
 export function MobileMenuProvider({ children, onShowHelp, onStartTour }: MobileMenuProviderProps) {

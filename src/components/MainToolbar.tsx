@@ -6,6 +6,7 @@ import { ViewToggle } from './ViewToggle';
 import { MobileToolbarMenu } from './MobileToolbarMenu';
 import { showToast } from './toastStore';
 import type { TableShape } from '../types';
+import type { TourId } from '../data/tourRegistry';
 import './MainToolbar.css';
 
 interface MainToolbarProps {
@@ -16,7 +17,7 @@ interface MainToolbarProps {
   onToggleRelationships?: () => void;
   // Mobile settings props
   onShowHelp?: () => void;
-  onStartTour?: () => void;
+  onStartTour?: (tourId: TourId) => void;
   onSubscribe?: () => void;
   canShowEmailButton?: boolean;
 }

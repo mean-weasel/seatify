@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { version } from '../../package.json';
 import { UpdatesButton } from './UpdatesPopup';
+import { getToursByCategory, type TourId } from '../data/tourRegistry';
 import type { TableShape } from '../types';
 import './MobileToolbarMenu.css';
 
@@ -18,7 +19,7 @@ interface MobileToolbarMenuProps {
   onToggleGridControls?: () => void;
   // Settings props
   onShowHelp?: () => void;
-  onStartTour?: () => void;
+  onStartTour?: (tourId: TourId) => void;
   onSubscribe?: () => void;
   canShowEmailButton?: boolean;
 }
@@ -35,12 +36,17 @@ export function MobileToolbarMenu({
   onSubscribe,
   canShowEmailButton,
 }: MobileToolbarMenuProps) {
-  const { event, addTable, activeView, setActiveView, optimizeSeating, resetSeating, hasOptimizationSnapshot, canvas, setZoom, recenterCanvas, theme, cycleTheme, currentEventId } = useStore();
+  const { event, addTable, activeView, setActiveView, optimizeSeating, resetSeating, hasOptimizationSnapshot, canvas, setZoom, recenterCanvas, theme, cycleTheme, currentEventId, isTourComplete } = useStore();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showTableSubmenu, setShowTableSubmenu] = useState(false);
+  const [showTourSubmenu, setShowTourSubmenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuSheetRef = useRef<HTMLDivElement>(null);
+
+  // Get tours by category
+  const gettingStartedTours = getToursByCategory('getting-started');
+  const featureTours = getToursByCategory('features');
 
   // Check optimization state
   const hasRelationships = event.guests.some(g => g.relationships.length > 0);
@@ -57,6 +63,7 @@ export function MobileToolbarMenu({
       if (isOutsideBottomNav && isOutsideMenuSheet) {
         setIsOpen(false);
         setShowTableSubmenu(false);
+        setShowTourSubmenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -69,6 +76,7 @@ export function MobileToolbarMenu({
       if (e.key === 'Escape') {
         setIsOpen(false);
         setShowTableSubmenu(false);
+        setShowTourSubmenu(false);
       }
     };
     if (isOpen) {
@@ -143,10 +151,11 @@ export function MobileToolbarMenu({
     }
   };
 
-  const handleStartTour = () => {
+  const handleStartTour = (tourId: TourId) => {
     if (onStartTour) {
-      onStartTour();
+      onStartTour(tourId);
       setIsOpen(false);
+      setShowTourSubmenu(false);
     }
   };
 
@@ -442,18 +451,6 @@ export function MobileToolbarMenu({
                 </button>
               )}
 
-              {/* Tour */}
-              {onStartTour && (
-                <button
-                  className="menu-item"
-                  onClick={handleStartTour}
-                  role="menuitem"
-                >
-                  <span className="menu-icon">🎯</span>
-                  <span>Take a Tour</span>
-                </button>
-              )}
-
               {/* Keyboard Shortcuts */}
               {onShowHelp && (
                 <button
@@ -476,6 +473,75 @@ export function MobileToolbarMenu({
                 <span>Theme: {getThemeLabel()}</span>
               </button>
             </div>
+
+            {/* Learn Section */}
+            {onStartTour && (
+              <div className="menu-section">
+                <div className="menu-section-label">Learn</div>
+
+                {showTourSubmenu ? (
+                  <>
+                    <button
+                      className="menu-item back"
+                      onClick={() => setShowTourSubmenu(false)}
+                      role="menuitem"
+                    >
+                      <span className="menu-icon">←</span>
+                      <span>Back</span>
+                    </button>
+
+                    {/* Getting Started Tours */}
+                    {gettingStartedTours.map(tour => (
+                      <button
+                        key={tour.id}
+                        className={`menu-item tour-item ${isTourComplete(tour.id) ? 'completed' : ''}`}
+                        onClick={() => handleStartTour(tour.id)}
+                        role="menuitem"
+                      >
+                        <span className="menu-icon">{tour.icon}</span>
+                        <span className="tour-info">
+                          <span className="tour-title">{tour.title}</span>
+                          <span className="tour-time">{tour.estimatedTime}</span>
+                        </span>
+                        {isTourComplete(tour.id) && <span className="checkmark">✓</span>}
+                      </button>
+                    ))}
+
+                    {/* Feature Tours */}
+                    {featureTours.length > 0 && (
+                      <>
+                        <div className="menu-section-sublabel">Feature Tours</div>
+                        {featureTours.map(tour => (
+                          <button
+                            key={tour.id}
+                            className={`menu-item tour-item ${isTourComplete(tour.id) ? 'completed' : ''}`}
+                            onClick={() => handleStartTour(tour.id)}
+                            role="menuitem"
+                          >
+                            <span className="menu-icon">{tour.icon}</span>
+                            <span className="tour-info">
+                              <span className="tour-title">{tour.title}</span>
+                              <span className="tour-time">{tour.estimatedTime}</span>
+                            </span>
+                            {isTourComplete(tour.id) && <span className="checkmark">✓</span>}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    className="menu-item"
+                    onClick={() => setShowTourSubmenu(true)}
+                    role="menuitem"
+                  >
+                    <span className="menu-icon">🎓</span>
+                    <span>Browse Tours</span>
+                    <span className="menu-chevron">›</span>
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Event Info */}
             <div className="menu-footer">

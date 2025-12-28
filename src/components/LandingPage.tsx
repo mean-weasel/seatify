@@ -8,6 +8,7 @@ import { MobileSettingsHeader } from './MobileSettingsHeader';
 import { trackCTAClick, trackAppEntry, trackFunnelStep } from '../utils/analytics';
 import { captureUtmParams } from '../utils/utm';
 import { shouldShowEmailCapture } from '../utils/emailCaptureManager';
+import type { TourId } from '../data/tourRegistry';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -26,6 +27,16 @@ export function LandingPage() {
 
   const handleEnterApp = () => {
     trackCTAClick('hero');
+    trackAppEntry();
+    trackFunnelStep('cta_click');
+    trackFunnelStep('app_entry');
+    navigate('/events');
+  };
+
+  // Handle "See how it works" clicks - navigates to app with pending tour
+  const handleFeatureTourClick = (tourId: TourId) => {
+    sessionStorage.setItem('pendingTour', tourId);
+    trackCTAClick(`feature_tour_${tourId}`);
     trackAppEntry();
     trackFunnelStep('cta_click');
     trackFunnelStep('app_entry');
@@ -160,6 +171,12 @@ export function LandingPage() {
                   Keep partners together, separate people who shouldn't sit near
                   each other. The optimizer handles the relationship math.
                 </p>
+                <button
+                  className="feature-tour-link"
+                  onClick={() => handleFeatureTourClick('optimization')}
+                >
+                  See how it works &rarr;
+                </button>
               </div>
             </div>
             <div className="feature-card">
@@ -183,6 +200,12 @@ export function LandingPage() {
                   Drag-and-drop tables in any shape. Add venue elements like
                   stages, bars, and dance floors.
                 </p>
+                <button
+                  className="feature-tour-link"
+                  onClick={() => handleFeatureTourClick('canvas-floor-plan')}
+                >
+                  See how it works &rarr;
+                </button>
               </div>
             </div>
             <div className="feature-card">
