@@ -11,6 +11,7 @@ import type { DragEndEvent, DragStartEvent, DragMoveEvent } from '@dnd-kit/core'
 import { useGesture } from '@use-gesture/react';
 import { useStore } from '../store/useStore';
 import { useLongPress } from '../hooks/useLongPress';
+import { useIsMobile } from '../hooks/useResponsive';
 import { useMobileMenu } from '../contexts/MobileMenuContext';
 import { TableComponent } from './Table';
 import { GuestChip } from './GuestChip';
@@ -27,6 +28,10 @@ import { GridControls } from './GridControls';
 import { RelationshipMatrix } from './RelationshipMatrix';
 import { ImportWizard } from './ImportWizard/ImportWizard';
 import { QRCodeModal } from './QRCodeModal';
+import { MobileFAB } from './MobileFAB';
+import { MobileGuestPanel } from './MobileGuestPanel';
+import { MobileImmersiveCanvas } from './MobileImmersiveCanvas';
+import { useMobileGuestPanel } from '../hooks/useMobileGuestPanel';
 import type { Table, AlignmentGuide, Guest } from '../types';
 import { getFullName, getInitials } from '../types';
 import './Canvas.css';
@@ -378,6 +383,12 @@ export function Canvas() {
   // Mobile menu context for settings
   const { onShowHelp, onStartTour, onSubscribe, canShowEmailButton } = useMobileMenu();
 
+  // Mobile detection for FAB
+  const isMobile = useIsMobile();
+
+  // Mobile guest panel state
+  const guestPanel = useMobileGuestPanel();
+
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [draggedGuestId, setDraggedGuestId] = useState<string | null>(null);
@@ -571,9 +582,10 @@ export function Canvas() {
           return;
         }
 
-        // Single-finger panning when pan mode is enabled (mobile feature)
+        // Single-finger panning on mobile (default behavior) or when pan mode is enabled
         // Only pan if touching empty canvas area, not interactive elements
-        if (touches === 1 && canvasPrefs.panMode && !pinching) {
+        const shouldEnableSingleFingerPan = isMobile || canvasPrefs.panMode;
+        if (touches === 1 && shouldEnableSingleFingerPan && !pinching) {
           const targetEl = target as HTMLElement;
           const isOnInteractiveElement = targetEl?.closest?.('.table-component') ||
             targetEl?.closest?.('.canvas-guest') ||
@@ -1085,58 +1097,9 @@ export function Canvas() {
     ? event.guests.find((g) => g.id === draggedGuestId)
     : null;
 
-  return (
-    <div className="canvas-container">
-      <MainToolbar
-        showRelationships={showRelationships}
-        onToggleRelationships={() => setShowRelationships(!showRelationships)}
-        onImport={() => setShowImportWizard(true)}
-        onShowHelp={onShowHelp}
-        onStartTour={onStartTour}
-        onSubscribe={onSubscribe}
-        canShowEmailButton={canShowEmailButton}
-      >
-        {/* Grid controls */}
-        <GridControls />
-
-        {/* Go to Table dropdown */}
-        {event.tables.length > 0 && (
-          <div className="table-nav-dropdown" ref={tableDropdownRef}>
-            <button
-              onClick={() => setShowTableDropdown(!showTableDropdown)}
-              className="toolbar-btn"
-            >
-              Go to Table
-            </button>
-            {showTableDropdown && (
-              <div className="dropdown-menu">
-                {event.tables.map(table => {
-                  const guestCount = event.guests.filter(g => g.tableId === table.id).length;
-                  const isFull = guestCount >= table.capacity;
-                  return (
-                    <button
-                      key={table.id}
-                      onClick={() => goToTable(table)}
-                      className={`table-nav-item ${isFull ? 'full' : ''}`}
-                    >
-                      <span className="table-nav-name">{table.name}</span>
-                      <span className="table-nav-count">{guestCount}/{table.capacity}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Zoom controls */}
-        <div className="zoom-controls">
-          <button onClick={() => setZoom(canvas.zoom - 0.1)} title="Zoom Out">−</button>
-          <span className="zoom-display">{Math.round(canvas.zoom * 100)}%</span>
-          <button onClick={() => setZoom(canvas.zoom + 0.1)} title="Zoom In">+</button>
-          <button onClick={handleRecenter} className="recenter-btn has-tooltip" data-tooltip="Re-center">⌖</button>
-        </div>
-      </MainToolbar>
+  // Canvas content that's shared between desktop and mobile
+  const canvasContent = (
+    <>
 
       <DndContext
         sensors={sensors}
@@ -1304,6 +1267,101 @@ export function Canvas() {
           onClose={() => setQrModalTableId(null)}
         />
       )}
+
+    </>
+  );
+
+  // Desktop: Show MainToolbar + canvas content
+  // Mobile: Wrap in immersive mode with gesture-based UI access
+  if (isMobile) {
+    return (
+      <div className="canvas-container mobile-immersive">
+        <MobileImmersiveCanvas
+          showRelationships={showRelationships}
+          onToggleRelationships={() => setShowRelationships(!showRelationships)}
+          onShowImport={() => setShowImportWizard(true)}
+          isGuestPanelOpen={guestPanel.isOpen}
+          onOpenGuestPanel={guestPanel.onOpen}
+          onCloseGuestPanel={guestPanel.onClose}
+        >
+          {canvasContent}
+
+          {/* Mobile FAB for quick add actions */}
+          <MobileFAB
+            onAddGuest={() => {
+              const centerX = (window.innerWidth / 2 - canvas.panX) / canvas.zoom;
+              const centerY = (window.innerHeight / 2 - canvas.panY) / canvas.zoom;
+              addQuickGuest(centerX, centerY);
+            }}
+            isHidden={!!draggedGuestId || isPanning || guestPanel.isOpen}
+          />
+
+          {/* Mobile Guest Panel (slide-over from right) */}
+          <MobileGuestPanel
+            isOpen={guestPanel.isOpen}
+            onOpen={guestPanel.onOpen}
+            onClose={guestPanel.onClose}
+          />
+        </MobileImmersiveCanvas>
+      </div>
+    );
+  }
+
+  // Desktop layout with MainToolbar
+  return (
+    <div className="canvas-container">
+      <MainToolbar
+        showRelationships={showRelationships}
+        onToggleRelationships={() => setShowRelationships(!showRelationships)}
+        onImport={() => setShowImportWizard(true)}
+        onShowHelp={onShowHelp}
+        onStartTour={onStartTour}
+        onSubscribe={onSubscribe}
+        canShowEmailButton={canShowEmailButton}
+      >
+        {/* Grid controls */}
+        <GridControls />
+
+        {/* Go to Table dropdown */}
+        {event.tables.length > 0 && (
+          <div className="table-nav-dropdown" ref={tableDropdownRef}>
+            <button
+              onClick={() => setShowTableDropdown(!showTableDropdown)}
+              className="toolbar-btn"
+            >
+              Go to Table
+            </button>
+            {showTableDropdown && (
+              <div className="dropdown-menu">
+                {event.tables.map(table => {
+                  const guestCount = event.guests.filter(g => g.tableId === table.id).length;
+                  const isFull = guestCount >= table.capacity;
+                  return (
+                    <button
+                      key={table.id}
+                      onClick={() => goToTable(table)}
+                      className={`table-nav-item ${isFull ? 'full' : ''}`}
+                    >
+                      <span className="table-nav-name">{table.name}</span>
+                      <span className="table-nav-count">{guestCount}/{table.capacity}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Zoom controls */}
+        <div className="zoom-controls">
+          <button onClick={() => setZoom(canvas.zoom - 0.1)} title="Zoom Out">−</button>
+          <span className="zoom-display">{Math.round(canvas.zoom * 100)}%</span>
+          <button onClick={() => setZoom(canvas.zoom + 0.1)} title="Zoom In">+</button>
+          <button onClick={handleRecenter} className="recenter-btn has-tooltip" data-tooltip="Re-center">⌖</button>
+        </div>
+      </MainToolbar>
+
+      {canvasContent}
     </div>
   );
 }
