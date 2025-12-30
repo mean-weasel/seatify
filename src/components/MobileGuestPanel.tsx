@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useGesture } from '@use-gesture/react';
 import { useStore } from '../store/useStore';
 import { getFullName, getInitials } from '../types';
+import { GESTURE_CONFIG, rubberBand } from '../utils/gestureUtils';
 import type { Guest } from '../types';
 import './MobileGuestPanel.css';
 
-const EDGE_ZONE = 30; // pixels from right edge to trigger
+const EDGE_ZONE = 30; // pixels from right edge to trigger (Safari back-swipe safety)
 const OPEN_THRESHOLD = 80; // horizontal swipe distance to open
-const CLOSE_THRESHOLD = 60; // swipe distance to close
 
 interface MobileGuestPanelProps {
   isOpen: boolean;
@@ -19,8 +20,10 @@ export function MobileGuestPanel({ isOpen, onOpen, onClose }: MobileGuestPanelPr
   const { event, selectGuest, setEditingGuest, canvas, panToPosition } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'unassigned' | 'assigned'>('all');
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef<{ x: number; y: number; inEdgeZone: boolean } | null>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
 
   // Filter guests based on search and filter
   const filteredGuests = event.guests.filter(guest => {
@@ -38,74 +41,83 @@ export function MobileGuestPanel({ isOpen, onOpen, onClose }: MobileGuestPanelPr
   const unassignedGuests = filteredGuests.filter(g => !g.tableId);
   const assignedGuests = filteredGuests.filter(g => g.tableId);
 
-  // Handle edge swipe detection
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      const windowWidth = window.innerWidth;
-      const inEdgeZone = touch.clientX >= windowWidth - EDGE_ZONE;
+  // Edge swipe to open (from right edge of screen)
+  // Uses velocity OR distance threshold for iOS-like feel
+  useGesture(
+    {
+      onDrag: ({ movement: [mx], velocity: [vx], direction: [dx], active, xy: [startX] }) => {
+        // Only process when panel is closed
+        if (isOpen) return;
 
-      touchStartRef.current = {
-        x: touch.clientX,
-        y: touch.clientY,
-        inEdgeZone,
-      };
-    };
+        // Check if started in edge zone (right side of screen)
+        const windowWidth = window.innerWidth;
+        const inEdgeZone = startX >= windowWidth - EDGE_ZONE;
+        if (!inEdgeZone) return;
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStartRef.current) return;
-
-      const touch = e.touches[0];
-      const deltaX = touchStartRef.current.x - touch.clientX;
-      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-
-      // Only trigger if horizontal swipe and started in edge zone
-      if (touchStartRef.current.inEdgeZone && deltaX > OPEN_THRESHOLD && deltaY < 50) {
-        onOpen();
-        touchStartRef.current = null;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      touchStartRef.current = null;
-    };
-
-    // Only listen for edge swipes when panel is closed
-    if (!isOpen) {
-      document.addEventListener('touchstart', handleTouchStart, { passive: true });
-      document.addEventListener('touchmove', handleTouchMove, { passive: true });
-      document.addEventListener('touchend', handleTouchEnd, { passive: true });
+        // On gesture end, check if should open
+        if (!active) {
+          const velocityThreshold = GESTURE_CONFIG.VELOCITY_THRESHOLD;
+          // Swipe left (negative movement) to open
+          if (dx < 0 && (vx > velocityThreshold || Math.abs(mx) > OPEN_THRESHOLD)) {
+            onOpen();
+          }
+        }
+      },
+    },
+    {
+      target: typeof window !== 'undefined' ? window : undefined,
+      drag: {
+        pointer: { touch: true },
+        filterTaps: true,
+        threshold: 10,
+        axis: 'x',
+      },
+      enabled: !isOpen,
     }
+  );
 
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [isOpen, onOpen]);
+  // Panel drag-to-close with velocity detection and rubber-banding
+  useGesture(
+    {
+      onDrag: ({ movement: [mx], velocity: [vx], direction: [dx], active }) => {
+        if (!isOpen) return;
 
-  // Handle panel close swipe
-  const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      inEdgeZone: false,
-    };
-  }, []);
+        if (active) {
+          setIsDragging(true);
+          // Apply rubber-band when dragging left (past bounds)
+          if (mx < 0) {
+            // Rubber-band resistance when dragging left
+            const boundedOffset = rubberBand(mx, 0, GESTURE_CONFIG.RUBBER_BAND_FACTOR);
+            setDragOffset(boundedOffset);
+          } else {
+            // Allow free drag to the right (toward close)
+            setDragOffset(mx);
+          }
+        } else {
+          setIsDragging(false);
+          setDragOffset(0);
 
-  const handlePanelTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
+          // Check if should close - velocity OR distance
+          const velocityThreshold = GESTURE_CONFIG.VELOCITY_THRESHOLD;
+          const closeThreshold = GESTURE_CONFIG.DISTANCE_THRESHOLD;
 
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-
-    // Swipe right to close
-    if (deltaX > CLOSE_THRESHOLD) {
-      onClose();
-      touchStartRef.current = null;
+          if (dx > 0 && (vx > velocityThreshold || mx > closeThreshold)) {
+            onClose();
+          }
+        }
+      },
+    },
+    {
+      target: handleRef,
+      drag: {
+        pointer: { touch: true },
+        filterTaps: true,
+        threshold: 5,
+        axis: 'x',
+      },
+      enabled: isOpen,
     }
-  }, [onClose]);
+  );
 
   // Find table name for assigned guest
   const getTableName = (guest: Guest) => {
@@ -154,12 +166,13 @@ export function MobileGuestPanel({ isOpen, onOpen, onClose }: MobileGuestPanelPr
       {/* Panel */}
       <div
         ref={panelRef}
-        className={`mobile-guest-panel ${isOpen ? 'open' : ''}`}
-        onTouchStart={handlePanelTouchStart}
-        onTouchMove={handlePanelTouchMove}
+        className={`mobile-guest-panel ${isOpen ? 'open' : ''} ${isDragging ? 'dragging' : ''}`}
+        style={{
+          transform: isDragging && dragOffset > 0 ? `translateX(${dragOffset}px)` : undefined,
+        }}
       >
-        {/* Swipe handle */}
-        <div className="panel-handle">
+        {/* Swipe handle - touch target for close gesture */}
+        <div ref={handleRef} className="panel-handle">
           <div className="handle-bar" />
         </div>
 

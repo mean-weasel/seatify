@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGesture } from '@use-gesture/react';
 import { useStore } from '../store/useStore';
+import { GESTURE_CONFIG, rubberBand } from '../utils/gestureUtils';
 
 interface TransientTopBarProps {
   isVisible: boolean;
@@ -11,6 +13,7 @@ interface TransientTopBarProps {
 /**
  * Transient navigation bar that slides down from top.
  * Contains: Back button, event name (editable), settings button.
+ * Supports swipe-up-to-dismiss with velocity detection and rubber-banding.
  */
 export function TransientTopBar({
   isVisible,
@@ -20,7 +23,10 @@ export function TransientTopBar({
   const navigate = useNavigate();
   const { event, setEventName } = useStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   // Focus input when editing starts
   useEffect(() => {
@@ -49,8 +55,59 @@ export function TransientTopBar({
     }
   };
 
+  // Swipe-up-to-dismiss gesture with velocity detection and rubber-banding
+  useGesture(
+    {
+      onDrag: ({ movement: [, my], velocity: [, vy], direction: [, dy], active }) => {
+        if (!isVisible) return;
+
+        if (active) {
+          setIsDragging(true);
+          // Upward drag (negative my) dismisses; apply rubber-band for downward
+          if (my > 0) {
+            // Dragging down (past bounds) - apply rubber-band resistance
+            const boundedOffset = rubberBand(my, 0, GESTURE_CONFIG.RUBBER_BAND_FACTOR);
+            setDragOffset(boundedOffset);
+          } else {
+            // Dragging up (toward dismiss) - allow free movement
+            setDragOffset(my);
+          }
+        } else {
+          setIsDragging(false);
+          setDragOffset(0);
+
+          // Check if should dismiss - velocity OR distance
+          const velocityThreshold = GESTURE_CONFIG.VELOCITY_THRESHOLD;
+          const dismissThreshold = GESTURE_CONFIG.DISTANCE_THRESHOLD;
+
+          // Swipe up (negative direction and movement) to dismiss
+          if (dy < 0 && (vy > velocityThreshold || Math.abs(my) > dismissThreshold)) {
+            onClose();
+          }
+        }
+      },
+    },
+    {
+      target: barRef,
+      drag: {
+        pointer: { touch: true },
+        filterTaps: true,
+        threshold: 5,
+        axis: 'y',
+      },
+      enabled: isVisible,
+    }
+  );
+
   return (
-    <div className={`transient-top-bar ${isVisible ? 'visible' : ''}`}>
+    <div
+      ref={barRef}
+      className={`transient-top-bar ${isVisible ? 'visible' : ''} ${isDragging ? 'dragging' : ''}`}
+      style={{
+        // When dragging, apply offset from current position
+        '--drag-offset': isDragging ? `${dragOffset}px` : '0px',
+      } as React.CSSProperties}
+    >
       <button
         className="back-btn"
         onClick={handleBack}
