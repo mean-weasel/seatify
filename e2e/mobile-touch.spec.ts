@@ -26,12 +26,8 @@ test.describe('Mobile Responsive Layout', () => {
       await expect(cornerIndicator).toBeVisible();
       await cornerIndicator.click();
 
-      // Should open either top bar or bottom sheet
-      const controlsVisible = await Promise.race([
-        page.locator('.transient-top-bar.visible').waitFor({ timeout: 2000 }).then(() => true).catch(() => false),
-        page.locator('.bottom-control-sheet').waitFor({ timeout: 2000 }).then(() => true).catch(() => false),
-      ]);
-      expect(controlsVisible).toBe(true);
+      // Should open the transient top bar
+      await expect(page.locator('.transient-top-bar.visible')).toBeVisible({ timeout: 3000 });
     });
 
     test('header is hidden in mobile canvas view (immersive mode)', async ({ page }) => {
