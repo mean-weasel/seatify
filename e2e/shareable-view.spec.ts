@@ -87,9 +87,9 @@ test.describe('Share Modal', () => {
   test('share modal has url input field', async ({ page }) => {
     const urlInput = page.locator('.share-url-input');
     await expect(urlInput).toBeVisible();
-    // URL should contain #/share/
+    // URL should contain /share/
     const value = await urlInput.inputValue();
-    expect(value).toContain('#/share/');
+    expect(value).toContain('/share/');
   });
 
   test('share modal has copy button', async ({ page }) => {
@@ -234,7 +234,9 @@ test.describe('Share Flow', () => {
 
     // Open new page and navigate to share URL
     const newPage = await context.newPage();
-    await newPage.goto(shareUrl.replace(page.url().split('#')[0], ''));
+    // Extract the path from the share URL (works with BrowserRouter)
+    const shareUrlObj = new URL(shareUrl);
+    await newPage.goto(shareUrlObj.pathname);
 
     // Should show the shared view
     await expect(newPage.locator('.shareable-page-full')).toBeVisible({ timeout: 10000 });
@@ -265,9 +267,9 @@ test.describe('Read-Only Canvas', () => {
     const urlInput = page.locator('.share-url-input');
     const shareUrl = await urlInput.inputValue();
 
-    // Navigate to share URL in same page
-    const hashPart = new URL(shareUrl).hash;
-    await page.goto('/' + hashPart);
+    // Navigate to share URL in same page (extract pathname for BrowserRouter)
+    const shareUrlObj = new URL(shareUrl);
+    await page.goto(shareUrlObj.pathname);
     await expect(page.locator('.readonly-canvas-container')).toBeVisible({ timeout: 10000 });
   });
 
@@ -441,9 +443,9 @@ test.describe('Enhanced Visual Features', () => {
     const urlInput = page.locator('.share-url-input');
     const shareUrl = await urlInput.inputValue();
 
-    // Navigate to share URL in same page
-    const hashPart = new URL(shareUrl).hash;
-    await page.goto('/' + hashPart);
+    // Navigate to share URL in same page (extract pathname for BrowserRouter)
+    const shareUrlObj = new URL(shareUrl);
+    await page.goto(shareUrlObj.pathname);
     await expect(page.locator('.readonly-canvas-container')).toBeVisible({ timeout: 10000 });
   });
 
