@@ -1,6 +1,6 @@
-// React Router v6 with HashRouter for GitHub Pages compatibility
+// React Router v6 with BrowserRouter for clean URLs and proper GA4 analytics
 import { useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LandingPage } from '../components/LandingPage';
 import { EventListView } from '../components/EventListView';
 import { EventLayout } from './EventLayout';
@@ -118,7 +118,7 @@ function PageViewTracker() {
 
 export function AppRouter() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <PageViewTracker />
       <Routes>
         {/* Landing page */}
@@ -155,6 +155,6 @@ export function AppRouter() {
         {/* Fallback redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
