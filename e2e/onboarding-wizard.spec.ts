@@ -45,9 +45,9 @@ test.describe('Onboarding Wizard', () => {
     await enterAppAndGoToCanvas(page);
     await expect(page.locator('.onboarding-tooltip')).toBeVisible({ timeout: 3000 });
 
-    // Skip through all steps
-    const skipButton = page.locator('.onboarding-btn--skip');
-    await skipButton.click();
+    // Skip through all steps - auto-started tours show "Later" on first step instead of "Skip"
+    const laterOrSkipButton = page.locator('.onboarding-btn--later, .onboarding-btn--skip').first();
+    await laterOrSkipButton.click();
 
     // Wizard should close
     await expect(page.locator('.onboarding-tooltip')).not.toBeVisible();
@@ -95,7 +95,8 @@ test.describe('Onboarding Wizard', () => {
     await enterAppAndGoToCanvas(page);
     await expect(page.locator('.onboarding-tooltip')).toBeVisible({ timeout: 3000 });
 
-    await page.click('.onboarding-btn--skip');
+    // Auto-started tours show "Later" on first step instead of "Skip"
+    await page.locator('.onboarding-btn--later, .onboarding-btn--skip').first().click();
     await expect(page.locator('.onboarding-tooltip')).not.toBeVisible();
   });
 
@@ -147,7 +148,8 @@ test.describe('Onboarding Wizard', () => {
     // First complete the wizard (auto-start triggers on canvas view)
     await enterAppAndGoToCanvas(page);
     await expect(page.locator('.onboarding-tooltip')).toBeVisible({ timeout: 3000 });
-    await page.click('.onboarding-btn--skip');
+    // Auto-started tours show "Later" on first step instead of "Skip"
+    await page.locator('.onboarding-btn--later, .onboarding-btn--skip').first().click();
     await expect(page.locator('.onboarding-tooltip')).not.toBeVisible();
 
     // Open the Learn menu dropdown
@@ -169,9 +171,9 @@ test.describe('Onboarding Wizard', () => {
     }
     await enterApp(page);
 
-    // Close wizard if it shows
+    // Close wizard if it shows - auto-started tours show "Later" on first step instead of "Skip"
     if (await page.locator('.onboarding-tooltip').isVisible()) {
-      await page.click('.onboarding-btn--skip');
+      await page.locator('.onboarding-btn--later, .onboarding-btn--skip').first().click();
     }
 
     // Learn menu trigger should be visible with correct title

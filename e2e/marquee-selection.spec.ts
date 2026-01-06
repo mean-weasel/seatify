@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 async function enterApp(page: import('@playwright/test').Page) {
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 11 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.version = 11;
