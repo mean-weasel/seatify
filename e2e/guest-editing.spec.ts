@@ -5,7 +5,7 @@ test.describe('Guest Editing', () => {
   test.beforeEach(async ({ page }) => {
     // Set onboarding completion before navigating
     await page.addInitScript(() => {
-      const data = { state: { hasCompletedOnboarding: true }, version: 11 };
+      const data = { state: { hasCompletedOnboarding: true }, version: 13 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
     // Navigate to landing page and enter app

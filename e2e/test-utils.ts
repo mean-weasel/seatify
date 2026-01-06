@@ -18,10 +18,11 @@ export async function isMobileViewport(page: Page): Promise<boolean> {
 export async function enterApp(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 11 };
+    // Use version 13 to match current store version and avoid migrations
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
-    data.version = 11;
+    data.version = 13;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
