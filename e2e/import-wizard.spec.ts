@@ -858,8 +858,8 @@ test.describe('Import Wizard - Table Assignment Integration', () => {
     expect(finalTables).toBe(initialTables + 2);
 
     // Guests should be unassigned - verify via the sidebar that shows unassigned count
-    // The sidebar should show "10 unassigned" for the newly imported guests
-    await expect(page.locator('text=10 unassigned')).toBeVisible();
+    // Demo has 8 unassigned guests + 10 imported = 18 unassigned
+    await expect(page.locator('text=18 unassigned')).toBeVisible();
   });
 
   test('imports without creating tables when assignment is disabled', async ({ page }) => {
