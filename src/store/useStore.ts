@@ -166,7 +166,7 @@ interface AppState extends OnboardingState {
   newlyAddedTableId: string | null;
 
   // Pre-optimization snapshot for reset
-  preOptimizationSnapshot: { guestId: string; tableId: string | undefined }[] | null;
+  preOptimizationSnapshot: { guestId: string; tableId: string | undefined; seatIndex: number | undefined }[] | null;
 
   // Flying animation state
   flyingGuests: FlyingGuest[];
@@ -1985,7 +1985,7 @@ export const useStore = create<AppState>()(
         const movedGuests: string[] = [];
 
         // Save snapshot of current seating before optimization
-        const snapshot = guests.map(g => ({ guestId: g.id, tableId: g.tableId }));
+        const snapshot = guests.map(g => ({ guestId: g.id, tableId: g.tableId, seatIndex: g.seatIndex }));
 
         // Get confirmed guests only
         const confirmedGuests = guests.filter(g => g.rsvpStatus !== 'declined');
@@ -2139,7 +2139,7 @@ export const useStore = create<AppState>()(
         const currentGuests = get().event.guests;
         for (const entry of snapshot) {
           const currentGuest = currentGuests.find(g => g.id === entry.guestId);
-          if (currentGuest && currentGuest.tableId !== entry.tableId) {
+          if (currentGuest && (currentGuest.tableId !== entry.tableId || currentGuest.seatIndex !== entry.seatIndex)) {
             movedGuests.push(entry.guestId);
           }
         }
@@ -2151,7 +2151,7 @@ export const useStore = create<AppState>()(
             guests: event.guests.map(guest => {
               const snapshotEntry = snapshot.find(s => s.guestId === guest.id);
               if (snapshotEntry) {
-                return { ...guest, tableId: snapshotEntry.tableId };
+                return { ...guest, tableId: snapshotEntry.tableId, seatIndex: snapshotEntry.seatIndex };
               }
               return guest;
             }),
