@@ -5,7 +5,7 @@ async function enterApp(page: import('@playwright/test').Page) {
   // First set localStorage before the app hydrates
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 10 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.version = 9;
@@ -21,7 +21,7 @@ test.describe('Theme toggle functionality', () => {
     // Set hasCompletedOnboarding but preserve any other data that may exist
     await page.addInitScript(() => {
       const stored = localStorage.getItem('seating-arrangement-storage');
-      const data = stored ? JSON.parse(stored) : { state: {}, version: 10 };
+      const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
       data.state = data.state || {};
       data.state.hasCompletedOnboarding = true;
       data.version = 9;
@@ -31,7 +31,7 @@ test.describe('Theme toggle functionality', () => {
     await page.goto('/');
     await page.evaluate(() => {
       // Clear localStorage but keep onboarding completion
-      const data = { state: { hasCompletedOnboarding: true }, version: 10 };
+      const data = { state: { hasCompletedOnboarding: true }, version: 15 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
     await page.click('button:has-text("Start Planning")');

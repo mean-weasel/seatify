@@ -166,7 +166,7 @@ test.describe('Optimization Feature', () => {
   test('clicking optimize changes button to reset', async ({ page }) => {
     // Set onboarding completion before navigating
     await page.addInitScript(() => {
-      const data = { state: { hasCompletedOnboarding: true }, version: 13 };
+      const data = { state: { hasCompletedOnboarding: true }, version: 15 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
 
@@ -233,7 +233,7 @@ test.describe('Header Subscribe Button', () => {
           triggersShown: { guestMilestone: false, optimizerSuccess: false, exportAttempt: false }
         }));
       }
-      const data = { state: { hasCompletedOnboarding: true }, version: 13 };
+      const data = { state: { hasCompletedOnboarding: true }, version: 15 };
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     }, { subscribed });
     await page.goto('/');
