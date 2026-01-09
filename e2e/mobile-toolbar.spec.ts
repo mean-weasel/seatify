@@ -22,11 +22,11 @@ async function enterAppMobile(page: import('@playwright/test').Page) {
   // Set up localStorage via init script (runs before each page load)
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.state.hasSeenImmersiveHint = true; // Skip immersive hint
-    data.version = 11;
+    data.version = 15;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
 
@@ -58,10 +58,10 @@ async function enterAppDesktop(page: import('@playwright/test').Page) {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
-    data.version = 11;
+    data.version = 15;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');

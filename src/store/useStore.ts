@@ -81,6 +81,14 @@ interface HistoryEntry {
   description: string;
 }
 
+// Fading guest animation state (for fade-out at old position)
+export interface FadingOutGuest {
+  guestId: string;
+  guest: Guest;  // Guest data at time of capture
+  tableId: string;  // Old table position
+  seatIndex: number;  // Old seat index
+}
+
 const MAX_HISTORY_SIZE = 50;
 const MAX_EVENTS = 10;
 
@@ -154,7 +162,11 @@ interface AppState extends OnboardingState {
   newlyAddedTableId: string | null;
 
   // Pre-optimization snapshot for reset
-  preOptimizationSnapshot: { guestId: string; tableId: string | undefined }[] | null;
+  preOptimizationSnapshot: { guestId: string; tableId: string | undefined; seatIndex: number | undefined }[] | null;
+
+  // Fade animation state
+  fadingOutGuests: FadingOutGuest[];
+  optimizeAnimationEnabled: boolean;
 
   // Actions - Event Management (multi-event)
   createEvent: (data?: Partial<Pick<Event, 'name' | 'eventType' | 'date' | 'venueName' | 'venueAddress' | 'guestCapacityLimit'>>) => string;
@@ -289,12 +301,17 @@ interface AppState extends OnboardingState {
 
   // Actions - Seating Optimization
   calculateSeatingScore: () => number;
-  optimizeSeating: () => { beforeScore: number; afterScore: number; movedGuests: string[] };
+  optimizeSeating: () => { beforeScore: number; afterScore: number; movedGuests: string[]; newlySeated: number; violationsResolved: number };
   resetSeating: () => void;
   clearAnimatingGuests: () => void;
   hasOptimizationSnapshot: () => boolean;
   clearNewlyAddedGuest: () => void;
   clearNewlyAddedTable: () => void;
+
+  // Actions - Fade Animation
+  setFadingOutGuests: (guests: FadingOutGuest[]) => void;
+  clearFadingOutGuests: () => void;
+  setOptimizeAnimationEnabled: (enabled: boolean) => void;
 }
 
 const createDefaultEvent = (): Event => {
@@ -374,7 +391,7 @@ const createDefaultEvent = (): Event => {
         interests: ['photography', 'hiking', 'cooking'], email: 'olivia.chen@figma.com'
       },
       {
-        id: 'demo-guest-4', firstName: 'Liam', lastName: 'Chen', tableId: table1Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-4', firstName: 'Liam', lastName: 'Chen', rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-3', type: 'partner', strength: 5 },
         ],
@@ -392,7 +409,7 @@ const createDefaultEvent = (): Event => {
         interests: ['yoga', 'reading', 'podcasts'], email: 'sophia.m@acme.com'
       },
       {
-        id: 'demo-guest-6', firstName: 'Noah', lastName: 'Martinez', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-6', firstName: 'Noah', lastName: 'Martinez', rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-5', type: 'partner', strength: 5 },
           { guestId: 'demo-guest-12', type: 'colleague', strength: 2 },
@@ -401,7 +418,7 @@ const createDefaultEvent = (): Event => {
         interests: ['tennis', 'investing'], email: 'noah@martinezconsulting.com'
       },
       {
-        id: 'demo-guest-7', firstName: 'Ava', lastName: 'Johnson', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-7', firstName: 'Ava', lastName: 'Johnson', rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-8', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-11', type: 'friend', strength: 3 },
@@ -411,7 +428,7 @@ const createDefaultEvent = (): Event => {
         interests: ['film', 'theater', 'writing'], email: 'ava.johnson@netflix.com'
       },
       {
-        id: 'demo-guest-8', firstName: 'Mason', lastName: 'Lee', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-8', firstName: 'Mason', lastName: 'Lee', rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-7', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-14', type: 'avoid', strength: 5 },
@@ -428,7 +445,7 @@ const createDefaultEvent = (): Event => {
         interests: ['design', 'sustainable living', 'gardening'], email: 'isabella@brownarch.com'
       },
       {
-        id: 'demo-guest-10', firstName: 'Ethan', lastName: 'Davis', tableId: table2Id, rsvpStatus: 'confirmed', group: 'Family',
+        id: 'demo-guest-10', firstName: 'Ethan', lastName: 'Davis', rsvpStatus: 'confirmed', group: 'Family',
         relationships: [
           { guestId: 'demo-guest-13', type: 'family', strength: 4 },
           { guestId: 'demo-guest-9', type: 'avoid', strength: 5 },
@@ -482,7 +499,7 @@ const createDefaultEvent = (): Event => {
         interests: ['hiking', 'photography', 'cooking'], email: 'daniel.t@google.com'
       },
       {
-        id: 'demo-guest-16', firstName: 'Sofia', lastName: 'Garcia', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Work',
+        id: 'demo-guest-16', firstName: 'Sofia', lastName: 'Garcia', rsvpStatus: 'confirmed', group: 'Work',
         relationships: [
           { guestId: 'demo-guest-12', type: 'partner', strength: 5 },
         ],
@@ -490,7 +507,7 @@ const createDefaultEvent = (): Event => {
         interests: ['design', 'yoga', 'painting'], email: 'sofia.g@apple.com'
       },
       {
-        id: 'demo-guest-17', firstName: 'Ryan', lastName: 'Mitchell', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-17', firstName: 'Ryan', lastName: 'Mitchell', rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-18', type: 'friend', strength: 3 },
           { guestId: 'demo-guest-11', type: 'friend', strength: 3 },
@@ -499,7 +516,7 @@ const createDefaultEvent = (): Event => {
         interests: ['travel', 'rock climbing', 'craft beer'], email: 'ryan.m@airbnb.com'
       },
       {
-        id: 'demo-guest-18', firstName: 'Harper', lastName: 'Reed', tableId: table3Id, rsvpStatus: 'confirmed', group: 'Friends',
+        id: 'demo-guest-18', firstName: 'Harper', lastName: 'Reed', rsvpStatus: 'confirmed', group: 'Friends',
         relationships: [
           { guestId: 'demo-guest-17', type: 'friend', strength: 3 },
         ],
@@ -671,6 +688,8 @@ export const useStore = create<AppState>()(
       newlyAddedGuestId: null,
       newlyAddedTableId: null,
       preOptimizationSnapshot: null,
+      fadingOutGuests: [],
+      optimizeAnimationEnabled: true,
       hasCompletedOnboarding: false,
       completedTours: new Set<TourId>(),
       activeTourId: null,
@@ -1959,10 +1978,11 @@ export const useStore = create<AppState>()(
         const state = get();
         const { guests, tables } = state.event;
         const beforeScore = state.calculateSeatingScore();
+        const beforeViolations = detectConstraintViolations(state.event).length;
         const movedGuests: string[] = [];
 
         // Save snapshot of current seating before optimization
-        const snapshot = guests.map(g => ({ guestId: g.id, tableId: g.tableId }));
+        const snapshot = guests.map(g => ({ guestId: g.id, tableId: g.tableId, seatIndex: g.seatIndex }));
 
         // Get confirmed guests only
         const confirmedGuests = guests.filter(g => g.rsvpStatus !== 'declined');
@@ -2066,11 +2086,17 @@ export const useStore = create<AppState>()(
           }
         }
 
-        // First pass: identify moved guests
+        // First pass: identify moved guests and newly seated guests
+        let newlySeated = 0;
         for (const guest of guests) {
           for (const [tableId, guestIds] of tableAssignments) {
             if (guestIds.includes(guest.id)) {
-              if (guest.tableId !== tableId) {
+              if (!guest.tableId) {
+                // Guest was unassigned, now has a table
+                newlySeated++;
+                movedGuests.push(guest.id); // Include in animation
+              } else if (guest.tableId !== tableId) {
+                // Guest moved from one table to another
                 movedGuests.push(guest.id);
               }
               break;
@@ -2085,8 +2111,11 @@ export const useStore = create<AppState>()(
             guests: event.guests.map(guest => {
               // Find new table for this guest
               for (const [tableId, guestIds] of tableAssignments) {
-                if (guestIds.includes(guest.id)) {
-                  return { ...guest, tableId, canvasX: undefined, canvasY: undefined };
+                const seatIndex = guestIds.indexOf(guest.id);
+                if (seatIndex !== -1) {
+                  // Set seatIndex to match position in guestIds array
+                  // This ensures animation destination matches actual rendered position
+                  return { ...guest, tableId, seatIndex, canvasX: undefined, canvasY: undefined };
                 }
               }
               return guest;
@@ -2098,12 +2127,14 @@ export const useStore = create<AppState>()(
         }));
 
         const afterScore = get().calculateSeatingScore();
+        const afterViolations = detectConstraintViolations(get().event).length;
+        const violationsResolved = Math.max(0, beforeViolations - afterViolations);
 
         // Track optimizer usage
         trackOptimizerRun(guests.length, tables.length);
 
-        console.log('Optimization complete:', { beforeScore, afterScore, movedGuests, tableAssignments: Object.fromEntries(tableAssignments) });
-        return { beforeScore, afterScore, movedGuests };
+        console.log('Optimization complete:', { beforeScore, afterScore, movedGuests, newlySeated, violationsResolved, tableAssignments: Object.fromEntries(tableAssignments) });
+        return { beforeScore, afterScore, movedGuests, newlySeated, violationsResolved };
       },
 
       resetSeating: () => {
@@ -2116,7 +2147,7 @@ export const useStore = create<AppState>()(
         const currentGuests = get().event.guests;
         for (const entry of snapshot) {
           const currentGuest = currentGuests.find(g => g.id === entry.guestId);
-          if (currentGuest && currentGuest.tableId !== entry.tableId) {
+          if (currentGuest && (currentGuest.tableId !== entry.tableId || currentGuest.seatIndex !== entry.seatIndex)) {
             movedGuests.push(entry.guestId);
           }
         }
@@ -2128,7 +2159,7 @@ export const useStore = create<AppState>()(
             guests: event.guests.map(guest => {
               const snapshotEntry = snapshot.find(s => s.guestId === guest.id);
               if (snapshotEntry) {
-                return { ...guest, tableId: snapshotEntry.tableId };
+                return { ...guest, tableId: snapshotEntry.tableId, seatIndex: snapshotEntry.seatIndex };
               }
               return guest;
             }),
@@ -2145,11 +2176,18 @@ export const useStore = create<AppState>()(
       clearNewlyAddedGuest: () => set({ newlyAddedGuestId: null }),
 
       clearNewlyAddedTable: () => set({ newlyAddedTableId: null }),
+
+      // Flying animation actions
+      setFadingOutGuests: (guests: FadingOutGuest[]) => set({ fadingOutGuests: guests }),
+
+      clearFadingOutGuests: () => set({ fadingOutGuests: [] }),
+
+      setOptimizeAnimationEnabled: (enabled: boolean) => set({ optimizeAnimationEnabled: enabled }),
     };
     },
     {
       name: 'seating-arrangement-storage',
-      version: 13, // Increment for single-event consolidation
+      version: 15, // Increment for demo data with fewer seated guests (only conflicts seated)
       partialize: (state) => ({
         events: state.events,
         currentEventId: state.currentEventId,
@@ -2157,6 +2195,9 @@ export const useStore = create<AppState>()(
         eventListViewMode: state.eventListViewMode,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         hasUsedOptimizeButton: state.hasUsedOptimizeButton,
+        optimizeAnimationEnabled: state.optimizeAnimationEnabled,
+        // Persist optimization snapshot so Reset works across sessions
+        preOptimizationSnapshot: state.preOptimizationSnapshot,
         // Serialize Set as array for persistence
         completedTours: Array.from(state.completedTours),
       }),
@@ -2171,6 +2212,12 @@ export const useStore = create<AppState>()(
           if (!state.currentEventId) {
             state.currentEventId = currentEvent.id;
           }
+        } else if (state) {
+          // Events array is empty (e.g., after migration) - create a default event
+          const defaultEvent = createDefaultEvent();
+          state.events = [defaultEvent];
+          state.currentEventId = defaultEvent.id;
+          state.event = defaultEvent;
         }
         // Convert completedTours array back to Set
         if (state) {
@@ -2249,6 +2296,24 @@ export const useStore = create<AppState>()(
             state.events = [eventToKeep];
             state.currentEventId = eventToKeep.id;
           }
+        }
+
+        // Migration for v13 → v14: reset to updated demo data with unassigned guests
+        if (version < 14) {
+          // Clear events to trigger fresh demo data load
+          state.events = [];
+          state.currentEventId = null;
+          state.preOptimizationSnapshot = null;
+          state.hasUsedOptimizeButton = false;
+        }
+
+        // Migration for v14 → v15: reset to demo data with only conflict guests seated
+        if (version < 15) {
+          // Clear events to trigger fresh demo data load
+          state.events = [];
+          state.currentEventId = null;
+          state.preOptimizationSnapshot = null;
+          state.hasUsedOptimizeButton = false;
         }
 
         return state;

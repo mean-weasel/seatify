@@ -13,11 +13,12 @@ async function enterAppMobile(page: import('@playwright/test').Page, targetView:
   // Set up localStorage via init script (runs before each page load)
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+    // Use version 15 to match current store version and avoid migrations
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
     data.state.hasSeenImmersiveHint = true; // Skip immersive hint
-    data.version = 11;
+    data.version = 15;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
 
@@ -167,11 +168,11 @@ test.describe('Mobile Settings - Subscribe', () => {
     // Clear any previous email submission
     await page.addInitScript(() => {
       const stored = localStorage.getItem('seating-arrangement-storage');
-      const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+      const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
       data.state = data.state || {};
       data.state.hasCompletedOnboarding = true;
       data.state.hasSubmittedEmail = false;
-      data.version = 11;
+      data.version = 15;
       localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
     });
 

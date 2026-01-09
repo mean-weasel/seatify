@@ -5,10 +5,10 @@ async function enterApp(page: import('@playwright/test').Page) {
   // First set localStorage before the app hydrates
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
-    data.version = 11;
+    data.version = 15;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');

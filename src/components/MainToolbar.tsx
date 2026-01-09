@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '../store/useStore';
-import { getFullName } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
 import { ViewToggle } from './ViewToggle';
 import { MobileToolbarMenu } from './MobileToolbarMenu';
 import { MobileCanvasToolbar } from './MobileCanvasToolbar';
 import { showToast } from './toastStore';
+import { prefersReducedMotion } from '../utils/animationHelpers';
 import type { TableShape } from '../types';
 import type { TourId } from '../data/tourRegistry';
 import './MainToolbar.css';
@@ -24,11 +24,26 @@ interface MainToolbarProps {
 }
 
 export function MainToolbar({ children, onAddGuest, onImport, showRelationships, onToggleRelationships, onShowHelp, onStartTour, onSubscribe, canShowEmailButton }: MainToolbarProps) {
-  const { event, addTable, addGuest, activeView, optimizeSeating, resetSeating, hasOptimizationSnapshot, hasUsedOptimizeButton } = useStore();
+  const {
+    event,
+    addTable,
+    addGuest,
+    activeView,
+    optimizeSeating,
+    resetSeating,
+    hasOptimizationSnapshot,
+    hasUsedOptimizeButton,
+    setFadingOutGuests,
+    clearFadingOutGuests,
+    optimizeAnimationEnabled,
+    setOptimizeAnimationEnabled,
+  } = useStore();
   const isMobile = useIsMobile();
   const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [showOptimizeDropdown, setShowOptimizeDropdown] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const addDropdownRef = useRef<HTMLDivElement>(null);
+  const optimizeDropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if optimization is possible
   const hasRelationships = event.guests.some(g => g.relationships.length > 0);
@@ -39,46 +54,102 @@ export function MainToolbar({ children, onAddGuest, onImport, showRelationships,
   // Show attention animation if user hasn't used optimize button yet and can optimize
   const showOptimizeAttention = canOptimize && !hasUsedOptimizeButton && !hasSnapshot;
 
-  // Debug logging
-  console.log('Optimization state:', {
-    hasRelationships,
-    hasTablesWithCapacity,
-    guestCount: event.guests.length,
-    canOptimize,
-    hasSnapshot,
-    guestsWithRelationships: event.guests.filter(g => g.relationships.length > 0).map(g => ({ name: getFullName(g), relCount: g.relationships.length }))
-  });
-
-  // Handle optimize seating
-  const handleOptimize = () => {
+  // Handle optimize seating with fade animation
+  const handleOptimize = useCallback(() => {
     setIsOptimizing(true);
 
-    // Small delay to show animation starting
-    setTimeout(() => {
-      const result = optimizeSeating();
-      setIsOptimizing(false);
+    // Check if we should use animation
+    const shouldAnimate = optimizeAnimationEnabled && !isMobile && !prefersReducedMotion();
 
-      // Show toast using the global toast system (positioned correctly outside toolbar)
-      const movedText = result.movedGuests.length > 0
-        ? ` · ${result.movedGuests.length} guest${result.movedGuests.length !== 1 ? 's' : ''} moved`
-        : '';
+    // Capture old positions BEFORE optimization (for fade-out ghosts)
+    const oldPositions = new Map<string, { tableId: string; seatIndex: number; guest: typeof event.guests[0] }>();
+    event.guests.forEach(guest => {
+      if (guest.tableId && guest.seatIndex !== undefined) {
+        oldPositions.set(guest.id, {
+          tableId: guest.tableId,
+          seatIndex: guest.seatIndex,
+          guest: { ...guest }
+        });
+      }
+    });
+
+    // Run optimization
+    const result = optimizeSeating();
+
+    // Check for no changes
+    if (result.movedGuests.length === 0) {
+      setIsOptimizing(false);
+      showToast('Already optimized! No changes needed.', 'info');
+      return;
+    }
+
+    // Create fading-out guests for animation
+    if (shouldAnimate && result.movedGuests.length > 0) {
+      const fadingGuests = result.movedGuests
+        .filter(guestId => oldPositions.has(guestId))
+        .map(guestId => {
+          const old = oldPositions.get(guestId)!;
+          return {
+            guestId,
+            guest: old.guest,
+            tableId: old.tableId,
+            seatIndex: old.seatIndex
+          };
+        });
+
+      if (fadingGuests.length > 0) {
+        setFadingOutGuests(fadingGuests);
+
+        // Clear fading guests after animation completes
+        setTimeout(() => {
+          clearFadingOutGuests();
+        }, 1200); // Match CSS animation duration (0.4s delay + 0.8s fade-in)
+      }
+    }
+
+    // Show toast
+    setTimeout(() => {
+      setIsOptimizing(false);
+      const parts: string[] = [];
+      if (result.violationsResolved > 0) {
+        parts.push(`${result.violationsResolved} conflict${result.violationsResolved !== 1 ? 's' : ''} resolved`);
+      }
+      // Calculate guests moved between tables (exclude newly seated from count)
+      const movedBetweenTables = result.movedGuests.length - result.newlySeated;
+      if (movedBetweenTables > 0) {
+        parts.push(`${movedBetweenTables} guest${movedBetweenTables !== 1 ? 's' : ''} moved`);
+      }
+      if (result.newlySeated > 0) {
+        parts.push(`${result.newlySeated} guest${result.newlySeated !== 1 ? 's' : ''} seated`);
+      }
+      const actionSummary = parts.length > 0 ? parts.join(' · ') + ' · ' : '';
       showToast(
-        `Seating Optimized! Score: ${result.beforeScore} → ${result.afterScore}${movedText}`,
+        `Seating Optimized! ${actionSummary}Score: ${result.beforeScore} → ${result.afterScore}`,
         'success'
       );
-    }, 300);
-  };
+    }, shouldAnimate ? 1200 : 100);
+  }, [
+    optimizeAnimationEnabled,
+    isMobile,
+    event.guests,
+    optimizeSeating,
+    setFadingOutGuests,
+    clearFadingOutGuests
+  ]);
 
   // Handle reset seating
   const handleReset = () => {
     resetSeating();
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (addDropdownRef.current && !addDropdownRef.current.contains(e.target as Node)) {
         setShowAddDropdown(false);
+      }
+      if (optimizeDropdownRef.current && !optimizeDropdownRef.current.contains(e.target as Node)) {
+        setShowOptimizeDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -193,16 +264,39 @@ export function MainToolbar({ children, onAddGuest, onImport, showRelationships,
               {!isMobile && <span className="btn-text">Reset</span>}
             </button>
           ) : (
-            <button
-              onClick={handleOptimize}
-              className={`toolbar-btn optimize ${isOptimizing ? 'optimizing' : ''} ${showOptimizeAttention ? 'attention' : ''}`}
-              disabled={!canOptimize || isOptimizing}
-              title={!canOptimize ? 'Add guest relationships to enable optimization' : 'Optimize seating based on relationships'}
-            >
-              {showOptimizeAttention && <span className="optimize-badge">Try</span>}
-              <span className="btn-icon">✨</span>
-              {!isMobile && <span className="btn-text">{isOptimizing ? 'Optimizing...' : 'Optimize'}</span>}
-            </button>
+            <div className="optimize-dropdown" ref={optimizeDropdownRef}>
+              <button
+                onClick={handleOptimize}
+                className={`toolbar-btn optimize ${isOptimizing ? 'optimizing' : ''} ${showOptimizeAttention ? 'attention' : ''}`}
+                disabled={!canOptimize || isOptimizing}
+                title={!canOptimize ? 'Add guest relationships to enable optimization' : 'Optimize seating based on relationships'}
+              >
+                {showOptimizeAttention && <span className="optimize-badge">Try</span>}
+                <span className="btn-icon">✨</span>
+                {!isMobile && <span className="btn-text">{isOptimizing ? 'Optimizing...' : 'Optimize'}</span>}
+              </button>
+              {!isMobile && (
+                <button
+                  className="optimize-settings-btn"
+                  onClick={() => setShowOptimizeDropdown(!showOptimizeDropdown)}
+                  title="Optimization settings"
+                >
+                  ⚙️
+                </button>
+              )}
+              {showOptimizeDropdown && (
+                <div className="dropdown-menu optimize-menu">
+                  <label className="dropdown-toggle">
+                    <input
+                      type="checkbox"
+                      checked={optimizeAnimationEnabled}
+                      onChange={(e) => setOptimizeAnimationEnabled(e.target.checked)}
+                    />
+                    <span>Show fade animation</span>
+                  </label>
+                </div>
+              )}
+            </div>
           )
         )}
 

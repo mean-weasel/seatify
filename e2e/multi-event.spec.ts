@@ -8,11 +8,11 @@ const MAX_EVENTS = 10;
 async function enterEventList(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const stored = localStorage.getItem('seating-arrangement-storage');
-    // Use version 13 to match current store version and avoid migration that consolidates events
-    const data = stored ? JSON.parse(stored) : { state: {}, version: 13 };
+    // Use version 15 to match current store version and avoid migrations
+    const data = stored ? JSON.parse(stored) : { state: {}, version: 15 };
     data.state = data.state || {};
     data.state.hasCompletedOnboarding = true;
-    data.version = 13;
+    data.version = 15;
     localStorage.setItem('seating-arrangement-storage', JSON.stringify(data));
   });
   await page.goto('/');
