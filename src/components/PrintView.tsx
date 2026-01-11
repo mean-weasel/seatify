@@ -1,0 +1,152 @@
+import { useStore } from '../store/useStore';
+import { getFullName } from '../types';
+import './PrintView.css';
+
+interface PrintViewProps {
+  onClose: () => void;
+}
+
+export function PrintView({ onClose }: PrintViewProps) {
+  const { event } = useStore();
+
+  const getGuestsAtTable = (tableId: string) =>
+    event.guests.filter((g) => g.tableId === tableId && g.rsvpStatus === 'confirmed');
+
+  const unassignedGuests = event.guests.filter(
+    (g) => !g.tableId && g.rsvpStatus === 'confirmed'
+  );
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="print-view-container">
+      <div className="print-toolbar no-print">
+        <h2>Print Preview</h2>
+        <div className="toolbar-actions">
+          <button className="print-btn" onClick={handlePrint}>
+            Print
+          </button>
+          <button className="close-btn" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div className="print-view">
+        <header className="print-header">
+          <h1>{event.name}</h1>
+          {event.date && <p className="print-date">{formatDate(event.date)}</p>}
+          <p className="print-subtitle">Seating Chart</p>
+        </header>
+
+        <section className="print-floor-plan">
+          <h2>Floor Plan Overview</h2>
+          <div className="floor-plan-diagram">
+            {event.tables.map((table) => {
+              const guests = getGuestsAtTable(table.id);
+              return (
+                <div
+                  key={table.id}
+                  className={`table-marker ${table.shape}`}
+                  style={{
+                    left: `${(table.x / 800) * 100}%`,
+                    top: `${(table.y / 600) * 100}%`,
+                    width: `${(table.width / 800) * 100}%`,
+                    height: `${(table.height / 600) * 100}%`,
+                  }}
+                >
+                  <span className="table-marker-name">{table.name}</span>
+                  <span className="table-marker-count">
+                    {guests.length}/{table.capacity}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="print-table-list">
+          <h2>Seating Assignments</h2>
+          <div className="table-grid">
+            {event.tables.map((table) => {
+              const guests = getGuestsAtTable(table.id);
+              return (
+                <div key={table.id} className="table-card">
+                  <h3>{table.name}</h3>
+                  {guests.length > 0 ? (
+                    <ul>
+                      {guests.map((guest) => (
+                        <li key={guest.id}>
+                          {getFullName(guest)}
+                          {guest.dietaryRestrictions && guest.dietaryRestrictions.length > 0 && (
+                            <span className="dietary-badge">
+                              {guest.dietaryRestrictions[0]}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="no-guests">No guests assigned</p>
+                  )}
+                  <p className="seat-count">
+                    {guests.length} / {table.capacity} seats
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {unassignedGuests.length > 0 && (
+          <section className="print-unassigned">
+            <h2>Unassigned Guests ({unassignedGuests.length})</h2>
+            <ul className="unassigned-list">
+              {unassignedGuests.map((guest) => (
+                <li key={guest.id}>{getFullName(guest)}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className="print-dietary-summary">
+          <h2>Dietary Requirements Summary</h2>
+          <ul>
+            {Array.from(
+              event.guests
+                .filter((g) => g.rsvpStatus === 'confirmed' && g.dietaryRestrictions?.length)
+                .reduce((acc, guest) => {
+                  guest.dietaryRestrictions?.forEach((diet) => {
+                    if (!acc.has(diet)) acc.set(diet, []);
+                    acc.get(diet)!.push(getFullName(guest));
+                  });
+                  return acc;
+                }, new Map<string, string[]>())
+            ).map(([diet, names]) => (
+              <li key={diet}>
+                <strong>{diet}:</strong> {names.join(', ')}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <footer className="print-footer">
+          <p>Generated by Seatify</p>
+          <p>{new Date().toLocaleDateString()}</p>
+        </footer>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,136 @@
+[
+  {
+    "version": "0.10.0",
+    "highlights": [
+      "New Share button - send your seating chart to anyone with a single click!",
+      "Better mobile experience - landscape mode, swipe gestures, and improved navigation",
+      "Interactive tours to help you learn Seatify's features quickly",
+      "Performance improvements and bug fixes for a smoother experience"
+    ]
+  },
+  {
+    "version": "0.9.0",
+    "highlights": [
+      "Shareable read-only views - let others see your seating chart without editing",
+      "QR codes for easy mobile sharing at your event",
+      "Download seating data as a file to share via email or messaging"
+    ]
+  },
+  {
+    "version": "0.8.0",
+    "highlights": [
+      "Smart platform detection - we now recognize Zola and RSVPify exports automatically!",
+      "Better column mapping when importing from your favorite wedding planning tools",
+      "See which platform your guest list came from during import",
+      "Coming soon: Joy, The Knot, and Eventbrite support"
+    ]
+  },
+  {
+    "version": "0.7.0",
+    "highlights": [
+      "New list view option for your events - toggle between cards and list layout",
+      "List view shows all your events in a compact table format",
+      "See event name, type, date, guest count, and table count at a glance",
+      "Your view preference is saved automatically"
+    ]
+  },
+  {
+    "version": "0.6.0",
+    "highlights": [
+      "Multi-event support - manage up to 10 separate events in one app!",
+      "New event list view to easily switch between your events",
+      "Create events with name, type, date, and venue information",
+      "Event cards show guest count, table count, and event type at a glance"
+    ]
+  },
+  {
+    "version": "0.5.0",
+    "highlights": [
+      "Table Assignment in import wizard - create tables and assign guests automatically!",
+      "Choose from 6 table shapes and set capacity during import",
+      "Smart distribution strategies: Evenly, Keep Groups Together, or AI Optimization",
+      "Marquee selection - drag to select multiple tables and guests at once"
+    ]
+  },
+  {
+    "version": "0.4.1",
+    "highlights": [
+      "Improved mobile responsiveness - the app now detects your device size more reliably",
+      "Better mobile experience on all browsers and devices"
+    ]
+  },
+  {
+    "version": "0.4.0",
+    "highlights": [
+      "Import guests from CSV or Excel files - no more manual entry!",
+      "Smart column detection automatically maps your spreadsheet data",
+      "Support for wedding fields (RSVP, Meal Choice, Plus One) and corporate events",
+      "New mobile-friendly menu makes planning on the go even easier"
+    ]
+  },
+  {
+    "version": "0.3.0",
+    "highlights": [
+      "Fresh new landing page with a warm, inviting design",
+      "Subscribe for updates to hear about new features first",
+      "Coming Soon preview: AI-powered seating and guest list import",
+      "Improved branding and SEO for easier sharing"
+    ]
+  },
+  {
+    "version": "0.2.0",
+    "highlights": [
+      "Dark mode toggle - switch between light, dark, and system themes",
+      "Your theme preference is saved and persists across sessions",
+      "Improved toast notification contrast for better readability"
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "highlights": [
+      "New tables and guests now animate when added, making them easy to spot",
+      "Newly added guests are automatically selected and centered on screen",
+      "Added re-center button to quickly return to your table layout"
+    ]
+  },
+  {
+    "version": "0.0.5",
+    "highlights": [
+      "Full mobile and touch support - plan your seating on any device",
+      "Mobile-optimized table management panel for easy editing on the go",
+      "Improved touch gestures for panning and zooming the canvas"
+    ]
+  },
+  {
+    "version": "0.0.4",
+    "highlights": [
+      "Added group legend showing relationship types at a glance",
+      "Visual markers for dietary restrictions and accessibility needs",
+      "New grid controls with snap-to-grid for precise table placement"
+    ]
+  },
+  {
+    "version": "0.0.3",
+    "highlights": [
+      "Improved dropdown menu positioning for better usability",
+      "Enhanced default zoom level to better showcase your tables",
+      "App renamed to TableCraft with new branding"
+    ]
+  },
+  {
+    "version": "0.0.2",
+    "highlights": [
+      "Added guest editing - update names and details anytime",
+      "Toast notifications for clear feedback on actions",
+      "Automated testing to ensure reliability"
+    ]
+  },
+  {
+    "version": "0.0.1",
+    "highlights": [
+      "Initial release of TableCraft",
+      "Drag-and-drop guest seating",
+      "Multiple table shapes and sizes"
+    ]
+  }
+]

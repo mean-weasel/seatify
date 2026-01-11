@@ -1,0 +1,97 @@
+.canvas-minimap {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 50;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  animation: fadeInUp var(--duration-normal) var(--ease-out);
+}
+
+@media (prefers-color-scheme: dark) {
+  .canvas-minimap {
+    background: #2a2420;
+    border-color: var(--color-primary);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.canvas-minimap svg {
+  display: block;
+  cursor: pointer;
+}
+
+.minimap-table {
+  transition: opacity var(--duration-fast);
+}
+
+.minimap-table:hover {
+  opacity: 1 !important;
+}
+
+.viewport-indicator {
+  transition: stroke-dashoffset var(--duration-normal);
+}
+
+.minimap-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.minimap-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--color-text);
+  color: var(--color-bg);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  animation: fadeIn var(--duration-fast);
+}
+
+.minimap-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 1rem;
+  border: 6px solid transparent;
+  border-top-color: var(--color-text);
+}
+
+.minimap-tooltip strong {
+  font-weight: var(--font-weight-semibold);
+}
+
+.minimap-tooltip span {
+  opacity: 0.8;
+}
+
+/* Hide on mobile - minimap is less useful with touch gestures and conflicts with bottom nav */
+@media (max-width: 768px) {
+  .canvas-minimap {
+    display: none;
+  }
+}

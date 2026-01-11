@@ -1,0 +1,402 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from '@/lib/router-compat';
+import './LandingPage.css';
+import { EmailCaptureModal } from './EmailCaptureModal';
+import { Footer } from './Footer';
+import { MobileSettingsHeader } from './MobileSettingsHeader';
+import { trackCTAClick, trackAppEntryConversion, trackFunnelStep } from '../utils/analytics';
+import { captureUtmParams } from '../utils/utm';
+import { shouldShowEmailCapture } from '../utils/emailCaptureManager';
+import type { TourId } from '../data/tourRegistry';
+
+const faqItems = [
+  {
+    question: 'Is my data secure?',
+    answer: 'Yes! All your event data is stored locally in your browser using localStorage. Your guest lists, seating arrangements, and relationship data never leave your device — we don\'t have servers that store your information.',
+  },
+  {
+    question: 'Do I need to create an account?',
+    answer: 'No account needed! Just open the app and start planning. Your data saves automatically to your browser. You can export your seating charts anytime.',
+  },
+  {
+    question: 'Can I use this on my phone?',
+    answer: 'Absolutely! Seatify is fully responsive and works great on phones, tablets, and desktops. Drag-and-drop works with touch gestures on mobile devices.',
+  },
+  {
+    question: 'How does the seating optimizer work?',
+    answer: 'Our optimizer uses a smart algorithm that considers guest relationships. It keeps couples and partners together, respects "keep apart" constraints, and distributes groups evenly across tables to create balanced, harmonious seating.',
+  },
+  {
+    question: 'Is Seatify really free?',
+    answer: 'Yes! The core seating chart tools are completely free to use. Your data stays in your browser with no account required.',
+  },
+];
+
+export function LandingPage() {
+  const navigate = useNavigate();
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // Check if user has already subscribed (don't show button if so)
+  const canShowEmailButton = shouldShowEmailCapture('guestMilestone') ||
+                             shouldShowEmailCapture('optimizerSuccess') ||
+                             shouldShowEmailCapture('exportAttempt');
+
+  // Capture UTM parameters and track landing view on page load
+  useEffect(() => {
+    captureUtmParams();
+    trackFunnelStep('landing_view');
+  }, []);
+
+  const handleEnterApp = () => {
+    trackCTAClick('hero');
+    trackAppEntryConversion();
+    trackFunnelStep('cta_click');
+    trackFunnelStep('app_entry');
+    navigate('/events');
+  };
+
+  // Handle "See how it works" clicks - navigates to app with pending tour
+  const handleFeatureTourClick = (tourId: TourId) => {
+    sessionStorage.setItem('pendingTour', tourId);
+    trackCTAClick(`feature_tour_${tourId}`);
+    trackAppEntryConversion();
+    trackFunnelStep('cta_click');
+    trackFunnelStep('app_entry');
+    navigate('/events');
+  };
+
+  // Secondary CTA handler
+  const handleSecondaryCTA = () => {
+    trackCTAClick('secondary');
+    trackAppEntryConversion();
+    trackFunnelStep('cta_click');
+    trackFunnelStep('app_entry');
+    navigate('/events');
+  };
+
+  // Toggle FAQ item
+  const toggleFaq = (index: number) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
+  };
+  return (
+    <div className="landing-page">
+      {/* Mobile Settings Header - only visible on mobile */}
+      <div className="mobile-settings-container">
+        <MobileSettingsHeader
+          onSubscribe={() => setShowEmailCapture(true)}
+          canShowEmailButton={canShowEmailButton}
+        />
+      </div>
+
+      {/* Floating Decorative Shapes - Matching actual app visuals */}
+      <div className="floating-shapes" aria-hidden="true">
+        {/* Round Table with Seated Guests - Top Right (matches app's round table) */}
+        <svg className="floating-shape shape-table-round" viewBox="0 0 120 120">
+          {/* Table surface with border */}
+          <circle cx="60" cy="60" r="32" fill="var(--color-bg)" stroke="currentColor" strokeWidth="3" opacity="0.8" />
+          {/* Table label */}
+          <text x="60" y="56" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.9" fontWeight="600">Table 1</text>
+          <text x="60" y="70" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.7">4/6</text>
+          {/* Seated guests around table (circles with initials) */}
+          <circle cx="60" cy="18" r="12" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="60" y="22" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.8" fontWeight="500">JD</text>
+          <circle cx="102" cy="60" r="12" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="102" y="64" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.8" fontWeight="500">AS</text>
+          <circle cx="60" cy="102" r="12" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="60" y="106" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.8" fontWeight="500">MK</text>
+          <circle cx="18" cy="60" r="12" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="18" y="64" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.8" fontWeight="500">RW</text>
+        </svg>
+
+        {/* Guest Circle with Initials - Left Side (matches unassigned guest) */}
+        <svg className="floating-shape shape-guest-1" viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="var(--color-bg)" stroke="currentColor" strokeWidth="3" opacity="0.9" />
+          <text x="25" y="30" textAnchor="middle" fontSize="14" fill="currentColor" opacity="0.8" fontWeight="600">EB</text>
+        </svg>
+
+        {/* Rectangle Table with Guests - Bottom Left */}
+        <svg className="floating-shape shape-table-rect" viewBox="0 0 140 80">
+          {/* Table surface */}
+          <rect x="20" y="25" width="100" height="30" rx="8" fill="var(--color-bg)" stroke="currentColor" strokeWidth="3" opacity="0.8" />
+          <text x="70" y="44" textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.8" fontWeight="600">Table 2</text>
+          {/* Guests on top */}
+          <circle cx="45" cy="12" r="10" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="45" y="16" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.8" fontWeight="500">TL</text>
+          <circle cx="95" cy="12" r="10" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="95" y="16" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.8" fontWeight="500">KP</text>
+          {/* Guests on bottom */}
+          <circle cx="45" cy="68" r="10" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="45" y="72" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.8" fontWeight="500">NJ</text>
+          <circle cx="95" cy="68" r="10" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.9" />
+          <text x="95" y="72" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.8" fontWeight="500">CP</text>
+        </svg>
+
+        {/* Heart (relationships/wedding theme) - Upper Left */}
+        <svg className="floating-shape shape-heart" viewBox="0 0 40 40">
+          <path
+            d="M20 35 C10 25 2 18 2 12 C2 6 7 2 12 2 C15 2 18 4 20 7 C22 4 25 2 28 2 C33 2 38 6 38 12 C38 18 30 25 20 35Z"
+            fill="currentColor"
+            opacity="0.6"
+          />
+        </svg>
+
+        {/* Second Guest Circle - Right Side */}
+        <svg className="floating-shape shape-guest-2" viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="var(--color-bg)" stroke="currentColor" strokeWidth="3" opacity="0.85" />
+          <text x="25" y="30" textAnchor="middle" fontSize="14" fill="currentColor" opacity="0.75" fontWeight="600">LM</text>
+        </svg>
+
+        {/* Name Card / Place Card - Center Right */}
+        <svg className="floating-shape shape-namecard" viewBox="0 0 80 50">
+          <rect x="5" y="10" width="70" height="30" rx="4" fill="var(--color-bg)" stroke="currentColor" strokeWidth="2" opacity="0.85" />
+          <line x1="15" y1="28" x2="65" y2="28" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+          <text x="40" y="24" textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.7" fontWeight="500">Guest Name</text>
+        </svg>
+      </div>
+
+      <div className="landing-content">
+        {/* Hero Section */}
+        <section className="hero-section">
+          <div className="logo-wrapper">
+            <h1 className="landing-logo">
+              <span className="logo-seat">Seat</span>
+              <span className="logo-ify">ify</span>
+              <span className="sr-only"> - Free Seating Chart Maker & Wedding Seating Plan Generator</span>
+            </h1>
+          </div>
+          <p className="landing-tagline">Free Seating Chart Maker for Weddings & Events</p>
+          <p className="landing-description">
+            Create beautiful seating plans with drag-and-drop simplicity. Our smart
+            seating plan generator handles guest relationships automatically.
+          </p>
+          <button className="cta-button" onClick={handleEnterApp}>
+            Start Planning Free
+          </button>
+
+          {/* Trust Badges */}
+          <div className="trust-badges">
+            <div className="trust-badge">
+              <svg className="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span>100% Private</span>
+            </div>
+            <div className="trust-badge">
+              <svg className="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              <span>No Signup</span>
+            </div>
+            <div className="trust-badge">
+              <svg className="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              <span>No Credit Card</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Wave Divider */}
+        <div className="wave-divider">
+          <svg viewBox="0 0 900 60" preserveAspectRatio="none">
+            <path
+              d="M0 30 Q225 0, 450 30 T900 30"
+              stroke="var(--color-border)"
+              strokeWidth="1"
+              fill="none"
+            />
+          </svg>
+        </div>
+
+        {/* Features Section */}
+        <section className="features-section">
+          <div className="features-stack">
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg
+                  className="feature-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
+              <div className="feature-content">
+                <h3>Smart Seating</h3>
+                <p>
+                  Keep partners together, separate people who shouldn't sit near
+                  each other. The optimizer handles the relationship math.
+                </p>
+                <button
+                  className="feature-tour-link"
+                  onClick={() => handleFeatureTourClick('optimization')}
+                >
+                  See how it works &rarr;
+                </button>
+              </div>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg
+                  className="feature-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </div>
+              <div className="feature-content">
+                <h3>Visual Floor Plans</h3>
+                <p>
+                  Drag-and-drop tables in any shape. Add venue elements like
+                  stages, bars, and dance floors.
+                </p>
+                <button
+                  className="feature-tour-link"
+                  onClick={() => handleFeatureTourClick('canvas-floor-plan')}
+                >
+                  See how it works &rarr;
+                </button>
+              </div>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon-wrap">
+                <svg
+                  className="feature-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="5" y="2" width="14" height="20" rx="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+              </div>
+              <div className="feature-content">
+                <h3>Works Everywhere</h3>
+                <p>
+                  Phone, tablet, or desktop. Your data stays in your browser —
+                  private and always available.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Use Cases */}
+        <div className="use-cases">
+          <span className="use-case-tag">Weddings</span>
+          <span className="use-case-tag">Corporate Dinners</span>
+          <span className="use-case-tag">Galas</span>
+          <span className="use-case-tag">Team Offsites</span>
+          <span className="use-case-tag">Private Parties</span>
+        </div>
+
+        {/* Secondary CTA */}
+        <section className="secondary-cta-section">
+          <p className="secondary-cta-text">Ready to create your seating chart?</p>
+          <button className="secondary-cta-button" onClick={handleSecondaryCTA}>
+            Get Started Now
+          </button>
+        </section>
+
+        {/* Coming Soon Section */}
+        <section className="coming-soon-section">
+          <div className="coming-soon-header">
+            <h2>Coming Soon...</h2>
+          </div>
+          <div className="coming-soon-grid">
+            <div className="coming-soon-card">
+              <h3>AI-Powered Seating</h3>
+              <p>
+                Advanced algorithms that learn guest relationships and
+                preferences to suggest optimal arrangements.
+              </p>
+            </div>
+            <div className="coming-soon-card">
+              <h3>Guest Import & RSVP</h3>
+              <p>
+                Import your guest list from your favorite planning tools and
+                track responses as they come in.
+              </p>
+              <div className="supported-platforms">
+                <span className="platforms-label">Works with:</span>
+                <span className="platform-name">Zola</span>
+                <span className="platform-name">RSVPify</span>
+                <span className="platform-name">Joy</span>
+                <span className="platform-name">CSV/Excel</span>
+                <span className="platform-name coming-soon">The Knot <small>(coming soon)</small></span>
+                <span className="platform-name coming-soon">Eventbrite <small>(coming soon)</small></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="faq-section">
+          <h2 className="faq-header">Frequently Asked Questions</h2>
+          <div className="faq-list">
+            {faqItems.map((item, index) => (
+              <div
+                key={index}
+                className={`faq-item ${expandedFaq === index ? 'faq-item--expanded' : ''}`}
+              >
+                <button
+                  className="faq-question"
+                  onClick={() => toggleFaq(index)}
+                  aria-expanded={expandedFaq === index}
+                >
+                  <span>{item.question}</span>
+                  <svg
+                    className="faq-chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <div className="faq-answer">
+                  <p>{item.answer}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Email Capture */}
+        <section className="email-capture">
+          <h2>Get Updates</h2>
+          <p className="email-description">We'll email you when we ship something new. No spam.</p>
+          <button
+            className="subscribe-button"
+            onClick={() => setShowEmailCapture(true)}
+          >
+            Subscribe for Updates
+          </button>
+        </section>
+
+        {/* Email Capture Modal */}
+        {showEmailCapture && (
+          <EmailCaptureModal
+            onClose={() => setShowEmailCapture(false)}
+            source="landing"
+          />
+        )}
+      </div>
+
+      {/* Footer */}
+      <Footer variant="landing" />
+    </div>
+  );
+}

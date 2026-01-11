@@ -1,0 +1,102 @@
+.toast-container {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  animation: toastSlideUp var(--duration-fast) var(--ease-out);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.toast-success {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+  color: var(--color-success-text);
+}
+
+.toast-info {
+  border-color: var(--color-info);
+  background: var(--color-info-light);
+  color: var(--color-info-text);
+}
+
+.toast-warning {
+  border-color: var(--color-warning);
+  background: var(--color-warning-light);
+  color: var(--color-warning-text);
+}
+
+.toast-error {
+  border-color: var(--color-error);
+  background: var(--color-error-light);
+  color: var(--color-error-text);
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-action {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.toast-action:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive - avoid bottom action bar */
+@media (max-width: 480px) {
+  .toast-container {
+    bottom: calc(90px + env(safe-area-inset-bottom, 0));
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: none;
+  }
+
+  .toast {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+  }
+
+  .toast-action {
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+}

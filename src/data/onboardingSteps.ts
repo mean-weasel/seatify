@@ -1,0 +1,448 @@
+export interface OnboardingStep {
+  id: string;
+  target: string | null;        // CSS selector for element to highlight (null for centered modal)
+  targetFallback?: string;      // Fallback selector if primary not found
+  title: string;
+  description: string;
+  placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  requiredView?: 'event-list' | 'dashboard' | 'canvas' | 'guests';
+  highlightPadding?: number;    // Extra padding around highlighted element
+  action?: 'click-event-card';  // Special action to perform before moving to next step
+  tourId?: string;              // Optional: identifies which tour this step belongs to
+}
+
+export const ONBOARDING_STEPS: OnboardingStep[] = [
+  {
+    id: 'welcome',
+    target: null,
+    title: 'Welcome to Seatify!',
+    description: "Let's take a quick tour of the key features. This will only take about a minute.",
+    placement: 'center',
+  },
+  {
+    id: 'event-list-overview',
+    target: '.event-cards-grid',
+    targetFallback: '.event-list-view',
+    title: 'Your Events Dashboard',
+    description: 'This is where all your events live. Each card represents a separate event you\'re planning - weddings, corporate dinners, galas, and more.',
+    placement: 'center',
+    requiredView: 'event-list',
+    highlightPadding: 16,
+  },
+  {
+    id: 'create-event',
+    target: '.create-event-btn',
+    title: 'Create New Events',
+    description: 'Click here to create a new event. You can add up to 10 events, each with its own venue details, guest list, and seating arrangement.',
+    placement: 'bottom',
+    requiredView: 'event-list',
+    highlightPadding: 8,
+  },
+  {
+    id: 'event-card',
+    target: '.event-card',
+    title: 'Enter an Event',
+    description: 'Click any event card to open it and start planning. Let\'s go inside this event now!',
+    placement: 'right',
+    requiredView: 'event-list',
+    highlightPadding: 8,
+    action: 'click-event-card',
+  },
+  // Dashboard steps (after entering event, before canvas)
+  {
+    id: 'dashboard-overview',
+    target: '.stats-overview',
+    targetFallback: '.dashboard-grid',
+    title: 'Event Overview',
+    description: 'Your dashboard shows key stats at a glance - guest counts, RSVP status, and seating progress.',
+    placement: 'bottom',
+    requiredView: 'dashboard',
+    highlightPadding: 12,
+  },
+  {
+    id: 'quick-actions',
+    target: '.quick-actions',
+    title: 'Quick Actions',
+    description: 'Jump to common tasks: add tables, manage guests, share your seating chart, or export event data.',
+    placement: 'left',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+  },
+  // Canvas steps
+  {
+    id: 'canvas-overview',
+    target: '.canvas-container',
+    targetFallback: '.canvas',
+    title: 'The Canvas',
+    description: 'This is your floor plan. Drag tables to arrange them, pinch or scroll to zoom, and drag the background to pan.',
+    placement: 'center',
+    requiredView: 'canvas',
+    highlightPadding: 0,
+  },
+  {
+    id: 'add-table',
+    target: '.add-dropdown',
+    targetFallback: '.main-toolbar',
+    title: 'Add Tables',
+    description: 'Click here to add tables to your floor plan. Choose from round, rectangle, square, and other shapes.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+  },
+  {
+    id: 'sidebar',
+    target: '.sidebar',
+    targetFallback: '.sidebar-toggle',
+    title: 'Guest Sidebar',
+    description: 'Your guest list appears here. Drag guests from this panel onto tables to assign their seats.',
+    placement: 'right',
+    requiredView: 'canvas',
+    highlightPadding: 0,
+  },
+  {
+    id: 'view-toggle',
+    target: '.view-toggle',
+    targetFallback: '.view-toggle-container',
+    title: 'Switch Views',
+    description: 'Use Dashboard, Canvas, and Guests views to manage different aspects of your event.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+  },
+  {
+    id: 'optimize',
+    target: '.toolbar-btn.primary',
+    targetFallback: '.main-toolbar',
+    title: 'Smart Optimization',
+    description: 'Set up guest relationships, then click Optimize to auto-arrange seating. Partners stay together, conflicts stay apart.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+  },
+  {
+    id: 'help',
+    target: '.help-btn',
+    title: 'Need Help?',
+    description: "Press ? anytime to see keyboard shortcuts. You can restart this tour from the header.",
+    placement: 'bottom',
+    highlightPadding: 12,
+  },
+];
+
+// ============================================
+// FOCUSED TOUR STEP ARRAYS
+// Each tour is 4-6 steps for a focused experience
+// ============================================
+
+// Quick Start Tour - First-time user basics (starts in canvas with demo data)
+export const QUICK_START_STEPS: OnboardingStep[] = [
+  {
+    id: 'qs-welcome',
+    target: null,
+    title: 'Welcome to Seatify!',
+    description: "Let's take a quick tour of how to create the perfect seating arrangement. This will only take about 2 minutes.",
+    placement: 'center',
+    tourId: 'quick-start',
+  },
+  {
+    id: 'qs-canvas',
+    target: '.canvas-container',
+    targetFallback: '.canvas',
+    title: 'Your Floor Plan',
+    description: 'This is your canvas - your venue floor plan. Drag tables to arrange them, pinch or scroll to zoom, and drag the background to pan.',
+    placement: 'center',
+    requiredView: 'canvas',
+    highlightPadding: 0,
+    tourId: 'quick-start',
+  },
+  {
+    id: 'qs-add-table',
+    target: '.add-dropdown',
+    targetFallback: '.main-toolbar',
+    title: 'Add Tables',
+    description: 'Click here to add tables. Choose from round, rectangle, square, and other shapes to match your venue.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+    tourId: 'quick-start',
+  },
+  {
+    id: 'qs-sidebar',
+    target: '.sidebar',
+    targetFallback: '.sidebar-toggle',
+    title: 'Assign Guests',
+    description: 'Your guest list appears here. Drag guests from this panel onto tables to assign their seats. Easy as that!',
+    placement: 'right',
+    requiredView: 'canvas',
+    highlightPadding: 0,
+    tourId: 'quick-start',
+  },
+  {
+    id: 'qs-views',
+    target: '.view-toggle',
+    targetFallback: '.view-toggle-container',
+    title: 'Switch Views',
+    description: 'Switch between Dashboard (stats & exports), Canvas (floor plan), and Guests (manage your list) from the menu.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+    tourId: 'quick-start',
+  },
+  {
+    id: 'qs-complete',
+    target: null,
+    title: "You're All Set!",
+    description: "Start arranging your seating! Explore the feature tours in the Learn menu for more advanced features like optimization and exports.",
+    placement: 'center',
+    tourId: 'quick-start',
+  },
+];
+
+// Canvas & Floor Plans Tour - Grid, tables, venue elements
+export const CANVAS_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'canvas-intro',
+    target: null,
+    title: 'Canvas & Floor Plans',
+    description: "Learn how to design your venue layout with tables, grid controls, and venue elements.",
+    placement: 'center',
+    tourId: 'canvas-floor-plan',
+  },
+  {
+    id: 'canvas-grid',
+    target: '.grid-controls',
+    targetFallback: '.main-toolbar',
+    title: 'Grid Controls',
+    description: 'Toggle the grid, enable snap-to-grid for precise alignment, and show alignment guides. Adjust grid size to match your venue scale.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+    tourId: 'canvas-floor-plan',
+  },
+  {
+    id: 'canvas-table-edit',
+    target: '.table-component',
+    targetFallback: '.canvas',
+    title: 'Edit Tables',
+    description: 'Click a table to select it, then click again to edit. Change capacity, shape, name, or delete. Drag corners to resize.',
+    placement: 'right',
+    requiredView: 'canvas',
+    highlightPadding: 12,
+    tourId: 'canvas-floor-plan',
+  },
+  {
+    id: 'canvas-venue',
+    target: '.add-dropdown',
+    targetFallback: '.main-toolbar',
+    title: 'Venue Elements',
+    description: 'Add non-seating elements like dance floors, stages, bars, and buffets. These help visualize your complete venue layout.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+    tourId: 'canvas-floor-plan',
+  },
+  {
+    id: 'canvas-done',
+    target: null,
+    title: 'Floor Plan Ready!',
+    description: "Your venue layout tools are at your fingertips. Experiment with different arrangements until you find the perfect setup.",
+    placement: 'center',
+    tourId: 'canvas-floor-plan',
+  },
+];
+
+// Relationships Tour - Partners, family, conflicts
+export const RELATIONSHIPS_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'rel-intro',
+    target: null,
+    title: 'Guest Relationships',
+    description: "Set up relationships between guests so our optimizer can seat them intelligently. Partners together, conflicts apart!",
+    placement: 'center',
+    tourId: 'relationships',
+  },
+  {
+    id: 'rel-guest-list',
+    target: '.guest-management-view',
+    targetFallback: '.guest-table-container',
+    title: 'Your Guest List',
+    description: 'This is where you manage all your guests. Each guest can have relationships with other guests.',
+    placement: 'center',
+    requiredView: 'guests',
+    highlightPadding: 0,
+    tourId: 'relationships',
+  },
+  {
+    id: 'rel-edit-guest',
+    target: '.guest-table tbody tr',
+    targetFallback: '.guest-table',
+    title: 'Edit Guest Relationships',
+    description: 'Click any guest to edit their details. In the edit panel, you can set their partner, family members, and people to keep apart.',
+    placement: 'right',
+    requiredView: 'guests',
+    highlightPadding: 8,
+    tourId: 'relationships',
+  },
+  {
+    id: 'rel-types',
+    target: null,
+    title: 'Relationship Types',
+    description: 'Partner: Seats them together. Family: Groups at same table when possible. Avoid: Keeps them at different tables.',
+    placement: 'center',
+    tourId: 'relationships',
+  },
+  {
+    id: 'rel-done',
+    target: null,
+    title: 'Ready for Optimization!',
+    description: "With relationships set up, try the Optimize feature to auto-arrange seating based on your rules.",
+    placement: 'center',
+    tourId: 'relationships',
+  },
+];
+
+// Optimization Tour - Run optimizer, review results
+export const OPTIMIZATION_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'opt-intro',
+    target: null,
+    title: 'Smart Optimization',
+    description: "Let our AI arrange your seating automatically based on guest relationships and table capacity.",
+    placement: 'center',
+    tourId: 'optimization',
+  },
+  {
+    id: 'opt-button',
+    target: '.toolbar-btn.primary',
+    targetFallback: '.main-toolbar',
+    title: 'Run Optimization',
+    description: 'Click the Optimize button to automatically seat all unassigned guests. Partners stay together, conflicts are separated.',
+    placement: 'bottom',
+    requiredView: 'canvas',
+    highlightPadding: 8,
+    tourId: 'optimization',
+  },
+  {
+    id: 'opt-review',
+    target: '.canvas-container',
+    targetFallback: '.canvas',
+    title: 'Review Results',
+    description: 'After optimization, review the arrangement. Guests are placed to maximize relationship scores. Adjust manually if needed.',
+    placement: 'center',
+    requiredView: 'canvas',
+    highlightPadding: 0,
+    tourId: 'optimization',
+  },
+  {
+    id: 'opt-undo',
+    target: null,
+    title: 'Undo if Needed',
+    description: "Don't like the results? Use Cmd+Z (or Ctrl+Z) to undo. You can optimize multiple times with different relationship settings.",
+    placement: 'center',
+    requiredView: 'canvas',
+    tourId: 'optimization',
+  },
+  {
+    id: 'opt-done',
+    target: null,
+    title: 'Seating Complete!',
+    description: "Your optimized seating is ready. Fine-tune by dragging guests between seats or tables.",
+    placement: 'center',
+    tourId: 'optimization',
+  },
+];
+
+// Export & Share Tour - PDFs, share links, export data
+export const EXPORT_SHARE_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'export-intro',
+    target: null,
+    title: 'Export & Share',
+    description: "Learn how to share your seating chart and create printable materials for your event.",
+    placement: 'center',
+    tourId: 'export-share',
+  },
+  {
+    id: 'export-print',
+    target: '.print-materials',
+    targetFallback: '.dashboard-grid',
+    title: 'Print Materials',
+    description: 'Generate place cards, table cards, and guest lists as PDFs. Perfect for printing before your event.',
+    placement: 'bottom',
+    requiredView: 'dashboard',
+    highlightPadding: 12,
+    tourId: 'export-share',
+  },
+  {
+    id: 'export-share-link',
+    target: '.action-btn.secondary',
+    targetFallback: '.quick-actions',
+    title: 'Share Link',
+    description: 'Create a shareable link that others can view (read-only). Great for coordinators and vendors.',
+    placement: 'left',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+    tourId: 'export-share',
+  },
+  {
+    id: 'export-data',
+    target: '.action-btn.outline',
+    targetFallback: '.quick-actions',
+    title: 'Export Data',
+    description: 'Export your guest list and seating assignments as CSV or JSON for backup or importing elsewhere.',
+    placement: 'left',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+    tourId: 'export-share',
+  },
+  {
+    id: 'export-done',
+    target: null,
+    title: 'Ready to Share!',
+    description: "Your event materials are just a click away. Print, share, and export as needed.",
+    placement: 'center',
+    tourId: 'export-share',
+  },
+];
+
+// QR Code mini-tour (optional, triggered separately)
+export const QR_TOUR_STEPS: OnboardingStep[] = [
+  {
+    id: 'qr-intro',
+    target: null,
+    title: 'QR Codes for Your Tables',
+    description: 'Generate QR codes that guests can scan to see who\'s at their table. Perfect for table cards and place settings!',
+    placement: 'center',
+    tourId: 'qr-codes',
+  },
+  {
+    id: 'qr-print-all',
+    target: '.qr-print-btn',
+    targetFallback: '.tables-summary',
+    title: 'Print All QR Codes',
+    description: 'Click here to generate printable QR codes for every table at once. Great for bulk printing.',
+    placement: 'bottom',
+    requiredView: 'dashboard',
+    highlightPadding: 8,
+    tourId: 'qr-codes',
+  },
+  {
+    id: 'qr-single-table',
+    target: '.table-component',
+    targetFallback: '.canvas',
+    title: 'Individual Table QR',
+    description: 'Right-click any table on the canvas to generate its QR code. You can copy the link or download the QR image.',
+    placement: 'right',
+    requiredView: 'canvas',
+    highlightPadding: 12,
+    tourId: 'qr-codes',
+  },
+  {
+    id: 'qr-done',
+    target: null,
+    title: 'Ready to Print!',
+    description: 'When guests scan a QR code, they\'ll see a beautiful page with their table name and fellow guests. Try it out!',
+    placement: 'center',
+    tourId: 'qr-codes',
+  },
+];
