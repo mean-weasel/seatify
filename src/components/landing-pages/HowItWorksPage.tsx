@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 import { useNavigate, Link } from '@/lib/router-compat';
 import '../LandingPage.css';
