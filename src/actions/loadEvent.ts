@@ -95,6 +95,11 @@ interface DbGuestProfile {
   accessibility_needs: string[] | null;
 }
 
+interface DbConstraintGuest {
+  constraint_id: string;
+  guest_id: string;
+}
+
 // Transform database event to frontend format
 function transformEvent(
   dbEvent: DbEvent,
@@ -103,13 +108,14 @@ function transformEvent(
   dbRelationships: DbRelationship[] | null,
   dbVenueElements: DbVenueElement[] | null,
   dbConstraints: DbConstraint[] | null,
-  dbGuestProfiles: DbGuestProfile[] | null
+  dbGuestProfiles: DbGuestProfile[] | null,
+  dbConstraintGuests: DbConstraintGuest[] | null
 ): Event {
   // Create a map of guest profiles
   const profileMap = new Map<string, DbGuestProfile>();
   (dbGuestProfiles || []).forEach(p => profileMap.set(p.guest_id, p));
 
-  // Create a map of relationships by guest ID
+  // Create a map of relationships by guest ID (bidirectional)
   const relationshipMap = new Map<string, Relationship[]>();
   (dbRelationships || []).forEach(r => {
     // Add relationship from guest_id perspective
@@ -118,6 +124,16 @@ function transformEvent(
     }
     relationshipMap.get(r.guest_id)!.push({
       guestId: r.related_guest_id,
+      type: r.relationship_type as RelationshipType,
+      strength: r.strength,
+    });
+
+    // Add reverse relationship from related_guest_id perspective
+    if (!relationshipMap.has(r.related_guest_id)) {
+      relationshipMap.set(r.related_guest_id, []);
+    }
+    relationshipMap.get(r.related_guest_id)!.push({
+      guestId: r.guest_id,
       type: r.relationship_type as RelationshipType,
       strength: r.strength,
     });
@@ -176,12 +192,21 @@ function transformEvent(
     rotation: v.rotation ? Number(v.rotation) : 0,
   }));
 
-  // Transform constraints
+  // Create a map of constraint guest IDs
+  const constraintGuestMap = new Map<string, string[]>();
+  (dbConstraintGuests || []).forEach(cg => {
+    const existing = constraintGuestMap.get(cg.constraint_id) || [];
+    existing.push(cg.guest_id);
+    constraintGuestMap.set(cg.constraint_id, existing);
+  });
+
+  // Transform constraints with their guest IDs
   const constraints: Constraint[] = (dbConstraints || []).map(c => ({
     id: c.id,
     type: c.constraint_type as Constraint['type'],
     priority: c.priority as Constraint['priority'],
-    guestIds: [], // Will need to fetch from constraint_guests table if needed
+    guestIds: constraintGuestMap.get(c.id) || [],
+    description: c.description || undefined,
   }));
 
   return {
@@ -240,6 +265,17 @@ export async function loadEvent(eventId: string): Promise<{ data?: Event; error?
     supabase.from('constraints').select('*').eq('event_id', eventId),
   ]);
 
+  // Fetch constraint-guest mappings if there are constraints
+  const constraintIds = (constraints || []).map(c => c.id);
+  let constraintGuests: DbConstraintGuest[] | null = null;
+  if (constraintIds.length > 0) {
+    const { data: cgData } = await supabase
+      .from('constraint_guests')
+      .select('constraint_id, guest_id')
+      .in('constraint_id', constraintIds);
+    constraintGuests = cgData as DbConstraintGuest[] | null;
+  }
+
   // Fetch guest profiles for all guests
   const guestIds = (guests || []).map(g => g.id);
   let guestProfiles: DbGuestProfile[] | null = null;
@@ -259,7 +295,8 @@ export async function loadEvent(eventId: string): Promise<{ data?: Event; error?
     relationships as DbRelationship[] | null,
     venueElements as DbVenueElement[] | null,
     constraints as DbConstraint[] | null,
-    guestProfiles
+    guestProfiles,
+    constraintGuests
   );
 
   return { data: transformedEvent };

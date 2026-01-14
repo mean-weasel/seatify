@@ -134,7 +134,7 @@ export function MainToolbar({ children, onAddGuest, onImport, onExport, showRela
   }, [
     optimizeAnimationEnabled,
     isMobile,
-    event.guests,
+    event,
     optimizeSeating,
     setFadingOutGuests,
     clearFadingOutGuests

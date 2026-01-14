@@ -2165,13 +2165,11 @@ export const useStore = create<AppState>()(
         // Track optimizer usage
         trackOptimizerRun(guests.length, tables.length);
 
-        console.log('Optimization complete:', { beforeScore, afterScore, movedGuests, newlySeated, violationsResolved, tableAssignments: Object.fromEntries(tableAssignments) });
         return { beforeScore, afterScore, movedGuests, newlySeated, violationsResolved };
       },
 
       resetSeating: () => {
         const snapshot = get().preOptimizationSnapshot;
-        console.log('resetSeating called, snapshot:', snapshot);
         if (!snapshot) return;
 
         // Find which guests will move back
@@ -2184,7 +2182,6 @@ export const useStore = create<AppState>()(
           }
         }
 
-        console.log('Resetting seating, movedGuests:', movedGuests);
         set((state) => ({
           ...syncEventUpdate(state, (event) => ({
             ...event,
@@ -2275,7 +2272,7 @@ export const useStore = create<AppState>()(
                 const nameParts = guest.name.trim().split(' ');
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                 
                 const { name: _, ...rest } = guest;
                 return { ...rest, firstName, lastName };
               }

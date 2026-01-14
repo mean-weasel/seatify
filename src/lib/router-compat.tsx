@@ -8,7 +8,6 @@
 import { useRouter, usePathname, useParams, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, forwardRef } from 'react';
 import NextLink from 'next/link';
-import type { LinkProps as NextLinkProps } from 'next/link';
 
 /**
  * Link component that supports both react-router's `to` prop and Next.js's `href` prop
@@ -110,8 +109,7 @@ export function NavLink({
   children: React.ReactNode | ((props: { isActive: boolean }) => React.ReactNode);
   className?: string | ((props: { isActive: boolean }) => string);
   activeClassName?: string;
-  [key: string]: any;
-}) {
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'className' | 'children'>) {
   const pathname = usePathname();
   const isActive = pathname === to || pathname?.startsWith(to + '/');
 

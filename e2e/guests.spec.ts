@@ -26,7 +26,7 @@ test.describe('Guests Page', () => {
     const guestsPath = '/dashboard/events/test-id/guests';
 
     // Attempt to access - should redirect to login (proving route exists and is protected)
-    const response = await page.goto(guestsPath);
+    await page.goto(guestsPath);
 
     // Route should exist and redirect (not return 404)
     // A redirect will still show as 200 after following redirects
