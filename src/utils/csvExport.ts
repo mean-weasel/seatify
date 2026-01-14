@@ -1,5 +1,4 @@
 import type { Guest, Table } from '../types';
-import { getFullName } from '../types';
 
 interface ExportGuest {
   firstName: string;

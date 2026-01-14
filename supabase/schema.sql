@@ -155,6 +155,42 @@ CREATE TABLE IF NOT EXISTS public.guest_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS idx_guest_profiles_guest_id ON public.guest_profiles(guest_id);
+
+-- =====================================================
+-- SURVEY QUESTIONS
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.survey_questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+  question_text TEXT NOT NULL,
+  question_type VARCHAR NOT NULL DEFAULT 'text',
+  options JSONB,
+  required BOOLEAN NOT NULL DEFAULT false,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_survey_questions_event_id ON public.survey_questions(event_id);
+
+-- =====================================================
+-- SURVEY RESPONSES
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.survey_responses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  question_id UUID NOT NULL REFERENCES public.survey_questions(id) ON DELETE CASCADE,
+  guest_id UUID NOT NULL REFERENCES public.guests(id) ON DELETE CASCADE,
+  response_text TEXT,
+  response_data JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(question_id, guest_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_survey_responses_question_id ON public.survey_responses(question_id);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_guest_id ON public.survey_responses(guest_id);
+
 -- =====================================================
 -- ROW LEVEL SECURITY POLICIES
 -- =====================================================
@@ -169,6 +205,8 @@ ALTER TABLE public.constraints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.constraint_guests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.venue_elements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.guest_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.survey_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.survey_responses ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Users can only see/edit their own profile
 CREATE POLICY "Users can view own profile" ON public.profiles
@@ -240,6 +278,30 @@ CREATE POLICY "Users can CRUD guest_profiles" ON public.guest_profiles
       WHERE event_id IN (SELECT id FROM public.events WHERE user_id = auth.uid())
     )
   );
+
+-- Survey questions: Access via event ownership
+CREATE POLICY "Users can CRUD survey_questions in own events" ON public.survey_questions
+  FOR ALL USING (
+    event_id IN (SELECT id FROM public.events WHERE user_id = auth.uid())
+  );
+
+-- Survey responses: Owners can view, guests can submit
+-- Owners can view responses via question → event ownership
+CREATE POLICY "Users can view survey_responses in own events" ON public.survey_responses
+  FOR SELECT USING (
+    question_id IN (
+      SELECT id FROM public.survey_questions
+      WHERE event_id IN (SELECT id FROM public.events WHERE user_id = auth.uid())
+    )
+  );
+
+-- Allow anyone to insert responses (guests submitting surveys)
+CREATE POLICY "Anyone can submit survey_responses" ON public.survey_responses
+  FOR INSERT WITH CHECK (true);
+
+-- Allow anyone to update their own responses
+CREATE POLICY "Guests can update own survey_responses" ON public.survey_responses
+  FOR UPDATE USING (true);
 
 -- =====================================================
 -- TRIGGERS

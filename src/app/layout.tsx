@@ -15,6 +15,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://seatify.app'),
   title: {
     default: "Seatify - Smart Seating Arrangements Made Easy",
     template: "%s | Seatify",
