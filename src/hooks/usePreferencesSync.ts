@@ -7,7 +7,7 @@ import {
   updateUserPreference,
   type UserPreferences,
 } from '@/actions/profilePreferences';
-import type { TourId } from '@/types';
+import type { TourId } from '@/data/tourRegistry';
 
 /**
  * Hook that syncs user preferences between Zustand store and Supabase.
