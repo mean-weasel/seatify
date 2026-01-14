@@ -12,6 +12,7 @@ const createMockEvent = (overrides: Partial<Event> = {}): Event => ({
   id: 'event-1',
   name: 'Test Event',
   date: '2026-06-15',
+  eventType: 'wedding',
   tables: [],
   guests: [],
   venueElements: [],
@@ -175,17 +176,17 @@ describe('QR Code Utils', () => {
       expect(validateQRData({ v: 1, e: 'Event', t: 'Table', g: [123, 'name'], c: 8 })).toBe(false);
     });
 
-    it('should accept optional null date', () => {
-      const dataWithNullDate: QRTableData = {
+    it('should accept optional undefined date', () => {
+      const dataWithUndefinedDate: QRTableData = {
         v: 1,
         e: 'Event Name',
-        d: null,
+        d: undefined,
         t: 'Table 1',
         g: [],
         c: 8,
       };
 
-      expect(validateQRData(dataWithNullDate)).toBe(true);
+      expect(validateQRData(dataWithUndefinedDate)).toBe(true);
     });
   });
 

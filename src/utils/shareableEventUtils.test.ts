@@ -14,6 +14,7 @@ const createMockEvent = (overrides: Partial<Event> = {}): Event => ({
   id: 'event-1',
   name: 'Test Wedding',
   date: '2026-06-15',
+  eventType: 'wedding',
   tables: [
     { id: 't1', name: 'Table 1', shape: 'round', capacity: 8, x: 100, y: 100, width: 100, height: 100 },
     { id: 't2', name: 'Table 2', shape: 'rectangle', capacity: 10, x: 300, y: 100, width: 150, height: 80 },
@@ -27,7 +28,7 @@ const createMockEvent = (overrides: Partial<Event> = {}): Event => ({
     { id: 'v1', type: 'stage', label: 'Main Stage', x: 200, y: 50, width: 200, height: 50 },
   ],
   constraints: [
-    { id: 'c1', type: 'keep_together', guestIds: ['g1', 'g2'], priority: 'required' },
+    { id: 'c1', type: 'must_sit_together', guestIds: ['g1', 'g2'], priority: 'required' },
   ],
   surveyQuestions: [],
   surveyResponses: [],
