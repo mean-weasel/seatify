@@ -139,7 +139,7 @@ test.describe('Mobile iOS Tab Bar - Menu Interaction', () => {
     await expect(page.locator('.mobile-menu-sheet')).not.toBeVisible();
   });
 
-  test('Settings tab is highlighted when selected', async ({ page }) => {
+  test('Settings tab opens menu sheet', async ({ page }) => {
     await enterAppMobile(page);
 
     const settingsTab = page.locator('.ios-tab-bar .tab-bar-item:has-text("Settings")');
@@ -147,8 +147,8 @@ test.describe('Mobile iOS Tab Bar - Menu Interaction', () => {
     // Click Settings tab
     await settingsTab.click();
 
-    // Settings tab should have active class
-    await expect(settingsTab).toHaveClass(/active/);
+    // Menu sheet should open (Settings is an action button, not a nav tab)
+    await expect(page.locator('.mobile-menu-sheet')).toBeVisible();
   });
 });
 

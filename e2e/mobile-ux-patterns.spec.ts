@@ -697,8 +697,9 @@ test.describe('Interaction Patterns', () => {
     await page.setViewportSize(IPHONE_14);
     await enterApp(page);
 
-    // Canvas elements should have touch-action: none to prevent browser gestures
-    const canvas = page.locator('.canvas, canvas, [class*="canvas"]').first();
+    // Canvas element should have touch-action: none to prevent browser gestures
+    // Use specific .canvas class (not canvas HTML element or other containers)
+    const canvas = page.locator('.canvas').first();
 
     if (await canvas.isVisible().catch(() => false)) {
       const touchAction = await canvas.evaluate((el) =>
