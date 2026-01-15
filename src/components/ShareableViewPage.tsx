@@ -67,8 +67,7 @@ export function ShareableViewPage() {
         <div className="shareable-container">
           <div className="shareable-header">
             <h1 className="shareable-brand">
-              <span className="logo-seat">Seat</span>
-              <span className="logo-ify">ify</span>
+              Seatify
             </h1>
           </div>
 
@@ -112,8 +111,7 @@ export function ShareableViewPage() {
         <div className="shareable-container">
           <div className="shareable-header">
             <h1 className="shareable-brand">
-              <span className="logo-seat">Seat</span>
-              <span className="logo-ify">ify</span>
+              Seatify
             </h1>
           </div>
 
@@ -154,8 +152,7 @@ export function ShareableViewPage() {
       <div className="shareable-topbar">
         <div className="shareable-topbar-left">
           <h1 className="shareable-brand-small">
-            <span className="logo-table">Table</span>
-            <span className="logo-craft">Craft</span>
+            Seatify
           </h1>
           <span className="shareable-badge">Shared View</span>
         </div>

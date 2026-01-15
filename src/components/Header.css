@@ -71,8 +71,10 @@
 }
 
 .logo {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-extrabold);
+  font-family: 'Caveat', cursive;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
   margin: 0;
   letter-spacing: var(--letter-spacing-tight);
   transition: all var(--duration-normal) var(--ease-bounce);
@@ -101,18 +103,6 @@
 
 .logo:hover::after {
   opacity: 1;
-}
-
-.header .logo-seat {
-  color: var(--color-text);
-}
-
-.header .logo-ify {
-  color: var(--color-primary);
-  font-family: 'Caveat', cursive;
-  font-size: 1.15em;
-  font-weight: 600;
-  vertical-align: baseline;
 }
 
 .version-badge {

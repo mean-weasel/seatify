@@ -123,8 +123,7 @@ export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
           style={{ cursor: onLogoClick ? 'pointer' : 'default' }}
           title="Back to home"
         >
-          <span className="logo-seat">Seat</span>
-          <span className="logo-ify">ify</span>
+          Seatify
         </h1>
         <span className="version-badge">v{version}</span>
         <UpdatesButton variant="header" />

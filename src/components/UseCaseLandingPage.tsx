@@ -176,8 +176,7 @@ export function UseCaseLandingPage({ config }: UseCaseLandingPageProps) {
         <section className="hero-section">
           <div className="logo-wrapper">
             <h1 className="landing-logo">
-              <span className="logo-seat">Seat</span>
-              <span className="logo-ify">ify</span>
+              Seatify
             </h1>
           </div>
           <p className="landing-tagline">{config.tagline}</p>

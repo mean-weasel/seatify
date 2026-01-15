@@ -58,8 +58,7 @@ export function QRTableInfoPage() {
       <div className="qr-info-container">
         <div className="qr-info-header">
           <h1 className="qr-brand">
-            <span className="logo-seat">Seat</span>
-            <span className="logo-ify">ify</span>
+            Seatify
           </h1>
           {tableData.e && <p className="event-name">{tableData.e}</p>}
           {tableData.d && <p className="event-date">{tableData.d}</p>}

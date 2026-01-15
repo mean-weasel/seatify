@@ -25,21 +25,11 @@
 }
 
 .shareable-brand {
-  font-size: 2rem;
-  font-weight: var(--font-weight-bold);
-  margin: 0;
-}
-
-.shareable-brand .logo-seat {
-  color: var(--color-text);
-}
-
-.shareable-brand .logo-ify {
-  color: var(--color-primary);
   font-family: 'Caveat', cursive;
-  font-size: 1.15em;
+  font-size: 2.5rem;
   font-weight: 600;
-  vertical-align: baseline;
+  color: var(--color-primary);
+  margin: 0;
 }
 
 /* Upload prompt */
@@ -158,21 +148,11 @@
 }
 
 .shareable-brand-small {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin: 0;
-}
-
-.shareable-brand-small .logo-seat {
-  color: var(--color-text);
-}
-
-.shareable-brand-small .logo-ify {
-  color: var(--color-primary);
   font-family: 'Caveat', cursive;
-  font-size: 1.15em;
+  font-size: 1.5rem;
   font-weight: 600;
-  vertical-align: baseline;
+  color: var(--color-primary);
+  margin: 0;
 }
 
 .shareable-badge {
