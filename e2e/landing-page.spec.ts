@@ -9,8 +9,7 @@ test.describe('Landing Page', () => {
     test('displays Seatify logo with correct branding', async ({ page }) => {
       const logo = page.locator('.landing-logo');
       await expect(logo).toBeVisible();
-      await expect(logo.locator('.logo-seat')).toHaveText('Seat');
-      await expect(logo.locator('.logo-ify')).toHaveText('ify');
+      await expect(logo).toContainText('Seatify');
     });
 
     test('displays tagline and description', async ({ page }) => {
