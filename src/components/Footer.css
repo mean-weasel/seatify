@@ -29,20 +29,12 @@
 
 .footer-logo {
   display: inline-block;
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: 'Caveat', cursive;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
   text-decoration: none;
   margin-bottom: 0.75rem;
-}
-
-.footer-logo-seat {
-  color: var(--color-text);
-}
-
-.footer-logo-ify {
-  color: var(--color-primary);
-  font-family: 'Caveat', cursive;
-  font-weight: 600;
 }
 
 .footer-tagline {

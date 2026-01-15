@@ -18,8 +18,7 @@ export function Footer({ variant = 'landing' }: FooterProps) {
           {/* Brand column */}
           <div className="footer-brand">
             <Link to="/" className="footer-logo">
-              <span className="footer-logo-seat">Seat</span>
-              <span className="footer-logo-ify">ify</span>
+              Seatify
             </Link>
             <p className="footer-tagline">
               Free seating chart maker for weddings and events.

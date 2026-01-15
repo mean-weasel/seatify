@@ -63,23 +63,14 @@
 }
 
 .landing-logo {
-  font-size: 3.5rem;
-  font-weight: var(--font-weight-extrabold);
+  font-family: 'Caveat', cursive;
+  font-size: 4rem;
+  font-weight: 600;
+  color: var(--color-primary);
   margin: 0;
   letter-spacing: -0.02em;
   animation: floatDown 0.6s var(--ease-bounce) backwards;
   animation-delay: 0.1s;
-}
-
-.logo-seat {
-  color: var(--color-text);
-}
-
-.logo-ify {
-  color: var(--color-primary);
-  font-family: 'Caveat', cursive;
-  font-size: 4rem;
-  font-weight: 600;
 }
 
 @keyframes floatDown {
