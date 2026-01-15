@@ -5,7 +5,6 @@ import { EventFormModal } from './EventFormModal';
 import { DeleteEventDialog } from './DeleteEventDialog';
 import { IOSTabBar } from './IOSTabBar';
 import { EmailCaptureModal } from './EmailCaptureModal';
-import { shouldShowEmailCapture } from '../utils/emailCaptureManager';
 import { useIsMobile } from '../hooks/useResponsive';
 import type { Event } from '../types';
 import './EventListView.css';
@@ -57,13 +56,7 @@ export function EventListView() {
   const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
   const [showEmailCapture, setShowEmailCapture] = useState(false);
 
-  // Check if user has already subscribed (don't show button if so)
-  const canShowEmailButton = shouldShowEmailCapture('guestMilestone') ||
-                             shouldShowEmailCapture('optimizerSuccess') ||
-                             shouldShowEmailCapture('exportAttempt');
-
   const isMobile = useIsMobile();
-  const [showSettingsSheet, setShowSettingsSheet] = useState(false);
 
   // iOS swipe-to-reveal state
   const [swipedCardId, setSwipedCardId] = useState<string | null>(null);
@@ -150,7 +143,7 @@ export function EventListView() {
     <div className="event-list-view">
       {/* iOS Tab Bar - only visible on mobile */}
       {isMobile && (
-        <IOSTabBar onSettingsClick={() => setShowSettingsSheet(true)} />
+        <IOSTabBar />
       )}
 
       <div className="event-list-header">

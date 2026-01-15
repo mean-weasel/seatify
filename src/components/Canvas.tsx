@@ -28,7 +28,6 @@ import { GridControls } from './GridControls';
 import { RelationshipMatrix } from './RelationshipMatrix';
 import { ImportWizard } from './ImportWizard/ImportWizard';
 import { QRCodeModal } from './QRCodeModal';
-import { MobileFAB } from './MobileFAB';
 import { MobileGuestPanel } from './MobileGuestPanel';
 import { MobileImmersiveCanvas } from './MobileImmersiveCanvas';
 import { useMobileGuestPanel } from '../hooks/useMobileGuestPanel';
