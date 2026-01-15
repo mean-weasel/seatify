@@ -22,6 +22,9 @@ interface MobileToolbarMenuProps {
   onStartTour?: (tourId: TourId) => void;
   onSubscribe?: () => void;
   canShowEmailButton?: boolean;
+  // External control of menu state (optional - uses internal state if not provided)
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export function MobileToolbarMenu({
@@ -35,10 +38,18 @@ export function MobileToolbarMenu({
   onStartTour,
   onSubscribe,
   canShowEmailButton,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
 }: MobileToolbarMenuProps) {
   const { event, addTable, activeView, setActiveView, optimizeSeating, resetSeating, hasOptimizationSnapshot, hasUsedOptimizeButton, canvas, setZoom, recenterCanvas, theme, cycleTheme, currentEventId, isTourComplete } = useStore();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external control if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnClose !== undefined
+    ? (open: boolean) => { if (!open) externalOnClose(); }
+    : setInternalIsOpen;
   const [showTableSubmenu, setShowTableSubmenu] = useState(false);
   const [showTourSubmenu, setShowTourSubmenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
