@@ -91,7 +91,24 @@
 }
 
 .setting-row {
-  padding: 0.625rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.setting-row:hover {
+  background: var(--color-bg-secondary);
+}
+
+.setting-row .setting-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  flex: 1;
+  padding-right: 1rem;
 }
 
 .setting-row label {

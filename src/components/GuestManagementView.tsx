@@ -6,6 +6,7 @@ import { RelationshipMatrix } from './RelationshipMatrix';
 import { MainToolbar } from './MainToolbar';
 import { EmptyState } from './EmptyState';
 import { ImportWizard } from './ImportWizard/ImportWizard';
+import { IOSCheckmark } from './IOSCheckmark';
 import type { Guest } from '../types';
 import { getFullName } from '../types';
 import './GuestManagementView.css';
@@ -270,11 +271,12 @@ export function GuestManagementView() {
             <table className="guest-table">
               <thead>
                 <tr>
-                  <th className="checkbox-col">
-                    <input
-                      type="checkbox"
+                  <th className="selection-col">
+                    <IOSCheckmark
                       checked={selectedGuests.size === filteredGuests.length && filteredGuests.length > 0}
                       onChange={selectAll}
+                      indeterminate={selectedGuests.size > 0 && selectedGuests.size < filteredGuests.length}
+                      size="small"
                     />
                   </th>
                   <th
@@ -311,11 +313,11 @@ export function GuestManagementView() {
                     className={`${selectedGuests.has(guest.id) ? 'selected' : ''} ${selectedGuestDetail === guest.id ? 'highlighted' : ''}`}
                     onClick={() => setSelectedGuestDetail(guest.id)}
                   >
-                    <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
+                    <td className="selection-col">
+                      <IOSCheckmark
                         checked={selectedGuests.has(guest.id)}
                         onChange={() => toggleGuestSelection(guest.id)}
+                        size="small"
                       />
                     </td>
                     <td>

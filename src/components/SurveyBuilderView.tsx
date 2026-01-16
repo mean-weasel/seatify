@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
+import { IOSToggle } from './IOSToggle';
 import { getFullName } from '../types';
 import type { SurveyQuestion } from '../types';
 import './SurveyBuilderView.css';
@@ -318,8 +319,8 @@ export function SurveyBuilderView() {
                         {q.type === 'multiselect' && q.options && (
                           <div className="preview-options">
                             {q.options.map((opt) => (
-                              <label key={opt} className="preview-option checkbox">
-                                <input type="checkbox" disabled />
+                              <label key={opt} className="preview-option multiselect">
+                                <span className="multiselect-box" />
                                 <span>{opt}</span>
                               </label>
                             ))}
@@ -471,15 +472,13 @@ export function SurveyBuilderView() {
               </div>
             )}
 
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={formRequired}
-                  onChange={(e) => setFormRequired(e.target.checked)}
-                />
-                Required question
-              </label>
+            <div className="form-group toggle-row">
+              <span>Required question</span>
+              <IOSToggle
+                checked={formRequired}
+                onChange={(checked) => setFormRequired(checked)}
+                size="small"
+              />
             </div>
 
             <div className="modal-actions">

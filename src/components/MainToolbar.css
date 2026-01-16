@@ -254,33 +254,19 @@
   min-width: 180px;
 }
 
-.dropdown-toggle {
+/* iOS Toggle row style for dropdown menus */
+.dropdown-toggle-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   width: 100%;
   padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
   font-size: var(--font-size-sm);
   color: var(--color-text);
-  transition: background var(--duration-fast);
 }
 
-.dropdown-toggle:hover {
-  background: var(--color-bg-hover);
-}
-
-.dropdown-toggle input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
-  cursor: pointer;
-}
-
-.dropdown-toggle span {
+.dropdown-toggle-row span {
   flex: 1;
 }
 

@@ -4,6 +4,7 @@ import { useIsMobile } from '../hooks/useResponsive';
 import { ViewToggle } from './ViewToggle';
 import { MobileToolbarMenu } from './MobileToolbarMenu';
 import { MobileCanvasToolbar } from './MobileCanvasToolbar';
+import { IOSToggle } from './IOSToggle';
 import { showToast } from './toastStore';
 import { prefersReducedMotion } from '../utils/animationHelpers';
 import type { TableShape } from '../types';
@@ -286,14 +287,14 @@ export function MainToolbar({ children, onAddGuest, onImport, showRelationships,
               )}
               {showOptimizeDropdown && (
                 <div className="dropdown-menu optimize-menu">
-                  <label className="dropdown-toggle">
-                    <input
-                      type="checkbox"
-                      checked={optimizeAnimationEnabled}
-                      onChange={(e) => setOptimizeAnimationEnabled(e.target.checked)}
-                    />
+                  <div className="dropdown-toggle-row">
                     <span>Show fade animation</span>
-                  </label>
+                    <IOSToggle
+                      checked={optimizeAnimationEnabled}
+                      onChange={(checked) => setOptimizeAnimationEnabled(checked)}
+                      size="small"
+                    />
+                  </div>
                 </div>
               )}
             </div>

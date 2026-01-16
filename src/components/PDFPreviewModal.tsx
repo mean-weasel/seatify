@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { IOSToggle } from './IOSToggle';
 import './PDFPreviewModal.css';
 
 export type FontFamily = 'helvetica' | 'times' | 'courier';
@@ -193,44 +194,44 @@ export function PDFPreviewModal({
           <div className="pdf-options-panel">
             {/* Place card specific options */}
             {type === 'place' && (
-              <div className="pdf-option-group">
-                <label className="pdf-option-label">
-                  <input
-                    type="checkbox"
+              <div className="pdf-option-group pdf-toggle-group">
+                <div className="pdf-toggle-row">
+                  <span className="pdf-toggle-label">Show table name</span>
+                  <IOSToggle
                     checked={placeOptions.includeTableName}
-                    onChange={(e) => handlePlaceOptionChange('includeTableName', e.target.checked)}
+                    onChange={(checked) => handlePlaceOptionChange('includeTableName', checked)}
+                    size="small"
                   />
-                  <span>Show table name</span>
-                </label>
-                <label className="pdf-option-label">
-                  <input
-                    type="checkbox"
+                </div>
+                <div className="pdf-toggle-row">
+                  <span className="pdf-toggle-label">Show dietary icons</span>
+                  <IOSToggle
                     checked={placeOptions.includeDietary}
-                    onChange={(e) => handlePlaceOptionChange('includeDietary', e.target.checked)}
+                    onChange={(checked) => handlePlaceOptionChange('includeDietary', checked)}
+                    size="small"
                   />
-                  <span>Show dietary icons</span>
-                </label>
+                </div>
               </div>
             )}
             {/* Table card specific options */}
             {type === 'table' && (
-              <div className="pdf-option-group">
-                <label className="pdf-option-label">
-                  <input
-                    type="checkbox"
+              <div className="pdf-option-group pdf-toggle-group">
+                <div className="pdf-toggle-row">
+                  <span className="pdf-toggle-label">Show guest count</span>
+                  <IOSToggle
                     checked={tableOptions.showGuestCount}
-                    onChange={(e) => handleTableOptionChange('showGuestCount', e.target.checked)}
+                    onChange={(checked) => handleTableOptionChange('showGuestCount', checked)}
+                    size="small"
                   />
-                  <span>Show guest count</span>
-                </label>
-                <label className="pdf-option-label">
-                  <input
-                    type="checkbox"
+                </div>
+                <div className="pdf-toggle-row">
+                  <span className="pdf-toggle-label">Show event name</span>
+                  <IOSToggle
                     checked={tableOptions.showEventName}
-                    onChange={(e) => handleTableOptionChange('showEventName', e.target.checked)}
+                    onChange={(checked) => handleTableOptionChange('showEventName', checked)}
+                    size="small"
                   />
-                  <span>Show event name</span>
-                </label>
+                </div>
               </div>
             )}
             {/* Font size - shared between both types */}

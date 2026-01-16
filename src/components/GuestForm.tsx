@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import { IOSCheckmark } from './IOSCheckmark';
 import { DIETARY_OPTIONS, ACCESSIBILITY_OPTIONS } from '../constants/dietaryIcons';
 import type { Guest, RelationshipType } from '../types';
 import { getFullName } from '../types';
@@ -284,56 +285,62 @@ export function GuestForm({ guestId, onClose }: GuestFormProps) {
             </label>
             <label>
               Dietary Restrictions
-              <div className="checkbox-group">
-                {DIETARY_OPTIONS.map((opt) => (
-                  <label key={opt} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.dietaryRestrictions.includes(opt)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData({
-                            ...formData,
-                            dietaryRestrictions: [...formData.dietaryRestrictions, opt],
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            dietaryRestrictions: formData.dietaryRestrictions.filter((d) => d !== opt),
-                          });
-                        }
-                      }}
-                    />
-                    {opt}
-                  </label>
-                ))}
+              <div className="option-group">
+                {DIETARY_OPTIONS.map((opt) => {
+                  const isChecked = formData.dietaryRestrictions.includes(opt);
+                  return (
+                    <div key={opt} className="option-row">
+                      <IOSCheckmark
+                        checked={isChecked}
+                        onChange={() => {
+                          if (isChecked) {
+                            setFormData({
+                              ...formData,
+                              dietaryRestrictions: formData.dietaryRestrictions.filter((d) => d !== opt),
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              dietaryRestrictions: [...formData.dietaryRestrictions, opt],
+                            });
+                          }
+                        }}
+                        size="small"
+                      />
+                      <span>{opt}</span>
+                    </div>
+                  );
+                })}
               </div>
             </label>
             <label>
               Accessibility Needs
-              <div className="checkbox-group">
-                {ACCESSIBILITY_OPTIONS.map((opt) => (
-                  <label key={opt} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.accessibilityNeeds.includes(opt)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData({
-                            ...formData,
-                            accessibilityNeeds: [...formData.accessibilityNeeds, opt],
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            accessibilityNeeds: formData.accessibilityNeeds.filter((a) => a !== opt),
-                          });
-                        }
-                      }}
-                    />
-                    {opt}
-                  </label>
-                ))}
+              <div className="option-group">
+                {ACCESSIBILITY_OPTIONS.map((opt) => {
+                  const isChecked = formData.accessibilityNeeds.includes(opt);
+                  return (
+                    <div key={opt} className="option-row">
+                      <IOSCheckmark
+                        checked={isChecked}
+                        onChange={() => {
+                          if (isChecked) {
+                            setFormData({
+                              ...formData,
+                              accessibilityNeeds: formData.accessibilityNeeds.filter((a) => a !== opt),
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              accessibilityNeeds: [...formData.accessibilityNeeds, opt],
+                            });
+                          }
+                        }}
+                        size="small"
+                      />
+                      <span>{opt}</span>
+                    </div>
+                  );
+                })}
               </div>
             </label>
           </div>

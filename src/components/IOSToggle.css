@@ -1,0 +1,90 @@
+.ios-toggle-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ios-toggle-container.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ios-toggle-label {
+  font-size: 14px;
+  color: var(--color-text-primary, #fff);
+  user-select: none;
+}
+
+.ios-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-toggle:disabled {
+  cursor: not-allowed;
+}
+
+.ios-toggle:focus-visible .ios-toggle-track {
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.3);
+}
+
+/* Track */
+.ios-toggle-track {
+  width: 51px;
+  height: 31px;
+  border-radius: 15.5px;
+  background-color: rgba(120, 120, 128, 0.32);
+  transition: background-color 0.25s ease;
+}
+
+.ios-toggle.on .ios-toggle-track {
+  background-color: #34c759; /* iOS green */
+}
+
+/* Thumb */
+.ios-toggle-thumb {
+  position: absolute;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16), 0 3px 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.25s ease;
+}
+
+.ios-toggle.on .ios-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* Small size variant */
+.ios-toggle-container.small .ios-toggle-track {
+  width: 42px;
+  height: 26px;
+  border-radius: 13px;
+}
+
+.ios-toggle-container.small .ios-toggle-thumb {
+  width: 22px;
+  height: 22px;
+  left: 2px;
+}
+
+.ios-toggle-container.small .ios-toggle.on .ios-toggle-thumb {
+  transform: translateX(16px);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .ios-toggle-track {
+    background-color: rgba(120, 120, 128, 0.4);
+  }
+}

@@ -231,7 +231,7 @@
   background: var(--color-secondary-light);
 }
 
-.checkbox-col {
+.selection-col {
   width: 40px;
 }
 
@@ -621,7 +621,7 @@
     font-size: 11px;
   }
 
-  .checkbox-col {
+  .selection-col {
     width: 30px;
   }
 
