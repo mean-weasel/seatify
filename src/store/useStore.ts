@@ -1336,7 +1336,8 @@ export const useStore = create<AppState>()(
           const contentHeight = maxY - minY;
           const zoomX = viewportWidth / contentWidth;
           const zoomY = viewportHeight / contentHeight;
-          const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 2);
+          // Clamp between 0.25 and 1 (don't auto-zoom beyond 100% to avoid jarring zoom levels)
+          const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 1);
 
           // Calculate pan to center content
           const centerX = (minX + maxX) / 2;

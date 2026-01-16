@@ -9,6 +9,16 @@
   min-height: 56px;
   position: relative;
   z-index: 200;
+  /* Prevent toolbar overflow by allowing horizontal scroll */
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.main-toolbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
 }
 
 /* Manual dark mode */
@@ -27,10 +37,12 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  min-width: fit-content;
 }
 
 .toolbar-left {
   flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .toolbar-middle {
@@ -40,6 +52,7 @@
 
 .toolbar-right {
   flex-shrink: 0;
+  min-width: fit-content;
 }
 
 /* Primary action buttons */
