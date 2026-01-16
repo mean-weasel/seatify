@@ -94,6 +94,7 @@ export function GroupLegend({
                       checked={visible}
                       onChange={() => onToggleGroup(group.key)}
                       size="small"
+                      aria-label={visible ? `Hide ${group.name}` : `Show ${group.name}`}
                     />
                   </div>
                 </li>

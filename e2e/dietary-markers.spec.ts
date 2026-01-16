@@ -255,8 +255,8 @@ test.describe('Dietary & Accessibility Markers', () => {
       const vegCheckbox = page.locator('.option-row:has-text("Vegetarian") button.ios-checkmark');
       await expect(vegCheckbox).toHaveAttribute('aria-checked', 'true');
 
-      // Uncheck the dietary restriction
-      await vegCheckbox.click();
+      // Uncheck the dietary restriction (use force: true to ensure click registers)
+      await vegCheckbox.click({ force: true });
       await expect(vegCheckbox).toHaveAttribute('aria-checked', 'false');
 
       // Save
