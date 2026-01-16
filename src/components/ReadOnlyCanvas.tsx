@@ -178,7 +178,8 @@ export function ReadOnlyCanvas({ tables, guests, venueElements = [], constraints
     const contentHeight = maxY - minY;
     const zoomX = canvasWidth / contentWidth;
     const zoomY = canvasHeight / contentHeight;
-    const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 2);
+    // Clamp between 0.25 and 1 (don't auto-zoom beyond 100% to avoid jarring zoom levels)
+    const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 1);
 
     // Calculate pan to center content
     const centerX = (minX + maxX) / 2;
@@ -281,7 +282,8 @@ export function ReadOnlyCanvas({ tables, guests, venueElements = [], constraints
     const contentHeight = maxY - minY;
     const zoomX = canvasWidth / contentWidth;
     const zoomY = canvasHeight / contentHeight;
-    const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 2);
+    // Clamp between 0.25 and 1 (don't auto-zoom beyond 100% to avoid jarring zoom levels)
+    const newZoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.25), 1);
 
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
