@@ -251,9 +251,12 @@ test.describe('Dietary & Accessibility Markers', () => {
 
       await expect(page.locator('.guest-form-modal')).toBeVisible({ timeout: 3000 });
 
-      // Uncheck the dietary restriction
-      await page.locator('.option-row:has-text("Vegetarian") button.ios-checkmark').click();
+      // Wait for form to load with the checked state
       const vegCheckbox = page.locator('.option-row:has-text("Vegetarian") button.ios-checkmark');
+      await expect(vegCheckbox).toHaveAttribute('aria-checked', 'true');
+
+      // Uncheck the dietary restriction
+      await vegCheckbox.click();
       await expect(vegCheckbox).toHaveAttribute('aria-checked', 'false');
 
       // Save

@@ -116,7 +116,7 @@ test.describe('Group Legend', () => {
   test.describe('Group Visibility Toggle', () => {
     test('clicking checkbox toggles group visibility', async ({ page }) => {
       const firstToggle = page.locator('.group-legend-item button.ios-toggle').first();
-      const firstLabel = page.locator('.legend-item-label').first();
+      const firstLabel = page.locator('.legend-item-row').first();
 
       // Initially visible
       await expect(firstToggle).toHaveAttribute('aria-checked', 'true');
