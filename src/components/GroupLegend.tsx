@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { getGroupColor } from './groupColors';
+import { IOSToggle } from './IOSToggle';
 import './GroupLegend.css';
 
 interface GroupInfo {
@@ -81,13 +82,7 @@ export function GroupLegend({
               const visible = isGroupVisible(group.key);
               return (
                 <li key={group.key} className="group-legend-item">
-                  <label className={`legend-item-label ${!visible ? 'hidden-group' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={visible}
-                      onChange={() => onToggleGroup(group.key)}
-                      aria-label={`${visible ? 'Hide' : 'Show'} ${group.name}`}
-                    />
+                  <div className={`legend-item-row ${!visible ? 'hidden-group' : ''}`}>
                     <span
                       className="legend-color"
                       style={{ backgroundColor: group.color }}
@@ -95,7 +90,12 @@ export function GroupLegend({
                     />
                     <span className="legend-name">{group.name}</span>
                     <span className="legend-count">({group.count})</span>
-                  </label>
+                    <IOSToggle
+                      checked={visible}
+                      onChange={() => onToggleGroup(group.key)}
+                      size="small"
+                    />
+                  </div>
                 </li>
               );
             })}

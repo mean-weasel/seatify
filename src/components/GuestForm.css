@@ -123,13 +123,13 @@
   box-shadow: 0 0 0 4px var(--focus-ring-color);
 }
 
-.checkbox-group {
+.option-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.875rem;
 }
 
-.checkbox-label {
+.option-label {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -143,15 +143,27 @@
   transition: all var(--duration-fast) var(--ease-out);
 }
 
-.checkbox-label:hover {
+.option-label:hover {
   background: var(--color-primary-light);
 }
 
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+/* Option row for multi-select with IOSCheckmark */
+.option-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  accent-color: var(--color-primary);
+  margin-bottom: 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.option-row:hover {
+  background: var(--color-primary-light);
 }
 
 /* Relationships */
@@ -440,11 +452,11 @@
     font-size: var(--font-size-base);
   }
 
-  .checkbox-group {
+  .option-group {
     gap: 0.5rem;
   }
 
-  .checkbox-label {
+  .option-label {
     padding: 0.625rem 0.75rem;
     min-height: 44px;
   }

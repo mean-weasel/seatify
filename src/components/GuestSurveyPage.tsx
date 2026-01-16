@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { IOSCheckmark } from './IOSCheckmark';
 import { getFullName } from '../types';
 import type { Guest, SurveyQuestion } from '../types';
 import './GuestSurveyPage.css';
@@ -105,14 +106,14 @@ export function GuestSurveyPage() {
         return (
           <div className="question-options multi">
             {question.options?.map((option) => (
-              <label key={option} className="option-label">
-                <input
-                  type="checkbox"
+              <div key={option} className="option-row">
+                <IOSCheckmark
                   checked={((answers[question.id] as string[]) || []).includes(option)}
                   onChange={() => handleMultiselectToggle(question.id, option)}
+                  size="small"
                 />
                 <span className="option-text">{option}</span>
-              </label>
+              </div>
             ))}
           </div>
         );
@@ -137,14 +138,14 @@ export function GuestSurveyPage() {
             <p className="relationship-hint">Select guests you know well:</p>
             <div className="relationship-list">
               {otherGuests.slice(0, 10).map((otherGuest) => (
-                <label key={otherGuest.id} className="relationship-item">
-                  <input
-                    type="checkbox"
+                <div key={otherGuest.id} className="relationship-item">
+                  <IOSCheckmark
                     checked={((answers[question.id] as string[]) || []).includes(otherGuest.id)}
                     onChange={() => handleMultiselectToggle(question.id, otherGuest.id)}
+                    size="small"
                   />
                   <span>{getFullName(otherGuest)}</span>
-                </label>
+                </div>
               ))}
             </div>
           </div>

@@ -451,6 +451,15 @@
   cursor: pointer;
 }
 
+/* iOS Toggle row style */
+.filter-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
 .preview-table-container {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);

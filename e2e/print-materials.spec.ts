@@ -283,7 +283,7 @@ test.describe('PDF Customization Options', () => {
     await expect(page.locator('.pdf-preview-btn.options')).toBeVisible();
   });
 
-  test('table cards options panel has guest count checkbox', async ({ page }) => {
+  test('table cards options panel has guest count toggle', async ({ page }) => {
     // Click the table cards button
     const tableCardsBtn = page.locator('.print-material-btn').filter({ hasText: 'Table Cards' });
     await tableCardsBtn.click();
@@ -292,13 +292,13 @@ test.describe('PDF Customization Options', () => {
     // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Check for guest count checkbox
-    const guestCountCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show guest count' });
-    await expect(guestCountCheckbox).toBeVisible();
-    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+    // Check for guest count toggle (iOS-style toggle)
+    const guestCountToggle = page.locator('.pdf-toggle-row').filter({ hasText: 'Show guest count' });
+    await expect(guestCountToggle).toBeVisible();
+    await expect(guestCountToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('table cards options panel has event name checkbox', async ({ page }) => {
+  test('table cards options panel has event name toggle', async ({ page }) => {
     // Click the table cards button
     const tableCardsBtn = page.locator('.print-material-btn').filter({ hasText: 'Table Cards' });
     await tableCardsBtn.click();
@@ -307,10 +307,10 @@ test.describe('PDF Customization Options', () => {
     // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Check for event name checkbox
-    const eventNameCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show event name' });
-    await expect(eventNameCheckbox).toBeVisible();
-    await expect(eventNameCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+    // Check for event name toggle (iOS-style toggle)
+    const eventNameToggle = page.locator('.pdf-toggle-row').filter({ hasText: 'Show event name' });
+    await expect(eventNameToggle).toBeVisible();
+    await expect(eventNameToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'true');
   });
 
   test('table cards options panel has font size options', async ({ page }) => {
@@ -338,14 +338,14 @@ test.describe('PDF Customization Options', () => {
     // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Uncheck guest count
-    const guestCountCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show guest count' });
-    await guestCountCheckbox.click();
-    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).not.toBeChecked();
+    // Toggle guest count off
+    const guestCountToggle = page.locator('.pdf-toggle-row').filter({ hasText: 'Show guest count' });
+    await guestCountToggle.locator('button.ios-toggle').click();
+    await expect(guestCountToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'false');
 
-    // Re-check guest count
-    await guestCountCheckbox.click();
-    await expect(guestCountCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+    // Toggle guest count back on
+    await guestCountToggle.locator('button.ios-toggle').click();
+    await expect(guestCountToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'true');
   });
 
   test('options panel is visible by default', async ({ page }) => {
@@ -360,7 +360,7 @@ test.describe('PDF Customization Options', () => {
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
   });
 
-  test('options panel has table name checkbox', async ({ page }) => {
+  test('options panel has table name toggle', async ({ page }) => {
     // Open place cards preview
     const placeCardsBtn = page.locator('.print-material-btn').filter({ hasText: 'Place Cards' });
     await placeCardsBtn.click();
@@ -369,13 +369,13 @@ test.describe('PDF Customization Options', () => {
     // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Check for table name checkbox
-    const tableNameCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show table name' });
-    await expect(tableNameCheckbox).toBeVisible();
-    await expect(tableNameCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+    // Check for table name toggle (iOS-style toggle)
+    const tableNameToggle = page.locator('.pdf-toggle-row').filter({ hasText: 'Show table name' });
+    await expect(tableNameToggle).toBeVisible();
+    await expect(tableNameToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('options panel has dietary icons checkbox', async ({ page }) => {
+  test('options panel has dietary icons toggle', async ({ page }) => {
     // Open place cards preview
     const placeCardsBtn = page.locator('.print-material-btn').filter({ hasText: 'Place Cards' });
     await placeCardsBtn.click();
@@ -384,10 +384,10 @@ test.describe('PDF Customization Options', () => {
     // Options panel is visible by default
     await expect(page.locator('.pdf-options-panel')).toBeVisible();
 
-    // Check for dietary icons checkbox
-    const dietaryCheckbox = page.locator('.pdf-option-label').filter({ hasText: 'Show dietary icons' });
-    await expect(dietaryCheckbox).toBeVisible();
-    await expect(dietaryCheckbox.locator('input[type="checkbox"]')).toBeChecked();
+    // Check for dietary icons toggle (iOS-style toggle)
+    const dietaryToggle = page.locator('.pdf-toggle-row').filter({ hasText: 'Show dietary icons' });
+    await expect(dietaryToggle).toBeVisible();
+    await expect(dietaryToggle.locator('button.ios-toggle')).toHaveAttribute('aria-checked', 'true');
   });
 
   test('options panel has font size options', async ({ page }) => {

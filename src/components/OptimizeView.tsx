@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import type { Guest, Table, Constraint } from '../types';
 import { getFullName } from '../types';
 import { EmailCaptureModal } from './EmailCaptureModal';
+import { IOSToggle } from './IOSToggle';
 import { trackOptimizerRun, trackFunnelStep, trackMilestone, setUserProperties } from '../utils/analytics';
 import {
   shouldShowEmailCapture,
@@ -35,6 +36,12 @@ export function OptimizeView() {
     priority: 'preferred' as Constraint['priority'],
   });
   const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [settings, setSettings] = useState({
+    keepGroupsTogether: true,
+    respectAvoid: true,
+    matchInterests: true,
+    mixIndustries: true,
+  });
 
   const unassignedGuests = event.guests.filter(g => !g.tableId && g.rsvpStatus !== 'declined');
   const totalCapacity = event.tables.reduce((sum, t) => sum + t.capacity, 0);
@@ -146,28 +153,36 @@ export function OptimizeView() {
         <div className="section">
           <h3>Optimization Settings</h3>
           <div className="setting-row">
-            <label>
-              <input type="checkbox" defaultChecked />
-              Keep groups together (family, friends)
-            </label>
+            <span className="setting-label">Keep groups together (family, friends)</span>
+            <IOSToggle
+              checked={settings.keepGroupsTogether}
+              onChange={(checked) => setSettings({ ...settings, keepGroupsTogether: checked })}
+              size="small"
+            />
           </div>
           <div className="setting-row">
-            <label>
-              <input type="checkbox" defaultChecked />
-              Respect "avoid" relationships
-            </label>
+            <span className="setting-label">Respect "avoid" relationships</span>
+            <IOSToggle
+              checked={settings.respectAvoid}
+              onChange={(checked) => setSettings({ ...settings, respectAvoid: checked })}
+              size="small"
+            />
           </div>
           <div className="setting-row">
-            <label>
-              <input type="checkbox" defaultChecked />
-              Match guests by shared interests
-            </label>
+            <span className="setting-label">Match guests by shared interests</span>
+            <IOSToggle
+              checked={settings.matchInterests}
+              onChange={(checked) => setSettings({ ...settings, matchInterests: checked })}
+              size="small"
+            />
           </div>
           <div className="setting-row">
-            <label>
-              <input type="checkbox" defaultChecked />
-              Mix industries for networking (corporate events)
-            </label>
+            <span className="setting-label">Mix industries for networking (corporate events)</span>
+            <IOSToggle
+              checked={settings.mixIndustries}
+              onChange={(checked) => setSettings({ ...settings, mixIndustries: checked })}
+              size="small"
+            />
           </div>
         </div>
 

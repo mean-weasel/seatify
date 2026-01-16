@@ -355,30 +355,28 @@ test.describe('Component Anti-Patterns', () => {
     await enterApp(page);
     await navigateToGuestsView(page);
 
-    // Look for checkbox patterns
-    const checkboxSelectors = [
-      'input[type="checkbox"]:visible',
-      '[class*="checkbox"]:visible',
-      '[role="checkbox"]:visible',
-    ];
+    // Count native HTML checkbox inputs (the anti-pattern)
+    // Custom iOS-style components using role="checkbox" (like IOSCheckmark) are acceptable
+    const nativeCheckboxCount = await page.locator('input[type="checkbox"]:visible').count();
 
-    let checkboxCount = 0;
-    for (const selector of checkboxSelectors) {
-      checkboxCount += await page.locator(selector).count();
-    }
+    // Also check for elements with "checkbox" CSS class that use native checkbox styling
+    // Exclude our custom iOS components which use ios-checkmark or ios-toggle classes
+    const checkboxClassElements = await page.locator('[class*="checkbox"]:visible:not(.ios-checkmark):not(.ios-toggle)').count();
+
+    const checkboxCount = nativeCheckboxCount + checkboxClassElements;
 
     // Some checkboxes might be acceptable in specific contexts
-    // But warn if there are many visible checkboxes
+    // But warn if there are many visible native checkboxes
     if (checkboxCount > 5) {
       test.info().annotations.push({
         type: 'warning',
-        description: `Found ${checkboxCount} checkbox elements. Consider using iOS toggle switches.`,
+        description: `Found ${checkboxCount} native checkbox elements. Consider using iOS toggle switches.`,
       });
     }
 
     expect(
       checkboxCount,
-      `iOS anti-pattern: Found ${checkboxCount} checkboxes. Use toggle switches for boolean settings.`
+      `iOS anti-pattern: Found ${checkboxCount} native checkboxes. Use toggle switches for boolean settings.`
     ).toBeLessThan(10);
   });
 

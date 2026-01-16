@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import type { ImportWizardState, ImportWizardAction } from '../types';
 import { getFullName } from '../../../types';
+import { IOSToggle } from '../../IOSToggle';
+import { IOSCheckmark } from '../../IOSCheckmark';
 
 interface DataPreviewStepProps {
   state: ImportWizardState;
@@ -80,17 +82,17 @@ export function DataPreviewStep({ state, dispatch }: DataPreviewStepProps) {
 
       {(errorCount > 0 || warningCount > 0) && (
         <div className="filter-bar">
-          <label className="filter-checkbox">
-            <input
-              type="checkbox"
+          <div className="filter-toggle-row">
+            <span>Show only rows with issues</span>
+            <IOSToggle
               checked={showOnlyErrors}
-              onChange={(e) => {
-                setShowOnlyErrors(e.target.checked);
+              onChange={(checked) => {
+                setShowOnlyErrors(checked);
                 setCurrentPage(0);
               }}
+              size="small"
             />
-            Show only rows with issues
-          </label>
+          </div>
         </div>
       )}
 
@@ -123,11 +125,10 @@ export function DataPreviewStep({ state, dispatch }: DataPreviewStepProps) {
                   `}
                 >
                   <td className="col-include">
-                    <input
-                      type="checkbox"
+                    <IOSCheckmark
                       checked={!isExcluded}
                       onChange={() => handleToggleExclude(index)}
-                      aria-label={`Include row ${index + 1}`}
+                      size="small"
                     />
                   </td>
                   <td className="col-row">{index + 1}</td>

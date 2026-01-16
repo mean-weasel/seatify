@@ -127,6 +127,23 @@
   gap: 0.625rem;
 }
 
+/* Option row for multi-select with IOSCheckmark */
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-row:hover {
+  border-color: var(--color-primary-light);
+  background: rgba(249, 112, 102, 0.03);
+}
+
 .option-label {
   display: flex;
   align-items: center;
