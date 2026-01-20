@@ -63,7 +63,7 @@ const createMigrateMockSupabaseClient = (overrides: {
         const insertResult = {
           select: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue({
-              data: table === 'events' ? { id: 'new-event-id', ...data } : data,
+              data: table === 'events' ? { id: 'new-event-id', ...(data as Record<string, unknown>) } : data,
               error,
             }),
           }),
