@@ -74,6 +74,12 @@ jobs:
     name: E2E Tests
     needs: [lint-and-build, unit-tests]
     runs-on: ubuntu-latest
+    # Override global env with local Supabase values for this job
+    env:
+      # Local Supabase uses predictable URLs and keys
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,31 +105,15 @@ jobs:
         run: supabase start -x realtime,storage-api,imgproxy,inbucket,postgrest-exporter,pgadmin-schema-diff,migra,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       - name: Apply migrations and seed
-        run: |
-          supabase db reset --debug
-        env:
-          SUPABASE_DB_PASSWORD: postgres
-
-      - name: Get Supabase status
-        id: supabase
-        run: |
-          echo "API_URL=$(supabase status -o env | grep API_URL | cut -d= -f2)" >> $GITHUB_OUTPUT
-          echo "ANON_KEY=$(supabase status -o env | grep ANON_KEY | cut -d= -f2)" >> $GITHUB_OUTPUT
+        run: supabase db reset --debug
 
       - name: Build app
         run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.API_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.ANON_KEY }}
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
 
       - name: Run E2E tests
         run: npx playwright test --project=chromium
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.API_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.ANON_KEY }}
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
 
       - name: Upload test results
         if: failure()
