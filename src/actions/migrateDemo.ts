@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { v4 as uuidv4 } from 'uuid';
-import type { Event, Guest, Table, Constraint, VenueElement } from '@/types';
+import type { Event } from '@/types';
 
 /**
  * Migrates demo event data to a new event for the authenticated user.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { migrateDemo } from '@/actions/migrateDemo';
 import { showToast } from './toastStore';
@@ -67,17 +67,17 @@ export function DemoMigrationHandler() {
 
     // Perform migration
     performMigration(migrationData, feature);
-  }, [searchParams, isMigrating]);
+  }, [searchParams, isMigrating, performMigration, cleanupUrl]);
 
-  const cleanupUrl = () => {
+  const cleanupUrl = useCallback(() => {
     // Remove migrate and feature params from URL
     const url = new URL(window.location.href);
     url.searchParams.delete('migrate');
     url.searchParams.delete('feature');
     window.history.replaceState({}, '', url.pathname + url.search);
-  };
+  }, []);
 
-  const performMigration = async (data: DemoMigrationData, feature: GatedFeature | null) => {
+  const performMigration = useCallback(async (data: DemoMigrationData, feature: GatedFeature | null) => {
     setIsMigrating(true);
 
     try {
@@ -113,7 +113,7 @@ export function DemoMigrationHandler() {
     } finally {
       setIsMigrating(false);
     }
-  };
+  }, [cleanupUrl, router]);
 
   // Show loading state while migrating
   if (isMigrating) {

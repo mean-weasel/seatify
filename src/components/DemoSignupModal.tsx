@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useStore } from '../store/useStore';
-import { showToast } from './toastStore';
 import './DemoSignupModal.css';
 
 export type GatedFeature =
@@ -17,7 +16,6 @@ export type GatedFeature =
 interface DemoSignupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
   feature: GatedFeature;
 }
 
@@ -56,7 +54,7 @@ const FEATURE_MESSAGES: Record<GatedFeature, { title: string; description: strin
 
 type ModalState = 'form' | 'loading' | 'success' | 'verify_email';
 
-export function DemoSignupModal({ isOpen, onClose, onSuccess, feature }: DemoSignupModalProps) {
+export function DemoSignupModal({ isOpen, onClose, feature }: DemoSignupModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -84,15 +82,23 @@ export function DemoSignupModal({ isOpen, onClose, onSuccess, feature }: DemoSig
     }
   }, [isOpen]);
 
-  // Reset form when modal closes
+  // Track previous open state to detect close transition
+  const wasOpenRef = useRef(isOpen);
   useEffect(() => {
-    if (!isOpen) {
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setError(null);
-      setModalState('form');
+    // Only reset form when transitioning from open to closed
+    if (wasOpenRef.current && !isOpen) {
+      // Use setTimeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => {
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setError(null);
+        setModalState('form');
+      }, 0);
+      wasOpenRef.current = isOpen;
+      return () => clearTimeout(timer);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen]);
 
   const handleSignup = async (e: React.FormEvent) => {

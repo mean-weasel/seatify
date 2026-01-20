@@ -34,7 +34,7 @@ export function DashboardView() {
     setEventType,
     exportEvent
   } = useStore();
-  const { isDemo, checkGate, gatedFeature, closeGate, completeSignup } = useDemoGate();
+  const { checkGate, gatedFeature, closeGate, completeSignup } = useDemoGate();
   const [showQRPrintView, setShowQRPrintView] = useState(false);
   const [showQRTour, setShowQRTour] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
