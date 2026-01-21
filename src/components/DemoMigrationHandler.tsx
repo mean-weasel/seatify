@@ -29,6 +29,7 @@ export function DemoMigrationHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationComplete, setMigrationComplete] = useState(false);
 
   const cleanupUrl = useCallback(() => {
     // Remove migrate and feature params from URL
@@ -53,6 +54,9 @@ export function DemoMigrationHandler() {
       }
 
       if (result.data?.eventId) {
+        // Mark migration as complete to prevent useEffect from cleaning up URL
+        setMigrationComplete(true);
+
         // Clear the stored demo data
         sessionStorage.removeItem(DEMO_MIGRATION_KEY);
 
@@ -79,6 +83,11 @@ export function DemoMigrationHandler() {
   useEffect(() => {
     const migrate = searchParams.get('migrate');
     const feature = searchParams.get('feature') as GatedFeature | null;
+
+    // Skip if migration is complete (redirect is in progress)
+    if (migrationComplete) {
+      return;
+    }
 
     if (migrate !== 'demo' || isMigrating) {
       return;
@@ -113,7 +122,7 @@ export function DemoMigrationHandler() {
 
     // Perform migration
     performMigration(migrationData, feature);
-  }, [searchParams, isMigrating, performMigration, cleanupUrl]);
+  }, [searchParams, isMigrating, migrationComplete, performMigration, cleanupUrl]);
 
   // Show loading state while migrating
   if (isMigrating) {

@@ -66,14 +66,17 @@ test.describe('Demo Canvas Page', () => {
   });
 
   test('should open Learn dropdown with tours', async ({ page }) => {
+    // Prevent auto-start of tour
+    await page.goto('/');
+    await page.evaluate(() => {
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
     await page.goto(DEMO_EVENT_URL);
     await page.waitForLoadState('networkidle');
 
-    // Close auto-started tour first
-    const laterButton = page.locator('.onboarding-btn--later');
-    if (await laterButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await laterButton.click();
-    }
+    // Ensure no overlay is blocking
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 }).catch(() => {});
 
     // Click Learn button to open dropdown
     const learnButton = page.locator('.learn-btn');
@@ -332,6 +335,73 @@ test.describe('Demo Banner Signup Modal', () => {
     await expect(benefits.nth(0)).toContainText('Your demo work will be saved');
     await expect(benefits.nth(1)).toContainText('Access from any device');
     await expect(benefits.nth(2)).toContainText('Free forever');
+  });
+});
+
+test.describe('Demo Migration Flow', () => {
+  test('should migrate demo data to new account after signup', async ({ page }) => {
+    // Generate unique email for this test run
+    const testEmail = `test-migration-${Date.now()}@example.com`;
+    const testPassword = 'TestPassword123!';
+
+    // Set session flag to prevent auto-start of tour before navigating
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
+    // 1. Go to demo page
+    await page.goto('/demo');
+    await page.waitForLoadState('networkidle');
+
+    // Wait for page to load and ensure no overlay is blocking
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 });
+
+    // 3. Click the banner CTA to open signup modal
+    const bannerCTA = page.locator('.demo-banner-cta');
+    await expect(bannerCTA).toBeVisible();
+    await bannerCTA.click();
+
+    // 4. Signup modal should appear
+    const signupModal = page.locator('.demo-signup-modal');
+    await expect(signupModal).toBeVisible({ timeout: 5000 });
+
+    // 5. Fill in the signup form
+    await page.fill('#demo-signup-email', testEmail);
+    await page.fill('#demo-signup-password', testPassword);
+    await page.fill('#demo-signup-confirm', testPassword);
+
+    // 6. Submit the form
+    await page.click('.demo-signup-btn.primary');
+
+    // 7. With auto-confirm enabled, should redirect to dashboard with migration params
+    // Wait for navigation to dashboard
+    await page.waitForURL(/\/dashboard\?migrate=demo/, { timeout: 15000 });
+
+    // 8. Verify migration handler processes the migration
+    const migrationOverlay = page.locator('.migration-overlay');
+    // The overlay appears briefly during migration - it may already be gone
+    // So we check for either the overlay OR successful redirect to an event
+
+    // 9. Wait for migration to complete and redirect to new event
+    // When feature is provided, redirects to event dashboard; otherwise canvas
+    // Since we're using feature=save_work, it goes to the event dashboard
+    await page.waitForURL(/\/dashboard\/events\/[^/]+\/dashboard/, { timeout: 15000 });
+
+    // 10. Verify the migrated event page has loaded
+    // The event layout should be visible
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+
+    // 11. Verify the event name input shows "Demo Event" (the migrated event)
+    const eventNameInput = page.locator('.event-name-input');
+    await expect(eventNameInput.first()).toBeVisible({ timeout: 5000 });
+    await expect(eventNameInput.first()).toHaveValue('Demo Event');
+
+    // 12. Verify we're on the correct event page (not the public demo event)
+    // The URL should contain a valid UUID (not 00000000-...)
+    expect(page.url()).not.toContain('00000000-0000-0000-0000-000000000001');
   });
 });
 

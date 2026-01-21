@@ -139,7 +139,7 @@ export function DemoSignupModal({ isOpen, onClose, onSuccess: _onSuccess, featur
         }));
       }
 
-      const { error: signupError } = await supabase.auth.signUp({
+      const { data, error: signupError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -153,7 +153,14 @@ export function DemoSignupModal({ isOpen, onClose, onSuccess: _onSuccess, featur
         return;
       }
 
-      // Show email verification message
+      // If session exists, user was auto-confirmed (local dev/CI environment)
+      // Redirect directly to dashboard with migration params
+      if (data.session) {
+        window.location.href = `/dashboard?migrate=demo&feature=${feature}`;
+        return;
+      }
+
+      // Otherwise, show email verification message (production)
       setModalState('verify_email');
     } catch (err) {
       console.error('Signup failed:', err);
