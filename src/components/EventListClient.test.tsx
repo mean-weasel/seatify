@@ -157,7 +157,19 @@ describe('EventListClient', () => {
 
     it('should call createEvent when submitting form', async () => {
       const user = userEvent.setup();
-      mockedCreateEvent.mockResolvedValue({ data: { id: 'new-event' } });
+      mockedCreateEvent.mockResolvedValue({
+        data: {
+          id: 'new-event',
+          name: 'New Test Event',
+          eventType: 'wedding',
+          date: null,
+          venueName: null,
+          venueAddress: null,
+          guestCapacityLimit: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
 
       render(<EventListClient initialEvents={mockEvents} />);
 
@@ -199,7 +211,19 @@ describe('EventListClient', () => {
 
     it('should call updateEvent when saving changes', async () => {
       const user = userEvent.setup();
-      mockedUpdateEvent.mockResolvedValue({ data: { ...mockEvents[0], name: 'Updated Name' } });
+      mockedUpdateEvent.mockResolvedValue({
+        data: {
+          id: 'event-1',
+          name: 'Updated Name',
+          eventType: 'wedding',
+          date: '2026-06-15',
+          venueName: null,
+          venueAddress: null,
+          guestCapacityLimit: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
 
       render(<EventListClient initialEvents={mockEvents} />);
 
