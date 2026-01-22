@@ -1,8 +1,10 @@
 'use client';
 
-import { useNavigate } from '@/lib/router-compat';
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { trackCTAClick } from '../utils/analytics';
+import { DemoSignupModal } from './DemoSignupModal';
+import { isDemoEvent } from '../lib/constants';
 import './DemoBanner.css';
 
 interface BannerContent {
@@ -50,10 +52,12 @@ function getBannerContent(demoInteraction: {
 }
 
 export function DemoBanner() {
-  const navigate = useNavigate();
-  const { isDemo, demoInteraction } = useStore();
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const { isDemo, demoInteraction, event } = useStore();
 
-  if (!isDemo) return null;
+  // Only show banner if both isDemo is true AND we're viewing the actual demo event
+  // This prevents the banner from showing on migrated events due to stale store state
+  if (!isDemo || !event || !isDemoEvent(event.id)) return null;
 
   const { message, cta } = getBannerContent(demoInteraction);
 
@@ -64,20 +68,28 @@ export function DemoBanner() {
                    (demoInteraction.movedGuest || demoInteraction.addedTable) ? 'first_interaction' :
                    'initial';
     trackCTAClick(`demo_banner_${variant}`);
-    navigate('/signup');
+    setShowSignupModal(true);
   };
 
   return (
-    <div className="demo-banner">
-      <div className="demo-banner-content">
-        <span className="demo-banner-text">{message}</span>
-        <button
-          className="demo-banner-cta"
-          onClick={handleCTAClick}
-        >
-          {cta}
-        </button>
+    <>
+      <div className="demo-banner">
+        <div className="demo-banner-content">
+          <span className="demo-banner-text">{message}</span>
+          <button
+            className="demo-banner-cta"
+            onClick={handleCTAClick}
+          >
+            {cta}
+          </button>
+        </div>
       </div>
-    </div>
+      <DemoSignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onSuccess={() => setShowSignupModal(false)}
+        feature="save_work"
+      />
+    </>
   );
 }
