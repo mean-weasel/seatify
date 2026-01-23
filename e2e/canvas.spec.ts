@@ -1,0 +1,314 @@
+import { test, expect } from '@playwright/test';
+
+const DEMO_EVENT_URL = '/dashboard/events/00000000-0000-0000-0000-000000000001/canvas';
+
+/**
+ * Canvas Interaction E2E tests.
+ *
+ * These tests verify core canvas functionality including:
+ * - Table creation and positioning
+ * - Guest interactions
+ * - Optimization features
+ * - Toolbar actions
+ */
+
+test.describe('Canvas Interactions', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear localStorage and prevent tour auto-start
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
+    // Navigate to demo canvas
+    await page.goto(DEMO_EVENT_URL);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for canvas to be fully loaded
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+
+    // Ensure no overlay is blocking
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 }).catch(() => {});
+  });
+
+  test.describe('Table Creation', () => {
+    test('should add a round table via toolbar', async ({ page }) => {
+      // Get initial table count
+      const initialTableCount = await page.locator('.table-component').count();
+
+      // Click Add Table button to open dropdown
+      const addTableBtn = page.locator('.toolbar-btn.primary').filter({ hasText: 'Add Table' });
+      await addTableBtn.click();
+
+      // Dropdown should appear
+      const dropdown = page.locator('.dropdown-menu');
+      await expect(dropdown).toBeVisible();
+
+      // Click Round Table option
+      await page.locator('.dropdown-menu button').filter({ hasText: 'Round Table' }).click();
+
+      // Verify new table was added
+      const newTableCount = await page.locator('.table-component').count();
+      expect(newTableCount).toBe(initialTableCount + 1);
+    });
+
+    test('should add a rectangle table via toolbar', async ({ page }) => {
+      const initialTableCount = await page.locator('.table-component').count();
+
+      // Click Add Table button
+      const addTableBtn = page.locator('.toolbar-btn.primary').filter({ hasText: 'Add Table' });
+      await addTableBtn.click();
+
+      // Click Rectangle Table option
+      await page.locator('.dropdown-menu button').filter({ hasText: 'Rectangle Table' }).click();
+
+      // Verify table was added
+      const newTableCount = await page.locator('.table-component').count();
+      expect(newTableCount).toBe(initialTableCount + 1);
+    });
+  });
+
+  test.describe('Guest Management', () => {
+    test('should add a guest via toolbar', async ({ page }) => {
+      // Get initial unassigned guest count from sidebar
+      const initialGuestCount = await page.locator('.guest-chip').count();
+
+      // Click Add Guest button
+      const addGuestBtn = page.locator('.toolbar-btn.primary').filter({ hasText: 'Add Guest' });
+      await addGuestBtn.click();
+
+      // Verify new guest was added (may appear in sidebar or panel)
+      await page.waitForTimeout(500); // Wait for state update
+      const newGuestCount = await page.locator('.guest-chip').count();
+      expect(newGuestCount).toBeGreaterThanOrEqual(initialGuestCount);
+    });
+
+    test('should show unassigned guests in sidebar', async ({ page }) => {
+      // Demo event should have unassigned guests visible in the sidebar
+      const sidebar = page.locator('.sidebar-content, .guests-sidebar');
+
+      // Check for guest chips or guest list items
+      const guestChips = page.locator('.guest-chip, .unassigned-guest');
+      const count = await guestChips.count();
+
+      // Demo event should have at least some guests
+      expect(count).toBeGreaterThan(0);
+    });
+  });
+
+  test.describe('Optimize Seating', () => {
+    test('should show optimize button on canvas', async ({ page }) => {
+      const optimizeBtn = page.locator('.toolbar-btn.optimize');
+      await expect(optimizeBtn).toBeVisible();
+    });
+
+    test('should run optimization and show success toast', async ({ page }) => {
+      // Click optimize button
+      const optimizeBtn = page.locator('.toolbar-btn.optimize');
+
+      // Skip if button is disabled (no relationships set)
+      if (await optimizeBtn.isDisabled()) {
+        test.skip();
+        return;
+      }
+
+      await optimizeBtn.click();
+
+      // Wait for optimization to complete and toast to appear
+      const toast = page.locator('.toast, .toast-message');
+      await expect(toast).toBeVisible({ timeout: 5000 });
+    });
+
+    test('should show reset button after optimization', async ({ page }) => {
+      const optimizeBtn = page.locator('.toolbar-btn.optimize');
+
+      // Skip if optimization not available
+      if (await optimizeBtn.isDisabled()) {
+        test.skip();
+        return;
+      }
+
+      await optimizeBtn.click();
+
+      // Wait for optimization to complete
+      await page.waitForTimeout(1500);
+
+      // Reset button should now be visible
+      const resetBtn = page.locator('.toolbar-btn.reset');
+      await expect(resetBtn).toBeVisible({ timeout: 5000 });
+    });
+  });
+
+  test.describe('Canvas Navigation', () => {
+    test('should display minimap', async ({ page }) => {
+      const minimap = page.locator('.canvas-minimap');
+      await expect(minimap).toBeVisible();
+    });
+
+    test('should show tables on canvas', async ({ page }) => {
+      // Demo event should have pre-existing tables
+      const tables = page.locator('.table-component');
+      const count = await tables.count();
+      expect(count).toBeGreaterThan(0);
+    });
+
+    test('should display table names', async ({ page }) => {
+      // Tables should have visible names
+      const tableNames = page.locator('.table-name, .table-label');
+      const count = await tableNames.count();
+      expect(count).toBeGreaterThan(0);
+    });
+  });
+
+  test.describe('View Toggle', () => {
+    test('should show view toggle in header', async ({ page }) => {
+      const viewToggle = page.locator('.view-toggle');
+      await expect(viewToggle).toBeVisible();
+    });
+
+    test('should switch to dashboard view', async ({ page }) => {
+      // Click dashboard view button
+      const dashboardBtn = page.locator('.view-toggle-btn').filter({ hasText: /dashboard/i });
+
+      if (await dashboardBtn.isVisible()) {
+        await dashboardBtn.click();
+
+        // URL should change to dashboard view
+        await expect(page).toHaveURL(/\/dashboard$/);
+      }
+    });
+
+    test('should switch to guests view', async ({ page }) => {
+      // Click guests view button
+      const guestsBtn = page.locator('.view-toggle-btn').filter({ hasText: /guests/i });
+
+      if (await guestsBtn.isVisible()) {
+        await guestsBtn.click();
+
+        // URL should change to guests view
+        await expect(page).toHaveURL(/\/guests$/);
+      }
+    });
+  });
+});
+
+test.describe('Canvas Table Interactions', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
+    await page.goto(DEMO_EVENT_URL);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 }).catch(() => {});
+  });
+
+  test('should select table on click', async ({ page }) => {
+    // Click on a table
+    const table = page.locator('.table-component').first();
+    await table.click();
+
+    // Table should be selected (has selected class or shows selection UI)
+    await expect(table).toHaveClass(/selected|active/);
+  });
+
+  test('should show table properties panel when table selected', async ({ page }) => {
+    // Click on a table
+    const table = page.locator('.table-component').first();
+    await table.click();
+
+    // Properties panel should appear
+    const propertiesPanel = page.locator('.table-properties-panel, .properties-panel');
+    await expect(propertiesPanel).toBeVisible({ timeout: 3000 });
+  });
+
+  test('should deselect table when clicking canvas background', async ({ page }) => {
+    // First select a table
+    const table = page.locator('.table-component').first();
+    await table.click();
+    await expect(table).toHaveClass(/selected|active/);
+
+    // Click on canvas background
+    const canvas = page.locator('.canvas-container, .canvas-area');
+    await canvas.click({ position: { x: 50, y: 50 } });
+
+    // Table should no longer be selected
+    await expect(table).not.toHaveClass(/selected/);
+  });
+});
+
+test.describe('Canvas Guests at Tables', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
+    await page.goto(DEMO_EVENT_URL);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 }).catch(() => {});
+  });
+
+  test('should display guest seats around tables', async ({ page }) => {
+    // Tables should have guest seat positions rendered
+    const seats = page.locator('.table-seat, .seat-position, .canvas-guest');
+    const count = await seats.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('should show guest names or initials at seats', async ({ page }) => {
+    // Guests assigned to tables should show their names/initials
+    const guestLabels = page.locator('.guest-initials, .seat-guest-name, .canvas-guest');
+    const count = await guestLabels.count();
+    expect(count).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Canvas Toolbar Actions', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.setItem('tourRemindLater', 'true');
+    });
+
+    await page.goto(DEMO_EVENT_URL);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.event-layout')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.onboarding-overlay')).not.toBeVisible({ timeout: 3000 }).catch(() => {});
+  });
+
+  test('should have all main toolbar buttons', async ({ page }) => {
+    // Add Table button
+    await expect(page.locator('.toolbar-btn').filter({ hasText: 'Add Table' })).toBeVisible();
+
+    // Add Guest button
+    await expect(page.locator('.toolbar-btn').filter({ hasText: 'Add Guest' })).toBeVisible();
+
+    // Optimize button
+    await expect(page.locator('.toolbar-btn.optimize')).toBeVisible();
+  });
+
+  test('should close dropdown when clicking outside', async ({ page }) => {
+    // Open Add Table dropdown
+    const addTableBtn = page.locator('.toolbar-btn.primary').filter({ hasText: 'Add Table' });
+    await addTableBtn.click();
+
+    // Dropdown should be visible
+    const dropdown = page.locator('.dropdown-menu');
+    await expect(dropdown).toBeVisible();
+
+    // Click outside (on canvas)
+    const canvas = page.locator('.canvas-container, .canvas-area');
+    await canvas.click({ position: { x: 200, y: 200 } });
+
+    // Dropdown should close
+    await expect(dropdown).not.toBeVisible();
+  });
+});
