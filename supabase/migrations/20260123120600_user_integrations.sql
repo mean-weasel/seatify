@@ -42,10 +42,11 @@ CREATE INDEX idx_user_integrations_user_provider
   ON user_integrations(user_id, provider);
 
 -- Update timestamp trigger
-CREATE TRIGGER update_user_integrations_updated_at
-  BEFORE UPDATE ON user_integrations
+DROP TRIGGER IF EXISTS set_updated_at ON public.user_integrations;
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON public.user_integrations
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION public.handle_updated_at();
 
 -- Grant permissions
 GRANT ALL ON user_integrations TO authenticated;
