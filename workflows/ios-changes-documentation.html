@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iOS HIG Compliance Changes - Seatify</title>
+  <style>
+    :root {
+      --primary: #f97066;
+      --success: #10b981;
+      --error: #ef4444;
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), #fb923c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .summary-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .summary-card .number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .summary-card .label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 3rem 0 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .fix-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .fix-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .fix-number {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), #fb923c);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .fix-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .fix-status {
+      margin-left: auto;
+      background: #dcfce7;
+      color: #166534;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 900px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-side {
+      text-align: center;
+    }
+
+    .comparison-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    .comparison-label.before {
+      background: #fef2f2;
+      color: var(--error);
+    }
+
+    .comparison-label.after {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .screenshot-container {
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 1rem;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screenshot-container img {
+      max-width: 100%;
+      max-height: 600px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .screenshot-placeholder {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .explanation {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .explanation h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .explanation p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .files-changed {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #1e293b;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .files-changed .file {
+      color: #fbbf24;
+    }
+
+    .files-changed .new {
+      color: #4ade80;
+    }
+
+    .verification-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .verification-table th,
+    .verification-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .verification-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .pass {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .fail {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>iOS HIG Compliance Changes</h1>
+      <p class="subtitle">Seatify App - Human Interface Guidelines Compliance Report</p>
+    </header>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="number">5</div>
+        <div class="label">Issues Fixed</div>
+      </div>
+      <div class="summary-card">
+        <div class="number">5</div>
+        <div class="label">Critical Checks Pass</div>
+      </div>
+      <div class="summary-card">
+        <div class="number">8</div>
+        <div class="label">Files Changed</div>
+      </div>
+      <div class="summary-card">
+        <div class="number">4</div>
+        <div class="label">New Components</div>
+      </div>
+    </div>
+
+    <h2>Before / After Comparisons</h2>
+
+    <!-- Fix 1: iOS Tab Bar -->
+    <section class="fix-section">
+      <div class="fix-header">
+        <div class="fix-number">1</div>
+        <div class="fix-title">iOS Tab Bar Navigation</div>
+        <span class="fix-status">FIXED</span>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-side">
+          <div class="comparison-label before">Before: Hamburger Menu</div>
+          <div class="screenshot-container">
+            <img src="ios-before-screenshots/02-hamburger-menu.png" alt="Hamburger menu navigation">
+          </div>
+        </div>
+        <div class="comparison-side">
+          <div class="comparison-label after">After: iOS Tab Bar</div>
+          <div class="screenshot-container">
+            <img src="ios-after-screenshots/01-ios-tab-bar-events.png" alt="iOS tab bar navigation">
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>Why This Matters for iOS Users</h4>
+        <p>iOS Human Interface Guidelines explicitly state that tab bars should be used for primary navigation. Hamburger menus hide navigation from users and require extra taps to access core features. iOS users expect tab bars at the bottom of the screen with persistent access to main sections.</p>
+      </div>
+
+      <div class="files-changed">
+        <span class="new">NEW</span> <span class="file">src/components/IOSTabBar.tsx</span><br>
+        <span class="new">NEW</span> <span class="file">src/components/IOSTabBar.css</span><br>
+        Modified: <span class="file">src/router/EventLayout.tsx</span><br>
+        Modified: <span class="file">src/components/EventListView.tsx</span>
+      </div>
+    </section>
+
+    <!-- Fix 2: FAB Removal -->
+    <section class="fix-section">
+      <div class="fix-header">
+        <div class="fix-number">2</div>
+        <div class="fix-title">FAB (Floating Action Button) Removal</div>
+        <span class="fix-status">FIXED</span>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-side">
+          <div class="comparison-label before">Before: Material Design FAB</div>
+          <div class="screenshot-container">
+            <img src="ios-before-screenshots/01-fab-button.png" alt="Floating action button on canvas">
+          </div>
+        </div>
+        <div class="comparison-side">
+          <div class="comparison-label after">After: Clean Canvas</div>
+          <div class="screenshot-container">
+            <img src="ios-after-screenshots/03-canvas-no-fab.png" alt="Canvas without FAB">
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>Why This Matters for iOS Users</h4>
+        <p>Floating Action Buttons (FABs) are a Material Design pattern from Google's Android design system. They are explicitly NOT part of iOS design. iOS uses navigation bar buttons and action sheets instead. FABs can obstruct content and conflict with iOS gesture areas.</p>
+      </div>
+
+      <div class="files-changed">
+        Modified: <span class="file">src/components/Canvas.tsx</span>
+      </div>
+    </section>
+
+    <!-- Fix 3: Bottom Sheet Modals -->
+    <section class="fix-section">
+      <div class="fix-header">
+        <div class="fix-number">3</div>
+        <div class="fix-title">iOS Bottom Sheet Modals</div>
+        <span class="fix-status">FIXED</span>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-side">
+          <div class="comparison-label before">Before: Centered Web Modal</div>
+          <div class="screenshot-container">
+            <img src="ios-before-screenshots/04-web-modal-dropdown.png" alt="Web-style centered modal">
+          </div>
+        </div>
+        <div class="comparison-side">
+          <div class="comparison-label after">After: iOS Bottom Sheet</div>
+          <div class="screenshot-container">
+            <img src="ios-after-screenshots/04-ios-bottom-sheet-modal.png" alt="iOS bottom sheet modal">
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>Why This Matters for iOS Users</h4>
+        <p>iOS uses "sheets" for modal content - they slide up from the bottom with a drag handle and can be dismissed by dragging down. This provides visual hierarchy, supports natural gesture-based dismissal, and feels native to iOS users.</p>
+      </div>
+
+      <div class="files-changed">
+        Modified: <span class="file">src/components/EventFormModal.css</span>
+      </div>
+    </section>
+
+    <!-- Fix 4: iOS Action Sheet -->
+    <section class="fix-section">
+      <div class="fix-header">
+        <div class="fix-number">4</div>
+        <div class="fix-title">iOS Action Sheet for Dropdowns</div>
+        <span class="fix-status">FIXED</span>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-side">
+          <div class="comparison-label before">Before: HTML Select Dropdown</div>
+          <div class="screenshot-container">
+            <img src="ios-before-screenshots/05-web-dropdown-expanded.png" alt="HTML select dropdown">
+          </div>
+        </div>
+        <div class="comparison-side">
+          <div class="comparison-label after">After: iOS Action Sheet</div>
+          <div class="screenshot-container">
+            <img src="ios-after-screenshots/06-ios-action-sheet.png" alt="iOS action sheet with event type options">
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>Why This Matters for iOS Users</h4>
+        <p>iOS has specific patterns for presenting lists of options: action sheets slide up from the bottom, each option is a full-width tappable row, the selected option shows a checkmark, and Cancel is always a separate button below the options.</p>
+      </div>
+
+      <div class="files-changed">
+        <span class="new">NEW</span> <span class="file">src/components/IOSActionSheet.tsx</span><br>
+        <span class="new">NEW</span> <span class="file">src/components/IOSActionSheet.css</span><br>
+        Modified: <span class="file">src/components/EventFormModal.tsx</span>
+      </div>
+    </section>
+
+    <!-- Fix 5: Swipe to Reveal -->
+    <section class="fix-section">
+      <div class="fix-header">
+        <div class="fix-number">5</div>
+        <div class="fix-title">iOS Swipe-to-Reveal Actions</div>
+        <span class="fix-status">FIXED</span>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-side">
+          <div class="comparison-label before">Before: Always Visible Buttons</div>
+          <div class="screenshot-container">
+            <img src="ios-before-screenshots/03-visible-action-buttons.png" alt="Visible edit/delete buttons">
+          </div>
+        </div>
+        <div class="comparison-side">
+          <div class="comparison-label after">After: Swipe to Reveal</div>
+          <div class="screenshot-container">
+            <img src="ios-after-screenshots/05-ios-swipe-actions.png" alt="Swipe to reveal Edit and Delete actions">
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>Why This Matters for iOS Users</h4>
+        <p>iOS Mail, Notes, and most native apps use swipe gestures to reveal actions. This keeps the list view clean and focused on content. Actions are "hidden but discoverable" with red for destructive actions and gray for neutral ones.</p>
+      </div>
+
+      <div class="files-changed">
+        Modified: <span class="file">src/components/EventListView.tsx</span><br>
+        Modified: <span class="file">src/components/EventListView.css</span>
+      </div>
+    </section>
+
+    <h2>Testing Verification</h2>
+
+    <table class="verification-table">
+      <thead>
+        <tr>
+          <th>iOS Convention Check</th>
+          <th>Before</th>
+          <th>After</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tab bar for primary navigation</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>NO hamburger menu</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>NO floating action button</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>Bottom sheet modals (not centered)</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>iOS action sheets (not HTML select)</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>Swipe-to-reveal actions</td>
+          <td class="fail">FAIL</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>Safe area insets respected</td>
+          <td class="pass">PASS</td>
+          <td class="pass">PASS</td>
+        </tr>
+        <tr>
+          <td>NO Material Design components</td>
+          <td class="pass">PASS</td>
+          <td class="pass">PASS</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>
+      <p>iOS Human Interface Guidelines Compliance Report</p>
+      <p>Generated: January 15, 2026 | Seatify v0.10.0</p>
+    </footer>
+  </div>
+</body>
+</html>
