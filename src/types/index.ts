@@ -44,6 +44,13 @@ export interface Guest {
   group?: string; // e.g., "Bride's family", "Marketing team"
   rsvpStatus: 'pending' | 'confirmed' | 'declined';
   notes?: string;
+
+  // Enhanced RSVP fields
+  plusOneOf?: string; // Guest ID this person is a plus-one of
+  mealPreference?: string; // Selected meal option
+  seatingPreferences?: string[]; // Guest IDs they want to sit with
+  rsvpRespondedAt?: string; // Timestamp of RSVP response
+  rsvpToken?: string; // Unique token for email RSVP links
 }
 
 export type TableShape = 'round' | 'rectangle' | 'square' | 'oval' | 'half-round' | 'serpentine';
@@ -104,6 +111,40 @@ export interface SurveyResponse {
   answer: string | string[];
 }
 
+// RSVP Settings for an event
+export interface RSVPSettings {
+  eventId: string;
+  enabled: boolean;
+  deadline?: string; // ISO timestamp
+  allowPlusOnes: boolean;
+  maxPlusOnes: number;
+  mealOptions: string[]; // e.g., ['Chicken', 'Fish', 'Vegetarian']
+  collectDietary: boolean;
+  collectAccessibility: boolean;
+  collectSeatingPreferences: boolean;
+  customMessage?: string; // Welcome message on RSVP page
+  confirmationMessage?: string; // Shown after submitting
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// RSVP Response audit record
+export type RSVPResponseSource = 'web' | 'email' | 'manual';
+
+export interface RSVPResponseRecord {
+  id: string;
+  guestId: string;
+  eventId: string;
+  status: 'pending' | 'confirmed' | 'declined';
+  mealPreference?: string;
+  dietaryRestrictions?: string[];
+  accessibilityNeeds?: string[];
+  seatingPreferences?: string[];
+  plusOnesAdded: number;
+  respondedAt: string;
+  responseSource: RSVPResponseSource;
+}
+
 export type EventType = 'wedding' | 'corporate' | 'gala' | 'party' | 'other';
 
 // QR Code data structure for table lookup
@@ -114,6 +155,7 @@ export interface QRTableData {
   t: string; // Table name
   g: string[]; // Guest names (first + last)
   c: number; // Capacity
+  b?: number; // Show branding (0 = hide, 1 or undefined = show)
 }
 
 export interface Event {
@@ -127,6 +169,9 @@ export interface Event {
   surveyQuestions: SurveyQuestion[];
   surveyResponses: SurveyResponse[];
   venueElements: VenueElement[];
+
+  // RSVP settings (optional, loaded separately)
+  rsvpSettings?: RSVPSettings;
 
   // Venue Information
   venueName?: string;
