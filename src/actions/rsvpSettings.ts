@@ -1,20 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { DEFAULT_RSVP_SETTINGS } from '@/lib/constants/rsvp';
 import type { RSVPSettings } from '@/types';
-
-// Default RSVP settings for new events
-export const DEFAULT_RSVP_SETTINGS: Omit<RSVPSettings, 'eventId'> = {
-  enabled: false,
-  allowPlusOnes: true,
-  maxPlusOnes: 1,
-  mealOptions: [],
-  collectDietary: true,
-  collectAccessibility: true,
-  collectSeatingPreferences: true,
-  reminderEnabled: false,
-  reminderDaysBefore: 7,
-};
 
 /**
  * Load RSVP settings for an event
