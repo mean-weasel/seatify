@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import QRCode from 'react-qr-code';
-import { loadRSVPSettings, saveRSVPSettings, DEFAULT_RSVP_SETTINGS } from '@/actions/rsvpSettings';
+import { loadRSVPSettings, saveRSVPSettings } from '@/actions/rsvpSettings';
+import { DEFAULT_RSVP_SETTINGS } from '@/lib/constants/rsvp';
 import { useSubscription } from '@/hooks/useSubscription';
 import { copyToClipboard } from '@/utils/qrCodeUtils';
 import { showToast } from './toastStore';
