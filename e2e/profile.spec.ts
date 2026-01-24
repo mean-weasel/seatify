@@ -5,10 +5,10 @@ import { test, expect } from '@playwright/test';
  *
  * These tests verify:
  * - Unauthenticated users are redirected to login
- * - Profile page structure exists
+ * - Authenticated users can access profile page
+ * - Profile page displays correct sections
  *
- * Note: Authenticated tests are skipped in CI because there's no seeded test user
- * with login credentials. The demo user in seed.sql is for public demo access only.
+ * Uses seeded test user: test@example.com / testpassword123
  */
 
 test.describe('Profile Page', () => {
@@ -19,13 +19,63 @@ test.describe('Profile Page', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('should have profile route configured', async ({ page }) => {
-    // First go to login page to verify it exists
+  test('should show profile page elements for authenticated user', async ({ page }) => {
+    // Login with seeded test user
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible();
+    await page.getByLabel(/email/i).fill('test@example.com');
+    await page.getByLabel(/password/i).fill('testpassword123');
+    await page.getByRole('button', { name: /sign in/i }).click();
 
-    // Then navigate to profile - should redirect to login (proving the route exists)
+    // Wait for redirect to dashboard
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+
+    // Navigate to profile
     await page.goto('/profile');
-    await expect(page).toHaveURL(/\/login/);
+
+    // Check profile page elements
+    await expect(page.getByRole('heading', { name: /profile settings/i })).toBeVisible();
+    await expect(page.getByText(/account/i).first()).toBeVisible();
+    await expect(page.getByText(/subscription/i).first()).toBeVisible();
+    await expect(page.getByText(/preferences/i).first()).toBeVisible();
+  });
+
+  test('should show back link to dashboard', async ({ page }) => {
+    // Login with seeded test user
+    await page.goto('/login');
+    await page.getByLabel(/email/i).fill('test@example.com');
+    await page.getByLabel(/password/i).fill('testpassword123');
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    // Wait for redirect to dashboard
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+
+    // Navigate to profile
+    await page.goto('/profile');
+
+    // Check back link exists
+    await expect(page.getByRole('link', { name: /back to events/i })).toBeVisible();
+
+    // Click back link
+    await page.getByRole('link', { name: /back to events/i }).click();
+
+    // Should be back on dashboard
+    await expect(page).toHaveURL(/\/dashboard/);
+  });
+
+  test('should display user email in profile', async ({ page }) => {
+    // Login with seeded test user
+    await page.goto('/login');
+    await page.getByLabel(/email/i).fill('test@example.com');
+    await page.getByLabel(/password/i).fill('testpassword123');
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    // Wait for redirect to dashboard
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+
+    // Navigate to profile
+    await page.goto('/profile');
+
+    // Check that user email is displayed
+    await expect(page.getByText('test@example.com')).toBeVisible();
   });
 });
