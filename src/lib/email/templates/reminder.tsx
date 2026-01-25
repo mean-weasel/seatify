@@ -149,11 +149,13 @@ const header = {
 };
 
 const logo = {
-  fontSize: '24px',
-  fontWeight: '700' as const,
-  color: '#4f46e5',
+  fontSize: '28px',
+  fontWeight: '600' as const,
+  fontFamily: '"Playfair Display", Georgia, serif',
+  color: '#E07A5F',
   margin: '0',
   textAlign: 'center' as const,
+  letterSpacing: '-0.02em',
 };
 
 const urgentBanner = {
@@ -235,7 +237,7 @@ const smallText = {
 };
 
 const link = {
-  color: '#4f46e5',
+  color: '#E07A5F',
   textDecoration: 'underline',
   wordBreak: 'break-all' as const,
 };

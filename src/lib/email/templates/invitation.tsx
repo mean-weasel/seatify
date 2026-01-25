@@ -139,11 +139,13 @@ const header = {
 };
 
 const logo = {
-  fontSize: '24px',
-  fontWeight: '700' as const,
-  color: '#4f46e5',
+  fontSize: '28px',
+  fontWeight: '600' as const,
+  fontFamily: '"Playfair Display", Georgia, serif',
+  color: '#E07A5F',
   margin: '0',
   textAlign: 'center' as const,
+  letterSpacing: '-0.02em',
 };
 
 const content = {
@@ -173,7 +175,7 @@ const customMessageStyle = {
   backgroundColor: '#f9fafb',
   padding: '16px',
   borderRadius: '8px',
-  borderLeft: '4px solid #4f46e5',
+  borderLeft: '4px solid #E07A5F',
 };
 
 const deadlineText = {
@@ -189,7 +191,7 @@ const buttonContainer = {
 };
 
 const button = {
-  backgroundColor: '#4f46e5',
+  backgroundColor: '#E07A5F',
   borderRadius: '8px',
   color: '#fff',
   fontSize: '16px',
@@ -207,7 +209,7 @@ const smallText = {
 };
 
 const link = {
-  color: '#4f46e5',
+  color: '#E07A5F',
   textDecoration: 'underline',
   wordBreak: 'break-all' as const,
 };
