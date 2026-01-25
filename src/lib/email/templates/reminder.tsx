@@ -10,6 +10,7 @@ import {
   Button,
   Hr,
   Link,
+  Img,
 } from '@react-email/components';
 
 interface ReminderEmailProps {
@@ -20,7 +21,12 @@ interface ReminderEmailProps {
   rsvpUrl: string;
   deadline?: string;
   daysUntilDeadline?: number;
+  primaryColor?: string;
+  headerImageUrl?: string;
+  hideBranding?: boolean;
 }
+
+const DEFAULT_PRIMARY_COLOR = '#E07A5F';
 
 export function ReminderEmail({
   guestName,
@@ -30,6 +36,9 @@ export function ReminderEmail({
   rsvpUrl,
   deadline,
   daysUntilDeadline,
+  primaryColor = DEFAULT_PRIMARY_COLOR,
+  headerImageUrl,
+  hideBranding = false,
 }: ReminderEmailProps) {
   const previewText = `Reminder: Please RSVP for ${eventName}`;
 
@@ -40,7 +49,15 @@ export function ReminderEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>Seatify</Text>
+            {headerImageUrl ? (
+              <Img
+                src={headerImageUrl}
+                alt="Event logo"
+                style={headerImage}
+              />
+            ) : (
+              <Text style={{ ...logo, color: primaryColor }}>Seatify</Text>
+            )}
           </Section>
 
           <Section style={urgentBanner}>
@@ -76,7 +93,7 @@ export function ReminderEmail({
             </Text>
 
             <Section style={buttonContainer}>
-              <Button style={button} href={rsvpUrl}>
+              <Button style={{ ...button, backgroundColor: primaryColor }} href={rsvpUrl}>
                 Respond Now
               </Button>
             </Section>
@@ -84,7 +101,7 @@ export function ReminderEmail({
             <Text style={smallText}>
               Or copy and paste this link into your browser:
               <br />
-              <Link href={rsvpUrl} style={link}>
+              <Link href={rsvpUrl} style={{ ...link, color: primaryColor }}>
                 {rsvpUrl}
               </Link>
             </Text>
@@ -96,12 +113,14 @@ export function ReminderEmail({
             {hostName && (
               <Text style={footerText}>Hosted by {hostName}</Text>
             )}
-            <Text style={footerText}>
-              Powered by{' '}
-              <Link href="https://seatify.app" style={link}>
-                Seatify
-              </Link>
-            </Text>
+            {!hideBranding && (
+              <Text style={footerText}>
+                Powered by{' '}
+                <Link href="https://seatify.app" style={{ ...link, color: primaryColor }}>
+                  Seatify
+                </Link>
+              </Text>
+            )}
             <Text style={footerDisclaimer}>
               You received this reminder because you haven&apos;t responded to
               your invitation for {eventName}. If you&apos;ve already responded,
@@ -156,6 +175,13 @@ const logo = {
   margin: '0',
   textAlign: 'center' as const,
   letterSpacing: '-0.02em',
+};
+
+const headerImage = {
+  display: 'block',
+  margin: '0 auto',
+  maxWidth: '200px',
+  maxHeight: '80px',
 };
 
 const urgentBanner = {

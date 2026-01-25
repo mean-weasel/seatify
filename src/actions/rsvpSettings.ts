@@ -53,6 +53,14 @@ export async function loadRSVPSettings(
     reminderEnabled: data.reminder_enabled ?? false,
     reminderDaysBefore: data.reminder_days_before ?? 7,
     lastReminderSentAt: data.last_reminder_sent_at,
+    // Email customization fields
+    emailPrimaryColor: data.email_primary_color,
+    emailSenderName: data.email_sender_name,
+    emailSubjectTemplate: data.email_subject_template,
+    emailHeaderImageUrl: data.email_header_image_url,
+    hideSeatifyBranding: data.hide_seatify_branding ?? false,
+    sendConfirmationEmail: data.send_confirmation_email ?? true,
+    includeCalendarInvite: data.include_calendar_invite ?? true,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -100,6 +108,14 @@ export async function saveRSVPSettings(
     confirmation_message: settings.confirmationMessage || null,
     reminder_enabled: settings.reminderEnabled ?? false,
     reminder_days_before: settings.reminderDaysBefore ?? 7,
+    // Email customization fields
+    email_primary_color: settings.emailPrimaryColor || null,
+    email_sender_name: settings.emailSenderName || null,
+    email_subject_template: settings.emailSubjectTemplate || null,
+    email_header_image_url: settings.emailHeaderImageUrl || null,
+    hide_seatify_branding: settings.hideSeatifyBranding ?? false,
+    send_confirmation_email: settings.sendConfirmationEmail ?? true,
+    include_calendar_invite: settings.includeCalendarInvite ?? true,
   };
 
   const { error } = await supabase

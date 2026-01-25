@@ -6,7 +6,6 @@ import {
   exchangeCodeForTokens,
   refreshAccessToken,
   isTokenExpired,
-  type GoogleTokens,
 } from '@/lib/google/auth';
 import {
   listSpreadsheets,

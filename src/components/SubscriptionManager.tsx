@@ -10,7 +10,7 @@ import { openCustomerPortal } from '@/lib/stripe/client';
  * Shows current plan, usage, and upgrade/manage options
  */
 export function SubscriptionManager() {
-  const { subscription, plan, limits, isLoading, isPro, isTeam, isEnterprise, isFree } = useSubscription();
+  const { subscription, plan, limits, isLoading, isPro, isTeam, isEnterprise: _isEnterprise, isFree } = useSubscription();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {

@@ -408,11 +408,63 @@ INSERT INTO public.guest_profiles (guest_id, interests) VALUES
   ('00000000-0000-0000-0000-000000000218', ARRAY['gaming', 'sci-fi books', 'running']);
 
 -- =====================================================
+-- STEP 8: Enable RSVP for demo event
+-- =====================================================
+
+-- Create RSVP settings for the demo event
+INSERT INTO public.rsvp_settings (
+  event_id,
+  enabled,
+  deadline,
+  allow_plus_ones,
+  max_plus_ones,
+  meal_options,
+  collect_dietary,
+  collect_accessibility,
+  collect_seating_preferences,
+  custom_message,
+  confirmation_message
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  true,
+  '2025-12-31 23:59:59+00',
+  true,
+  2,
+  ARRAY['Chicken', 'Fish', 'Vegetarian', 'Vegan'],
+  true,
+  true,
+  true,
+  'We are so excited to celebrate with you!',
+  'Thank you for your RSVP! We look forward to seeing you at the event.'
+)
+ON CONFLICT (event_id) DO UPDATE SET
+  enabled = true,
+  deadline = '2025-12-31 23:59:59+00',
+  allow_plus_ones = true,
+  max_plus_ones = 2,
+  meal_options = ARRAY['Chicken', 'Fish', 'Vegetarian', 'Vegan'],
+  collect_dietary = true,
+  collect_accessibility = true,
+  collect_seating_preferences = true,
+  custom_message = 'We are so excited to celebrate with you!',
+  confirmation_message = 'Thank you for your RSVP! We look forward to seeing you at the event.';
+
+-- Add RSVP tokens to some guests for direct email links
+UPDATE public.guests
+SET rsvp_token = 'testtoken001'
+WHERE id = '00000000-0000-0000-0000-000000000201'; -- Emma Wilson
+
+UPDATE public.guests
+SET rsvp_token = 'testtoken002'
+WHERE id = '00000000-0000-0000-0000-000000000209'; -- Isabella Brown (pending)
+
+-- =====================================================
 -- Success message
 -- =====================================================
 DO $$
 BEGIN
   RAISE NOTICE 'Demo event created successfully!';
   RAISE NOTICE 'Event ID: 00000000-0000-0000-0000-000000000001';
-  RAISE NOTICE 'Tables: 3, Guests: 18, Constraints: 2';
+  RAISE NOTICE 'Tables: 3, Guests: 18, Constraints: 2, RSVP: Enabled';
 END $$;

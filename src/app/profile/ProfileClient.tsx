@@ -28,7 +28,7 @@ interface ProfileClientProps {
   };
 }
 
-export function ProfileClient({ user, subscription, profile, stats }: ProfileClientProps) {
+export function ProfileClient({ user, subscription, profile: _profile, stats }: ProfileClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const { theme, cycleTheme } = useStore();

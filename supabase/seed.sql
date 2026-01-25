@@ -547,3 +547,60 @@ CREATE POLICY "Anyone can view demo event guest_profiles" ON public.guest_profil
       WHERE event_id = '00000000-0000-0000-0000-000000000001'
     )
   );
+
+-- =====================================================
+-- STEP 10: Enable RSVP for demo event (for E2E testing)
+-- =====================================================
+
+-- Create RSVP settings for the demo event
+INSERT INTO public.rsvp_settings (
+  event_id,
+  enabled,
+  deadline,
+  allow_plus_ones,
+  max_plus_ones,
+  meal_options,
+  collect_dietary,
+  collect_accessibility,
+  collect_seating_preferences,
+  custom_message,
+  confirmation_message
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  true,
+  '2025-12-31 23:59:59+00',
+  true,
+  2,
+  ARRAY['Chicken', 'Fish', 'Vegetarian', 'Vegan'],
+  true,
+  true,
+  true,
+  'We are so excited to celebrate with you!',
+  'Thank you for your RSVP! We look forward to seeing you at the event.'
+)
+ON CONFLICT (event_id) DO UPDATE SET
+  enabled = true,
+  deadline = '2025-12-31 23:59:59+00',
+  allow_plus_ones = true,
+  max_plus_ones = 2,
+  meal_options = ARRAY['Chicken', 'Fish', 'Vegetarian', 'Vegan'],
+  collect_dietary = true,
+  collect_accessibility = true,
+  collect_seating_preferences = true,
+  custom_message = 'We are so excited to celebrate with you!',
+  confirmation_message = 'Thank you for your RSVP! We look forward to seeing you at the event.';
+
+-- Add RSVP tokens to some guests for testing direct email links
+UPDATE public.guests
+SET rsvp_token = 'testtoken001'
+WHERE id = '00000000-0000-0000-0000-000000000201'; -- Emma Wilson
+
+UPDATE public.guests
+SET rsvp_token = 'testtoken002'
+WHERE id = '00000000-0000-0000-0000-000000000209'; -- Isabella Brown (pending)
+
+-- Policy for RSVP settings on demo event
+DROP POLICY IF EXISTS "Anyone can view demo event rsvp_settings" ON public.rsvp_settings;
+CREATE POLICY "Anyone can view demo event rsvp_settings" ON public.rsvp_settings
+  FOR SELECT USING (event_id = '00000000-0000-0000-0000-000000000001');

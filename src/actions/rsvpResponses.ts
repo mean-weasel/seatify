@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sendConfirmationEmail } from '@/lib/email/send';
 import type { RSVPSettings, Guest } from '@/types';
 
 // Type for public event data (only what guests need)
@@ -340,6 +341,65 @@ export async function submitRSVPResponse(
       plus_ones_added: submission.plusOnes?.length || 0,
       response_source: 'web',
     });
+
+  // Send confirmation email if enabled
+  if (rsvpSettings.send_confirmation_email) {
+    // Fetch guest details for the email
+    const { data: guest } = await supabase
+      .from('guests')
+      .select('first_name, last_name, email')
+      .eq('id', submission.guestId)
+      .single();
+
+    // Fetch event details for the email
+    const { data: event } = await supabase
+      .from('events')
+      .select('name, date, venue_address')
+      .eq('id', submission.eventId)
+      .single();
+
+    // Fetch host profile for the email
+    const { data: eventWithHost } = await supabase
+      .from('events')
+      .select('user_id')
+      .eq('id', submission.eventId)
+      .single();
+
+    let hostName: string | undefined;
+    if (eventWithHost?.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', eventWithHost.user_id)
+        .single();
+      hostName = profile?.full_name || undefined;
+    }
+
+    // Only send if we have guest email and data
+    if (guest?.email && event) {
+      const guestName = `${guest.first_name} ${guest.last_name}`.trim();
+
+      // Send confirmation email (don't block on result)
+      sendConfirmationEmail({
+        guestId: submission.guestId,
+        guestName,
+        guestEmail: guest.email,
+        eventId: submission.eventId,
+        eventName: event.name,
+        eventDate: event.date || undefined,
+        hostName,
+        isAttending: submission.status === 'confirmed',
+        plusOneCount: submission.plusOnes?.length || 0,
+        mealPreference: submission.mealPreference,
+        dietaryRestrictions: submission.dietaryRestrictions,
+        venueAddress: event.venue_address || undefined,
+        includeCalendarInvite: rsvpSettings.include_calendar_invite ?? true,
+      }).catch((err) => {
+        // Log error but don't fail the RSVP submission
+        console.error('Failed to send confirmation email:', err);
+      });
+    }
+  }
 
   return { success: true };
 }

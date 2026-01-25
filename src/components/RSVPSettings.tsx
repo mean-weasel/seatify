@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import QRCode from 'react-qr-code';
 import { loadRSVPSettings, saveRSVPSettings } from '@/actions/rsvpSettings';
-import { DEFAULT_RSVP_SETTINGS } from '@/lib/constants/rsvp';
+import { DEFAULT_RSVP_SETTINGS, DEFAULT_EMAIL_PRIMARY_COLOR } from '@/lib/constants/rsvp';
 import { useSubscription } from '@/hooks/useSubscription';
 import { copyToClipboard } from '@/utils/qrCodeUtils';
 import { showToast } from './toastStore';
+import { EmailPreview } from './EmailPreview';
 import type { RSVPSettings as RSVPSettingsType } from '@/types';
 import './RSVPSettings.css';
 
@@ -15,7 +16,7 @@ interface RSVPSettingsProps {
   eventName: string;
 }
 
-export function RSVPSettings({ eventId, eventName }: RSVPSettingsProps) {
+export function RSVPSettings({ eventId, eventName: _eventName }: RSVPSettingsProps) {
   const { isPro } = useSubscription();
   const [settings, setSettings] = useState<RSVPSettingsType>({
     eventId,
@@ -373,6 +374,177 @@ export function RSVPSettings({ eventId, eventName }: RSVPSettingsProps) {
                 <a href="/settings/billing" className="upgrade-link">Upgrade to Pro</a>
               </div>
             )}
+          </div>
+
+          {/* Email Customization */}
+          <div className="rsvp-setting-group">
+            <h3>Email Customization</h3>
+
+            {/* Primary Color */}
+            <div className="setting-row">
+              <div className="setting-info">
+                <label htmlFor="email-primary-color">Primary color</label>
+                <span className="setting-hint">Button and accent color in emails</span>
+              </div>
+              <div className="color-picker-wrapper">
+                <input
+                  type="color"
+                  id="email-primary-color"
+                  className="color-picker-input"
+                  value={settings.emailPrimaryColor || DEFAULT_EMAIL_PRIMARY_COLOR}
+                  onChange={e => updateSetting('emailPrimaryColor', e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="color-hex-input"
+                  value={settings.emailPrimaryColor || DEFAULT_EMAIL_PRIMARY_COLOR}
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                      updateSetting('emailPrimaryColor', value);
+                    }
+                  }}
+                  placeholder="#E07A5F"
+                />
+              </div>
+            </div>
+
+            {/* Sender Name */}
+            <div className="setting-row vertical">
+              <label htmlFor="email-sender-name">Sender name</label>
+              <input
+                type="text"
+                id="email-sender-name"
+                className="text-input"
+                placeholder="Seatify"
+                value={settings.emailSenderName || ''}
+                onChange={e => updateSetting('emailSenderName', e.target.value || undefined)}
+              />
+              <span className="setting-hint">Display name guests see in their inbox</span>
+            </div>
+
+            {/* Subject Template */}
+            <div className="setting-row vertical">
+              <label htmlFor="email-subject-template">Subject line template</label>
+              <input
+                type="text"
+                id="email-subject-template"
+                className="text-input"
+                placeholder="You're Invited: {eventName}"
+                value={settings.emailSubjectTemplate || ''}
+                onChange={e => updateSetting('emailSubjectTemplate', e.target.value || undefined)}
+              />
+              <span className="setting-hint">Use {'{eventName}'} as a placeholder</span>
+            </div>
+
+            {/* Header Image (Pro Only) */}
+            <div className="setting-row vertical">
+              <div className="setting-label-row">
+                <label htmlFor="email-header-image">Header image URL</label>
+                {!isPro && <span className="pro-badge">Pro</span>}
+              </div>
+              {isPro ? (
+                <>
+                  <input
+                    type="url"
+                    id="email-header-image"
+                    className="text-input"
+                    placeholder="https://example.com/your-logo.png"
+                    value={settings.emailHeaderImageUrl || ''}
+                    onChange={e => updateSetting('emailHeaderImageUrl', e.target.value || undefined)}
+                  />
+                  <span className="setting-hint">Replaces the Seatify logo in emails (max 200x80px recommended)</span>
+                </>
+              ) : (
+                <div className="pro-feature-inline">
+                  <span>Add your own logo to emails</span>
+                  <a href="/settings/billing" className="upgrade-link-inline">Upgrade</a>
+                </div>
+              )}
+            </div>
+
+            {/* Hide Seatify Branding (Pro Only) */}
+            <div className="setting-row toggle-row">
+              <div className="setting-info">
+                <label htmlFor="hide-branding">Hide Seatify branding</label>
+                {!isPro && <span className="pro-badge">Pro</span>}
+                <span className="setting-hint">Remove &quot;Powered by Seatify&quot; from emails</span>
+              </div>
+              {isPro ? (
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    id="hide-branding"
+                    checked={settings.hideSeatifyBranding || false}
+                    onChange={e => updateSetting('hideSeatifyBranding', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              ) : (
+                <a href="/settings/billing" className="upgrade-link-inline">Upgrade</a>
+              )}
+            </div>
+          </div>
+
+          {/* Confirmation Emails */}
+          <div className="rsvp-setting-group">
+            <h3>Confirmation Emails</h3>
+
+            {/* Send Confirmation Email */}
+            <div className="setting-row toggle-row">
+              <div className="setting-info">
+                <label htmlFor="send-confirmation">Send confirmation email</label>
+                <span className="setting-hint">Automatically email guests after they RSVP</span>
+              </div>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  id="send-confirmation"
+                  checked={settings.sendConfirmationEmail ?? true}
+                  onChange={e => updateSetting('sendConfirmationEmail', e.target.checked)}
+                />
+                <span className="toggle-slider" />
+              </label>
+            </div>
+
+            {/* Include Calendar Invite */}
+            {(settings.sendConfirmationEmail ?? true) && (
+              <div className="setting-row toggle-row">
+                <div className="setting-info">
+                  <label htmlFor="include-calendar">Include calendar invite</label>
+                  <span className="setting-hint">Add &quot;Add to Calendar&quot; button for confirmed guests</span>
+                </div>
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    id="include-calendar"
+                    checked={settings.includeCalendarInvite ?? true}
+                    onChange={e => updateSetting('includeCalendarInvite', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* Email Preview */}
+          <div className="rsvp-setting-group email-preview-group">
+            <h3>Email Preview</h3>
+            <EmailPreview
+              templateType="invitation"
+              previewData={{
+                guestName: 'Jane Doe',
+                eventName: _eventName,
+                eventDate: settings.deadline,
+                customMessage: settings.customMessage,
+                deadline: settings.deadline,
+              }}
+              customization={{
+                primaryColor: settings.emailPrimaryColor || DEFAULT_EMAIL_PRIMARY_COLOR,
+                headerImageUrl: settings.emailHeaderImageUrl,
+                hideBranding: settings.hideSeatifyBranding || false,
+              }}
+            />
           </div>
         </>
       )}
