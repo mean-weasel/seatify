@@ -4,7 +4,7 @@ import { render } from '@react-email/components';
 import { resend, EMAIL_FROM, EMAIL_BATCH_SIZE, type BatchEmailResult } from './resend';
 import { InvitationEmail } from './templates/invitation';
 import { ReminderEmail } from './templates/reminder';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { generateRSVPToken, buildRSVPUrl } from './utils';
 
 interface SendInvitationParams {
@@ -35,7 +35,7 @@ interface SendReminderParams {
 
 // Get or create RSVP token for a guest
 export async function ensureGuestToken(guestId: string): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // First check if guest already has a token
   const { data: guest } = await supabase
@@ -68,7 +68,7 @@ export async function sendInvitationEmail(
     return { success: false, error: 'Email service not configured' };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const rsvpUrl = buildRSVPUrl(params.eventId, params.rsvpToken);
 
   // Create email log entry
@@ -162,7 +162,7 @@ export async function sendReminderEmail(
     return { success: false, error: 'Email service not configured' };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const rsvpUrl = buildRSVPUrl(params.eventId, params.rsvpToken);
 
   // Create email log entry
