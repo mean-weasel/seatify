@@ -111,6 +111,7 @@ export async function loadPublicEventForRSVP(
     collectSeatingPreferences: rsvpData.collect_seating_preferences,
     customMessage: rsvpData.custom_message,
     confirmationMessage: rsvpData.confirmation_message,
+    hideSeatifyBranding: rsvpData.hide_seatify_branding || false,
   };
 
   // Transform guests

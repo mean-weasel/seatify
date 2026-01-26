@@ -2,7 +2,7 @@
  * Subscription types for Pro features
  */
 
-export type SubscriptionPlan = 'free' | 'pro' | 'team' | 'enterprise';
+export type SubscriptionPlan = 'free' | 'pro' | 'enterprise';
 
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing';
 
@@ -68,17 +68,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     hasTeamMembers: false,
     maxTeamMembers: 0,
   },
-  team: {
-    plan: 'team',
-    maxEvents: -1,
-    maxGuestsPerEvent: -1,
-    hasWatermark: false,
-    canRemoveBranding: true,
-    hasCustomLogo: true,
-    hasPrioritySupport: true,
-    hasTeamMembers: true,
-    maxTeamMembers: 5,
-  },
   enterprise: {
     plan: 'enterprise',
     maxEvents: -1,
@@ -88,7 +77,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     hasCustomLogo: true,
     hasPrioritySupport: true,
     hasTeamMembers: true,
-    maxTeamMembers: -1,
+    maxTeamMembers: -1, // Unlimited team members
   },
 };
 
@@ -127,7 +116,7 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     plan: 'free',
     name: 'Free',
-    description: 'Perfect for small events',
+    description: 'Perfect for trying things out',
     monthlyPrice: 0,
     yearlyPrice: 0,
     features: [
@@ -138,7 +127,7 @@ export const PRICING_TIERS: PricingTier[] = [
       'Seating optimization',
       'Shareable links & QR codes',
     ],
-    ctaText: 'Get Started',
+    ctaText: 'Get Started Free',
   },
   {
     plan: 'pro',
@@ -149,44 +138,29 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       'Unlimited events',
       'Unlimited guests',
+      'Send email invitations & reminders',
       'Remove "Made with Seatify" branding',
       'Custom logo on PDFs',
       'Priority email support',
-      'Guest database (reuse across events)',
     ],
     highlighted: true,
-    ctaText: 'Start Free Trial',
-  },
-  {
-    plan: 'team',
-    name: 'Team',
-    description: 'For event planning teams',
-    monthlyPrice: 29,
-    yearlyPrice: 249,
-    features: [
-      'Everything in Pro',
-      'Up to 5 team members',
-      'Role-based access control',
-      'Comments & activity history',
-      'Real-time collaboration',
-    ],
-    ctaText: 'Start Free Trial',
+    ctaText: 'Upgrade to Pro',
   },
   {
     plan: 'enterprise',
     name: 'Enterprise',
-    description: 'Custom solutions for large organizations',
+    description: 'For teams & large organizations',
     monthlyPrice: 0, // Custom pricing
     yearlyPrice: 0,
     features: [
-      'Everything in Team',
+      'Everything in Pro',
       'Unlimited team members',
+      'Role-based access control',
       'SSO / SAML authentication',
       'Dedicated support',
       'Custom integrations',
-      'SLA guarantee',
     ],
-    ctaText: 'Contact Sales',
+    ctaText: 'Contact Us',
   },
 ];
 
@@ -197,9 +171,5 @@ export const STRIPE_PRICES = {
   pro: {
     monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
     yearly: process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
-  },
-  team: {
-    monthly: process.env.NEXT_PUBLIC_STRIPE_TEAM_MONTHLY_PRICE_ID || '',
-    yearly: process.env.NEXT_PUBLIC_STRIPE_TEAM_YEARLY_PRICE_ID || '',
   },
 };

@@ -524,17 +524,20 @@ export function DirectRSVPPageClient({
         )}
       </div>
 
-      <footer className="rsvp-footer">
-        <p>
-          Powered by{' '}
-          <Link href="/" target="_blank" rel="noopener noreferrer">
-            <strong>Seatify</strong>
-          </Link>
-        </p>
-        <p className="footer-cta">
-          <Link href="/">Create your own seating chart</Link>
-        </p>
-      </footer>
+      {/* Only show branding if not hidden (Pro feature) */}
+      {!settings?.hideSeatifyBranding && (
+        <footer className="rsvp-footer">
+          <p>
+            Powered by{' '}
+            <Link href="/" target="_blank" rel="noopener noreferrer">
+              <strong>Seatify</strong>
+            </Link>
+          </p>
+          <p className="footer-cta">
+            <Link href="/">Create your own seating chart</Link>
+          </p>
+        </footer>
+      )}
     </div>
   );
 }

@@ -20,8 +20,6 @@ function getPlanFromPriceId(priceId: string): string {
   const priceMap: Record<string, string> = {
     [process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '']: 'pro',
     [process.env.STRIPE_PRO_YEARLY_PRICE_ID || '']: 'pro',
-    [process.env.STRIPE_TEAM_MONTHLY_PRICE_ID || '']: 'team',
-    [process.env.STRIPE_TEAM_YEARLY_PRICE_ID || '']: 'team',
   };
   return priceMap[priceId] || 'pro';
 }

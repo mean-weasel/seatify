@@ -10,7 +10,7 @@ import { openCustomerPortal } from '@/lib/stripe/client';
  * Shows current plan, usage, and upgrade/manage options
  */
 export function SubscriptionManager() {
-  const { subscription, plan, limits, isLoading, isPro, isTeam, isEnterprise: _isEnterprise, isFree } = useSubscription();
+  const { subscription, plan, limits, isLoading, isPro, isEnterprise: _isEnterprise, isFree } = useSubscription();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -57,7 +57,7 @@ export function SubscriptionManager() {
     );
   }
 
-  const planBadgeClass = isFree ? 'free' : isPro ? 'pro' : isTeam ? 'team' : 'enterprise';
+  const planBadgeClass = isFree ? 'free' : isPro ? 'pro' : 'enterprise';
 
   return (
     <div className="subscription-manager">
@@ -159,11 +159,6 @@ export function SubscriptionManager() {
 
         .plan-badge.pro {
           background: #F97066;
-          color: white;
-        }
-
-        .plan-badge.team {
-          background: #3B82F6;
           color: white;
         }
 
@@ -272,7 +267,7 @@ export function PlanBadge({ className = '' }: { className?: string }) {
     return null;
   }
 
-  const badgeClass = plan === 'pro' ? 'pro' : plan === 'team' ? 'team' : 'enterprise';
+  const badgeClass = plan === 'pro' ? 'pro' : 'enterprise';
 
   return (
     <span className={`plan-badge-small ${badgeClass} ${className}`}>
@@ -290,11 +285,6 @@ export function PlanBadge({ className = '' }: { className?: string }) {
 
         .plan-badge-small.pro {
           background: #F97066;
-          color: white;
-        }
-
-        .plan-badge-small.team {
-          background: #3B82F6;
           color: white;
         }
 
