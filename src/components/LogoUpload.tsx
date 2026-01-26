@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import NextImage from 'next/image';
 import { useSubscription } from '@/hooks/useSubscription';
 import { showToast } from './toastStore';
 import './LogoUpload.css';
@@ -144,7 +145,7 @@ export function LogoUpload({ currentLogoUrl, onLogoChange, disabled }: LogoUploa
       {previewUrl ? (
         <div className="logo-preview-container">
           <div className="logo-preview">
-            <img src={previewUrl} alt="Custom logo" />
+            <NextImage src={previewUrl} alt="Custom logo" width={100} height={100} style={{ objectFit: 'contain' }} />
           </div>
           <div className="logo-actions">
             <button

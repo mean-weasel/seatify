@@ -24,7 +24,7 @@ export function UpgradePrompt({
   limitType,
   current,
   max,
-  plan,
+  plan: _plan,
   onDismiss,
   modal = false,
 }: UpgradePromptProps) {

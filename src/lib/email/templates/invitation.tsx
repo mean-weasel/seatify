@@ -10,6 +10,7 @@ import {
   Button,
   Hr,
   Link,
+  Img,
 } from '@react-email/components';
 
 interface InvitationEmailProps {
@@ -20,7 +21,12 @@ interface InvitationEmailProps {
   rsvpUrl: string;
   customMessage?: string;
   deadline?: string;
+  primaryColor?: string;
+  headerImageUrl?: string;
+  hideBranding?: boolean;
 }
+
+const DEFAULT_PRIMARY_COLOR = '#E07A5F';
 
 export function InvitationEmail({
   guestName,
@@ -30,6 +36,9 @@ export function InvitationEmail({
   rsvpUrl,
   customMessage,
   deadline,
+  primaryColor = DEFAULT_PRIMARY_COLOR,
+  headerImageUrl,
+  hideBranding = false,
 }: InvitationEmailProps) {
   const previewText = `You're invited to ${eventName}! Please RSVP.`;
 
@@ -40,7 +49,15 @@ export function InvitationEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>Seatify</Text>
+            {headerImageUrl ? (
+              <Img
+                src={headerImageUrl}
+                alt="Event logo"
+                style={headerImage}
+              />
+            ) : (
+              <Text style={{ ...logo, color: primaryColor }}>Seatify</Text>
+            )}
           </Section>
 
           <Section style={content}>
@@ -52,7 +69,7 @@ export function InvitationEmail({
             </Text>
 
             {customMessage && (
-              <Text style={customMessageStyle}>{customMessage}</Text>
+              <Text style={{ ...customMessageStyle, borderLeft: `4px solid ${primaryColor}` }}>{customMessage}</Text>
             )}
 
             <Text style={paragraph}>
@@ -67,7 +84,7 @@ export function InvitationEmail({
             )}
 
             <Section style={buttonContainer}>
-              <Button style={button} href={rsvpUrl}>
+              <Button style={{ ...button, backgroundColor: primaryColor }} href={rsvpUrl}>
                 RSVP Now
               </Button>
             </Section>
@@ -75,7 +92,7 @@ export function InvitationEmail({
             <Text style={smallText}>
               Or copy and paste this link into your browser:
               <br />
-              <Link href={rsvpUrl} style={link}>
+              <Link href={rsvpUrl} style={{ ...link, color: primaryColor }}>
                 {rsvpUrl}
               </Link>
             </Text>
@@ -87,12 +104,14 @@ export function InvitationEmail({
             {hostName && (
               <Text style={footerText}>Hosted by {hostName}</Text>
             )}
-            <Text style={footerText}>
-              Powered by{' '}
-              <Link href="https://seatify.app" style={link}>
-                Seatify
-              </Link>
-            </Text>
+            {!hideBranding && (
+              <Text style={footerText}>
+                Powered by{' '}
+                <Link href="https://seatify.app" style={{ ...link, color: primaryColor }}>
+                  Seatify
+                </Link>
+              </Text>
+            )}
             <Text style={footerDisclaimer}>
               You received this email because you&apos;re invited to {eventName}.
               If you believe this was sent in error, please ignore this email.
@@ -146,6 +165,13 @@ const logo = {
   margin: '0',
   textAlign: 'center' as const,
   letterSpacing: '-0.02em',
+};
+
+const headerImage = {
+  display: 'block',
+  margin: '0 auto',
+  maxWidth: '200px',
+  maxHeight: '80px',
 };
 
 const content = {

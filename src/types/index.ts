@@ -128,13 +128,21 @@ export interface RSVPSettings {
   reminderEnabled?: boolean;
   reminderDaysBefore?: number;
   lastReminderSentAt?: string;
+  // Email customization settings
+  emailPrimaryColor?: string; // Hex color for buttons and accents
+  emailSenderName?: string; // Display name for sender
+  emailSubjectTemplate?: string; // Custom subject line template
+  emailHeaderImageUrl?: string; // Custom header image (Pro only)
+  hideSeatifyBranding?: boolean; // Hide "Powered by Seatify" (Pro only)
+  sendConfirmationEmail?: boolean; // Send email after RSVP submission
+  includeCalendarInvite?: boolean; // Include calendar link in confirmation
   createdAt?: string;
   updatedAt?: string;
 }
 
 // Email log entry for tracking invitation/reminder status
 export type EmailLogStatus = 'pending' | 'sent' | 'delivered' | 'opened' | 'bounced' | 'failed';
-export type EmailLogType = 'invitation' | 'reminder';
+export type EmailLogType = 'invitation' | 'reminder' | 'confirmation';
 
 export interface EmailLog {
   id: string;

@@ -245,6 +245,140 @@ export async function sendReminderEmail(
   }
 }
 
+interface SendConfirmationParams {
+  guestId: string;
+  guestName: string;
+  guestEmail: string;
+  eventId: string;
+  eventName: string;
+  eventDate?: string;
+  hostName?: string;
+  isAttending: boolean;
+  plusOneCount?: number;
+  mealPreference?: string;
+  dietaryRestrictions?: string[];
+  venueAddress?: string;
+  includeCalendarInvite?: boolean;
+}
+
+// Send a confirmation email after RSVP submission
+export async function sendConfirmationEmail(
+  params: SendConfirmationParams
+): Promise<{ success: boolean; resendId?: string; error?: string }> {
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const supabase = createAdminClient();
+
+  // Generate calendar URL if attending and date is provided
+  let calendarUrl: string | undefined;
+  if (params.isAttending && params.eventDate && params.includeCalendarInvite) {
+    try {
+      const eventDateObj = new Date(params.eventDate);
+      // Import calendar utils dynamically to avoid client-side code issues
+      const { generateGoogleCalendarUrl } = await import('@/utils/calendarUtils');
+      calendarUrl = generateGoogleCalendarUrl({
+        title: params.eventName,
+        startDate: eventDateObj,
+        location: params.venueAddress,
+        description: params.hostName ? `Hosted by ${params.hostName}` : undefined,
+      });
+    } catch (err) {
+      console.error('Failed to generate calendar URL:', err);
+    }
+  }
+
+  const subject = params.isAttending
+    ? `RSVP Confirmed: ${params.eventName}`
+    : `RSVP Received: ${params.eventName}`;
+
+  // Create email log entry
+  const { data: emailLog, error: logError } = await supabase
+    .from('email_logs')
+    .insert({
+      event_id: params.eventId,
+      guest_id: params.guestId,
+      email_type: 'confirmation',
+      recipient_email: params.guestEmail,
+      subject,
+      status: 'pending',
+    })
+    .select('id')
+    .single();
+
+  if (logError) {
+    console.error('Failed to create email log:', logError);
+  }
+
+  try {
+    // Import confirmation email template
+    const { ConfirmationEmail } = await import('./templates/confirmation');
+
+    const emailHtml = await render(
+      ConfirmationEmail({
+        guestName: params.guestName,
+        eventName: params.eventName,
+        eventDate: params.eventDate,
+        hostName: params.hostName,
+        isAttending: params.isAttending,
+        plusOneCount: params.plusOneCount,
+        mealPreference: params.mealPreference,
+        dietaryRestrictions: params.dietaryRestrictions,
+        calendarUrl,
+        venueAddress: params.venueAddress,
+      })
+    );
+
+    const { data, error } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: params.guestEmail,
+      subject,
+      html: emailHtml,
+    });
+
+    if (error) {
+      if (emailLog?.id) {
+        await supabase
+          .from('email_logs')
+          .update({
+            status: 'failed',
+            error_message: error.message,
+          })
+          .eq('id', emailLog.id);
+      }
+      return { success: false, error: error.message };
+    }
+
+    if (emailLog?.id) {
+      await supabase
+        .from('email_logs')
+        .update({
+          status: 'sent',
+          resend_id: data?.id,
+          sent_at: new Date().toISOString(),
+        })
+        .eq('id', emailLog.id);
+    }
+
+    return { success: true, resendId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+
+    if (emailLog?.id) {
+      await supabase
+        .from('email_logs')
+        .update({
+          status: 'failed',
+          error_message: errorMessage,
+        })
+        .eq('id', emailLog.id);
+    }
+
+    return { success: false, error: errorMessage };
+  }
+}
+
 // Send batch invitations (processes in chunks)
 export async function sendBatchInvitations(
   eventId: string,
