@@ -282,7 +282,8 @@ test.describe('RSVP General Link (No Token)', () => {
 
     // Should show identify form
     await expect(page.locator('.rsvp-card')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('.identify-form, input[placeholder*="email"], input[placeholder*="Email"]')).toBeVisible();
+    // Use .first() to avoid strict mode violation when multiple elements match
+    await expect(page.locator('.identify-form').first()).toBeVisible();
   });
 
   test('can find guest by email on general RSVP page', async ({ page }) => {
