@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@/lib/router-compat';
 import '../LandingPage.css';
+import './PricingPage.css';
 import { Footer } from '../Footer';
 import { trackEvent } from '../../utils/analytics';
 import { captureUtmParams } from '../../utils/utm';
@@ -10,9 +11,15 @@ import { PRICING_TIERS, type SubscriptionPlan } from '@/types/subscription';
 import { startCheckout, STRIPE_PRICES } from '@/lib/stripe/client';
 import { useSubscription } from '@/hooks/useSubscription';
 
-// Check icon
+// Check icon with inline styles
 const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="check-icon">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#10B981"
+    strokeWidth="2.5"
+    style={{ width: '20px', height: '20px', flexShrink: 0 }}
+  >
     <path d="M20 6L9 17l-5-5" />
   </svg>
 );
@@ -125,7 +132,7 @@ export function PricingPage() {
     document.title = 'Pricing | Seatify';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Choose the Seatify plan that fits your needs. Free for small events, Pro for unlimited events and custom branding, Team for collaboration.');
+      metaDescription.setAttribute('content', 'Choose the Seatify plan that fits your needs. Free for small events, Pro for unlimited events and custom branding, Enterprise for teams.');
     }
   }, []);
 
@@ -133,8 +140,8 @@ export function PricingPage() {
     setIsLoading(true);
     try {
       const priceId = isAnnual
-        ? STRIPE_PRICES[plan as 'pro' | 'team']?.yearly
-        : STRIPE_PRICES[plan as 'pro' | 'team']?.monthly;
+        ? STRIPE_PRICES[plan as 'pro']?.yearly
+        : STRIPE_PRICES[plan as 'pro']?.monthly;
 
       if (!priceId) {
         console.error('Price ID not found for plan:', plan);
@@ -234,266 +241,6 @@ export function PricingPage() {
 
       {/* Footer */}
       <Footer variant="landing" />
-
-      <style jsx>{`
-        .pricing-page {
-          --primary-color: #F97066;
-        }
-
-        .billing-section {
-          display: flex;
-          justify-content: center;
-          margin: 2rem 0;
-        }
-
-        .billing-toggle {
-          display: inline-flex;
-          background: var(--bg-secondary, #f5f5f5);
-          border-radius: 999px;
-          padding: 4px;
-          gap: 4px;
-        }
-
-        .toggle-option {
-          padding: 0.75rem 1.5rem;
-          border: none;
-          background: transparent;
-          border-radius: 999px;
-          cursor: pointer;
-          font-weight: 500;
-          color: var(--text-secondary, #666);
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .toggle-option.active {
-          background: white;
-          color: var(--text-primary, #1a1a1a);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .save-badge {
-          background: var(--primary-color);
-          color: white;
-          font-size: 0.7rem;
-          padding: 0.2rem 0.5rem;
-          border-radius: 999px;
-          font-weight: 600;
-        }
-
-        .pricing-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 1.5rem;
-          max-width: 1200px;
-          margin: 2rem auto;
-          padding: 0 1rem;
-        }
-
-        .pricing-card {
-          background: var(--bg-card, white);
-          border-radius: 1rem;
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          border: 2px solid var(--border-color, #e5e5e5);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .pricing-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .pricing-card.highlighted {
-          border-color: var(--primary-color);
-          box-shadow: 0 8px 30px rgba(249, 112, 102, 0.2);
-        }
-
-        .pricing-card.current {
-          border-color: #10B981;
-        }
-
-        .popular-badge,
-        .current-badge {
-          position: absolute;
-          top: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          padding: 0.25rem 0.75rem;
-          border-radius: 999px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          white-space: nowrap;
-        }
-
-        .popular-badge {
-          background: var(--primary-color);
-          color: white;
-        }
-
-        .current-badge {
-          background: #10B981;
-          color: white;
-        }
-
-        .plan-name {
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .plan-description {
-          color: var(--text-secondary, #666);
-          font-size: 0.9rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .plan-price {
-          margin-bottom: 0.5rem;
-        }
-
-        .price-currency {
-          font-size: 1.5rem;
-          font-weight: 600;
-          vertical-align: top;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .price-amount {
-          font-size: 3rem;
-          font-weight: 700;
-          line-height: 1;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .price-period {
-          color: var(--text-secondary, #666);
-          font-size: 1rem;
-        }
-
-        .price-free,
-        .price-custom {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .price-monthly-equiv {
-          font-size: 0.85rem;
-          color: var(--text-secondary, #666);
-          margin-bottom: 1.5rem;
-        }
-
-        .feature-list {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 2rem 0;
-          flex-grow: 1;
-        }
-
-        .feature-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-          padding: 0.5rem 0;
-          color: var(--text-primary, #1a1a1a);
-          font-size: 0.9rem;
-        }
-
-        .feature-item :global(.check-icon) {
-          width: 20px;
-          height: 20px;
-          flex-shrink: 0;
-          stroke: #10B981;
-        }
-
-        .plan-cta {
-          width: 100%;
-          padding: 1rem;
-          border-radius: 0.5rem;
-          font-weight: 600;
-          font-size: 1rem;
-          cursor: pointer;
-          transition: all 0.2s;
-          border: none;
-        }
-
-        .plan-cta.primary {
-          background: var(--primary-color);
-          color: white;
-        }
-
-        .plan-cta.primary:hover {
-          background: #e65a4f;
-        }
-
-        .plan-cta.secondary {
-          background: var(--bg-secondary, #f5f5f5);
-          color: var(--text-primary, #1a1a1a);
-          border: 1px solid var(--border-color, #e5e5e5);
-        }
-
-        .plan-cta.secondary:hover {
-          background: var(--bg-tertiary, #e5e5e5);
-        }
-
-        .plan-cta.disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .faq-section {
-          max-width: 1000px;
-          margin: 4rem auto 2rem;
-          padding: 0 1rem;
-        }
-
-        .faq-section h2 {
-          text-align: center;
-          font-size: 2rem;
-          margin-bottom: 2rem;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .faq-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 2rem;
-        }
-
-        .faq-item h3 {
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-          color: var(--text-primary, #1a1a1a);
-        }
-
-        .faq-item p {
-          color: var(--text-secondary, #666);
-          font-size: 0.9rem;
-          line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-          .pricing-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .faq-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .toggle-option {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-          }
-        }
-      `}</style>
     </div>
   );
 }

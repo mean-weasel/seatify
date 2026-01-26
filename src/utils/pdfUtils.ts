@@ -681,6 +681,7 @@ export interface BulkPDFOptions {
   tableCardOptions?: TableCardPDFOptions;
   placeCardOptions?: PlaceCardPDFOptions;
   customLogoUrl?: string | null;
+  showWatermark?: boolean;
 }
 
 export interface SeatingChartPDFOptions {
@@ -719,6 +720,7 @@ export async function downloadAllPDFs(
     const tableCardOpts = {
       ...options?.tableCardOptions,
       customLogoUrl: options?.customLogoUrl,
+      showWatermark: options?.showWatermark,
     };
     const tableDoc = await generateTableCardsPDF(event, event.tables, tableCardOpts);
     const tableFilename = `${event.name.replace(/\s+/g, '-').toLowerCase()}-table-cards`;
@@ -739,6 +741,7 @@ export async function downloadAllPDFs(
     const placeCardOpts = {
       ...options?.placeCardOptions,
       customLogoUrl: options?.customLogoUrl,
+      showWatermark: options?.showWatermark,
     };
     const placeDoc = await generatePlaceCardsPDF(event, seatedConfirmedGuests, placeCardOpts);
     const placeFilename = `${event.name.replace(/\s+/g, '-').toLowerCase()}-place-cards`;

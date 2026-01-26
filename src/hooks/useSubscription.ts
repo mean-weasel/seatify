@@ -16,7 +16,6 @@ interface UseSubscriptionReturn {
   isLoading: boolean;
   error: string | null;
   isPro: boolean;
-  isTeam: boolean;
   isEnterprise: boolean;
   isFree: boolean;
   canCreateEvent: (currentEventCount: number) => boolean;
@@ -113,7 +112,6 @@ export function useSubscription(): UseSubscriptionReturn {
   // Convenience booleans
   const isFree = plan === 'free';
   const isPro = plan === 'pro';
-  const isTeam = plan === 'team';
   const isEnterprise = plan === 'enterprise';
 
   // Limit check helpers
@@ -134,7 +132,6 @@ export function useSubscription(): UseSubscriptionReturn {
     isLoading,
     error,
     isPro,
-    isTeam,
     isEnterprise,
     isFree,
     canCreateEvent,

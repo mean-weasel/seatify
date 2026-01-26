@@ -35,6 +35,7 @@ export function Footer({ variant = 'landing' }: FooterProps) {
               <h4>Product</h4>
               <ul>
                 <li><Link to="/events">Get Started</Link></li>
+                <li><Link to="/pricing">Pricing</Link></li>
                 <li><UpdatesButton variant="landing" /></li>
                 <li><span className="footer-version">v{version}</span></li>
               </ul>

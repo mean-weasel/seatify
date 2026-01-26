@@ -14,6 +14,7 @@ import { RSVPSettings } from './RSVPSettings';
 import { RSVPDashboard } from './RSVPDashboard';
 import { useDemoGate } from '../hooks/useDemoGate';
 import { useSubscription } from '../hooks/useSubscription';
+import { MainToolbar } from './MainToolbar';
 import { QR_TOUR_STEPS } from '../data/onboardingSteps';
 import {
   downloadTableCards,
@@ -161,6 +162,7 @@ export function DashboardView() {
     try {
       const url = await previewTableCards(event, {
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
       setPreviewUrl(url);
     } catch (error) {
@@ -197,6 +199,7 @@ export function DashboardView() {
     try {
       const url = await previewPlaceCards(event, {
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
       setPreviewUrl(url);
     } catch (error) {
@@ -251,6 +254,7 @@ export function DashboardView() {
           colorTheme: tableOptions.colorTheme,
           cardSize: tableOptions.cardSize,
           customLogoUrl: logoForPdf,
+          showWatermark: limits.hasWatermark,
         });
       } else if (previewType === 'place' && placeOptions) {
         url = await previewPlaceCards(event, {
@@ -261,6 +265,7 @@ export function DashboardView() {
           colorTheme: placeOptions.colorTheme,
           cardSize: placeOptions.cardSize,
           customLogoUrl: logoForPdf,
+          showWatermark: limits.hasWatermark,
         });
       }
       setPreviewUrl(url);
@@ -305,6 +310,7 @@ export function DashboardView() {
         colorTheme: options?.colorTheme ?? 'classic',
         cardSize: options?.cardSize ?? 'standard',
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
       showToast('Table cards PDF downloaded', 'success');
     } catch (error) {
@@ -335,6 +341,7 @@ export function DashboardView() {
         colorTheme: options?.colorTheme ?? 'classic',
         cardSize: options?.cardSize ?? 'standard',
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
       showToast('Place cards PDF downloaded', 'success');
     } catch (error) {
@@ -359,6 +366,7 @@ export function DashboardView() {
     try {
       const result = await downloadAllPDFs(event, {
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
 
       // Build success message
@@ -405,6 +413,7 @@ export function DashboardView() {
     try {
       await downloadSeatingChart(event, {
         customLogoUrl: limits.hasCustomLogo ? customLogoUrl : null,
+        showWatermark: limits.hasWatermark,
       });
       showToast('Seating chart PDF downloaded', 'success');
       trackPDFExported('seating_chart');
@@ -428,6 +437,7 @@ export function DashboardView() {
 
   return (
     <div className="dashboard-view">
+      <MainToolbar />
       <div className="dashboard-grid">
         {/* Event Summary Card */}
         <div className="dashboard-card event-summary">
