@@ -16,13 +16,8 @@ export function ViewToggle({ showRelationships, onToggleRelationships }: ViewTog
   const effectiveEventId = eventId || currentEventId;
 
   const handleViewChange = (view: 'dashboard' | 'canvas' | 'guests') => {
-    console.log('[ViewToggle] handleViewChange called:', { view, eventId, currentEventId, effectiveEventId });
     if (effectiveEventId) {
-      const targetPath = `/dashboard/events/${effectiveEventId}/${view}`;
-      console.log('[ViewToggle] Navigating to:', targetPath);
-      navigate(targetPath);
-    } else {
-      console.log('[ViewToggle] effectiveEventId is falsy, not navigating');
+      navigate(`/dashboard/events/${effectiveEventId}/${view}`);
     }
   };
 
