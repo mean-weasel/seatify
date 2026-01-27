@@ -2,7 +2,7 @@
  * Subscription types for Pro features
  */
 
-export type SubscriptionPlan = 'free' | 'pro' | 'enterprise';
+export type SubscriptionPlan = 'free' | 'pro' | 'team' | 'enterprise';
 
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing';
 
@@ -40,6 +40,9 @@ export interface PlanLimits {
   hasPrioritySupport: boolean;
   hasTeamMembers: boolean;
   maxTeamMembers: number; // -1 = unlimited
+  hasRsvp: boolean;
+  hasEmailInvitations: boolean;
+  hasAiOptimization: boolean; // false = basic optimization only
 }
 
 /**
@@ -48,14 +51,17 @@ export interface PlanLimits {
 export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
   free: {
     plan: 'free',
-    maxEvents: 5,
-    maxGuestsPerEvent: 200,
+    maxEvents: 3,
+    maxGuestsPerEvent: 100,
     hasWatermark: true,
     canRemoveBranding: false,
     hasCustomLogo: false,
     hasPrioritySupport: false,
     hasTeamMembers: false,
     maxTeamMembers: 0,
+    hasRsvp: false,
+    hasEmailInvitations: false,
+    hasAiOptimization: false,
   },
   pro: {
     plan: 'pro',
@@ -64,9 +70,26 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     hasWatermark: false,
     canRemoveBranding: true,
     hasCustomLogo: true,
-    hasPrioritySupport: true,
+    hasPrioritySupport: false,
     hasTeamMembers: false,
     maxTeamMembers: 0,
+    hasRsvp: true,
+    hasEmailInvitations: true,
+    hasAiOptimization: true,
+  },
+  team: {
+    plan: 'team',
+    maxEvents: -1,
+    maxGuestsPerEvent: -1,
+    hasWatermark: false,
+    canRemoveBranding: true,
+    hasCustomLogo: true,
+    hasPrioritySupport: true,
+    hasTeamMembers: true,
+    maxTeamMembers: 5,
+    hasRsvp: true,
+    hasEmailInvitations: true,
+    hasAiOptimization: true,
   },
   enterprise: {
     plan: 'enterprise',
@@ -77,7 +100,10 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     hasCustomLogo: true,
     hasPrioritySupport: true,
     hasTeamMembers: true,
-    maxTeamMembers: -1, // Unlimited team members
+    maxTeamMembers: -1,
+    hasRsvp: true,
+    hasEmailInvitations: true,
+    hasAiOptimization: true,
   },
 };
 
@@ -116,51 +142,52 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     plan: 'free',
     name: 'Free',
-    description: 'Perfect for trying things out',
+    description: 'Perfect for small events',
     monthlyPrice: 0,
     yearlyPrice: 0,
     features: [
-      'Up to 5 events',
-      'Up to 200 guests per event',
-      'Basic PDF exports',
-      'Guest management & import',
-      'Seating optimization',
+      'Up to 3 events',
+      'Up to 100 guests per event',
+      'Basic seating optimization',
+      'Guest import (CSV)',
       'Shareable links & QR codes',
+      'PDF export (watermarked)',
     ],
     ctaText: 'Get Started Free',
   },
   {
     plan: 'pro',
     name: 'Pro',
-    description: 'For professional event planners',
-    monthlyPrice: 20,
-    yearlyPrice: 168,
+    description: 'For individual event planners',
+    monthlyPrice: 19,
+    yearlyPrice: 159,
     features: [
       'Unlimited events',
       'Unlimited guests',
-      'Send email invitations & reminders',
-      'Remove "Made with Seatify" branding',
-      'Custom logo on PDFs',
-      'Priority email support',
+      'AI-powered seating optimization',
+      'RSVP collection',
+      'Email invitations & reminders',
+      'Clean PDF exports',
+      'Custom branding',
     ],
     highlighted: true,
     ctaText: 'Upgrade to Pro',
   },
   {
-    plan: 'enterprise',
-    name: 'Enterprise',
-    description: 'For teams & large organizations',
-    monthlyPrice: 0, // Custom pricing
-    yearlyPrice: 0,
+    plan: 'team',
+    name: 'Team',
+    description: 'For agencies & teams',
+    monthlyPrice: 49,
+    yearlyPrice: 412,
     features: [
       'Everything in Pro',
-      'Unlimited team members',
-      'Role-based access control',
-      'SSO / SAML authentication',
-      'Dedicated support',
-      'Custom integrations',
+      'Up to 5 team members',
+      'Shared event access',
+      'Role-based permissions',
+      'Priority support',
+      'Team collaboration (coming soon)',
     ],
-    ctaText: 'Contact Us',
+    ctaText: 'Upgrade to Team',
   },
 ];
 
@@ -171,5 +198,9 @@ export const STRIPE_PRICES = {
   pro: {
     monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
     yearly: process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
+  },
+  team: {
+    monthly: process.env.NEXT_PUBLIC_STRIPE_TEAM_MONTHLY_PRICE_ID || '',
+    yearly: process.env.NEXT_PUBLIC_STRIPE_TEAM_YEARLY_PRICE_ID || '',
   },
 };
