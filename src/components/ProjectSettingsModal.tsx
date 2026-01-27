@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { updateProject, deleteProject, getProjectGuests, getProjectRelationships } from '@/actions/projects';
+import { trackProjectDeleted } from '@/utils/analytics';
 import type { ProjectWithSummary } from '@/types';
 import './ProjectSettingsModal.css';
 
@@ -66,6 +67,9 @@ export function ProjectSettingsModal({
   const handleDelete = () => {
     if (deleteConfirmText !== project.name) return;
 
+    const eventCount = project.eventCount || 0;
+    const guestCount = project.guestCount || 0;
+
     startTransition(async () => {
       const result = await deleteProject(project.id, deleteEvents);
 
@@ -74,6 +78,7 @@ export function ProjectSettingsModal({
         return;
       }
 
+      trackProjectDeleted(eventCount, guestCount);
       onDeleted?.();
       onClose();
     });

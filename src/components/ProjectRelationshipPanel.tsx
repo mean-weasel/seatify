@@ -7,6 +7,7 @@ import {
   addProjectRelationship,
   deleteProjectRelationship,
 } from '@/actions/projects';
+import { trackProjectRelationshipAdded } from '@/utils/analytics';
 import type { ProjectGuest, ProjectGuestRelationship } from '@/types';
 import './ProjectRelationshipPanel.css';
 
@@ -100,6 +101,7 @@ export function ProjectRelationshipPanel({
 
       if (result.data) {
         setRelationships([...relationships, result.data]);
+        trackProjectRelationshipAdded(relationshipType);
       }
 
       // Reset form

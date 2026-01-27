@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { moveEventToProject } from '@/actions/projects';
 import { getProjects } from '@/actions/projects';
+import { trackEventMovedToProject } from '@/utils/analytics';
 import type { ProjectWithSummary } from '@/types';
 import './MoveEventToProjectModal.css';
 
@@ -59,6 +60,8 @@ export function MoveEventToProjectModal({
         return;
       }
 
+      // Track event moved (guest count will be 0 for now as we don't have access to it here)
+      trackEventMovedToProject(0);
       onMoved?.(selectedProjectId);
       onClose();
     });

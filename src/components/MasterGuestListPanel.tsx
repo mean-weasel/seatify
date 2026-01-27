@@ -7,6 +7,7 @@ import {
   updateProjectGuest,
   deleteProjectGuest,
 } from '@/actions/projects';
+import { trackProjectGuestAdded } from '@/utils/analytics';
 import type { ProjectGuest } from '@/types';
 import './MasterGuestListPanel.css';
 
@@ -134,7 +135,9 @@ export function MasterGuestListPanel({
           return;
         }
         if (result.data) {
-          setGuests([...guests, result.data]);
+          const newGuests = [...guests, result.data];
+          setGuests(newGuests);
+          trackProjectGuestAdded(newGuests.length);
         }
       }
 

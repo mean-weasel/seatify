@@ -7,6 +7,13 @@ import { createEvent, updateEvent, deleteEvent } from '@/actions/events';
 import { createProject, deleteProject, updateProject } from '@/actions/projects';
 import { getDateParts, formatDate, formatEventType } from '@/utils/date';
 import { useSubscription } from '@/hooks/useSubscription';
+import {
+  trackProjectCreated,
+  trackProjectDeleted,
+  trackEventCreated,
+  trackEventAddedToProject,
+  trackProjectEventRatio,
+} from '@/utils/analytics';
 import { useProjectStore } from '@/store/projectStore';
 import { ProjectCard } from './ProjectCard';
 import type { ProjectWithSummary } from '@/types';
@@ -65,6 +72,16 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
     setStoreProjects(projects);
   }, [projects, setStoreProjects]);
 
+  // Track project/event ratio on initial load
+  useEffect(() => {
+    const projectEventCount = projects.reduce((sum, p) => sum + (p.eventCount || 0), 0);
+    const standaloneEventCount = events.filter(e => !e.project_id).length;
+    if (projectEventCount > 0 || standaloneEventCount > 0) {
+      trackProjectEventRatio(projectEventCount, standaloneEventCount);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only track on initial load
+
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventName.trim()) return;
@@ -84,6 +101,11 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
       }
 
       if (result.data) {
+        const isProjectEvent = !!selectedProjectId;
+        trackEventCreated(eventType, isProjectEvent);
+        if (isProjectEvent) {
+          trackEventAddedToProject(true);
+        }
         router.push(`/dashboard/events/${result.data.id}/canvas`);
       }
     });
@@ -201,6 +223,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
           { ...result.data, eventCount: 0, guestCount: 0, events: [] },
           ...projects,
         ]);
+        trackProjectCreated();
       }
       closeModals();
     });
@@ -235,6 +258,9 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
   const handleDeleteProject = async () => {
     if (!selectedProject) return;
 
+    const eventCount = selectedProject.eventCount || 0;
+    const guestCount = selectedProject.guestCount || 0;
+
     startTransition(async () => {
       const result = await deleteProject(selectedProject.id, false);
 
@@ -244,6 +270,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
       }
 
       setProjects(projects.filter((p) => p.id !== selectedProject.id));
+      trackProjectDeleted(eventCount, guestCount);
       closeModals();
     });
   };
@@ -285,6 +312,8 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
       }
 
       if (result.data) {
+        trackEventCreated(eventType, true);
+        trackEventAddedToProject(true);
         router.push(`/dashboard/events/${result.data.id}/canvas`);
       }
     });
