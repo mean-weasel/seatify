@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base, expect } from '@playwright/test';
-import { STORAGE_STATE_PATH, TEST_USER } from './auth.setup';
+import { TEST_USER } from './auth.setup';
 
 /**
  * Extended test fixtures for Seatify E2E tests.

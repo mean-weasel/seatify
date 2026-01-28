@@ -25,6 +25,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Reset form when modal opens
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       setCategory(null);
@@ -34,6 +35,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       setError(null);
     }
   }, [isOpen]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSubmit = () => {
     if (!category || !description.trim()) return;
@@ -84,7 +86,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               </svg>
             </div>
             <h3>Thanks for your feedback!</h3>
-            <p>We'll review it and get back to you if needed.</p>
+            <p>We&apos;ll review it and get back to you if needed.</p>
           </div>
         ) : (
           <>
@@ -109,7 +111,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               )}
 
               <p className="feedback-intro">
-                We're actively improving Seatify and your feedback helps shape what we build next.
+                We&apos;re actively improving Seatify and your feedback helps shape what we build next.
               </p>
 
               <div className="feedback-form-group">
