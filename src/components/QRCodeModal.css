@@ -66,12 +66,13 @@
   gap: 1.25rem;
 }
 
-/* QR Code */
+/* QR Code - Keep white background for scanability */
 .qr-code-container {
-  background: white;
+  background: white; /* Must stay white for QR code scanning */
   padding: 1rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
 }
 
 .qr-code-container svg {
