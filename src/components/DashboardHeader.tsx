@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { FeedbackModal } from '@/components/FeedbackModal';
+import { useThemeApplier, getThemeIcon, getThemeTitle } from '@/hooks/useThemeApplier';
 import type { User } from '@supabase/supabase-js';
 
 interface DashboardHeaderProps {
@@ -16,6 +17,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   const [showFeedback, setShowFeedback] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { theme, cycleTheme } = useThemeApplier();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -33,6 +35,13 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
       </div>
 
       <div className="header-right">
+        <button
+          className="dashboard-theme-btn"
+          onClick={cycleTheme}
+          title={getThemeTitle(theme)}
+        >
+          {getThemeIcon(theme)}
+        </button>
         <div className="user-menu">
           <button
             className="user-menu-button"

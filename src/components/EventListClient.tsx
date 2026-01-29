@@ -325,12 +325,12 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
     <div className="events-page">
       <div className="events-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#171717', margin: 0 }}>Dashboard</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)', margin: 0 }}>Dashboard</h1>
           {limits.maxEvents !== -1 && (
             <span style={{
               fontSize: '0.75rem',
-              color: totalEventCount >= limits.maxEvents ? '#dc2626' : '#737373',
-              background: totalEventCount >= limits.maxEvents ? '#fef2f2' : '#f5f5f5',
+              color: totalEventCount >= limits.maxEvents ? 'var(--color-error)' : 'var(--color-text-secondary)',
+              background: totalEventCount >= limits.maxEvents ? 'var(--color-error-light)' : 'var(--color-bg-secondary)',
               padding: '4px 8px',
               borderRadius: '999px',
               fontWeight: 500
@@ -347,8 +347,8 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
               alignItems: 'center',
               gap: '8px',
               padding: '12px 16px',
-              background: '#fef3c7',
-              color: '#92400e',
+              background: 'var(--color-warning-light)',
+              color: 'var(--color-warning-text)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '0.875rem',
@@ -369,7 +369,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
               alignItems: 'center',
               gap: '8px',
               padding: '12px 16px',
-              background: '#f97352',
+              background: 'var(--color-primary)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -389,7 +389,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
       {/* Projects Section */}
       {projects.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#737373', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
             Projects
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -408,7 +408,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
 
       {/* Standalone Events Section */}
       {(events.length > 0 || projects.length > 0) && events.length > 0 && (
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#737373', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
           Standalone Events
         </h2>
       )}
@@ -422,8 +422,8 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
               onClick={() => setShowProjectCreateModal(true)}
               style={{
                 padding: '12px 20px',
-                background: '#fef3c7',
-                color: '#92400e',
+                background: 'var(--color-warning-light)',
+                color: 'var(--color-warning-text)',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: 500,
@@ -450,8 +450,8 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                background: 'white',
-                border: '1px solid #e5e5e5',
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '12px',
                 padding: '16px'
               }}
@@ -460,7 +460,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
               <div style={{
                 width: '44px',
                 height: '44px',
-                background: '#fafafa',
+                background: 'var(--color-bg)',
                 borderRadius: '10px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -468,14 +468,14 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                 justifyContent: 'center',
                 flexShrink: 0,
                 overflow: 'hidden',
-                border: '1px solid #e5e5e5'
+                border: '1px solid var(--color-border)'
               }}>
                 {getDateParts(event.date) ? (
                   <>
                     <div style={{
                       fontSize: '0.5rem',
                       fontWeight: 600,
-                      color: '#f97352',
+                      color: 'var(--color-primary)',
                       textTransform: 'uppercase',
                       lineHeight: 1,
                       marginBottom: '2px'
@@ -485,7 +485,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                     <div style={{
                       fontSize: '1.125rem',
                       fontWeight: 700,
-                      color: '#171717',
+                      color: 'var(--color-text)',
                       lineHeight: 1
                     }}>
                       {getDateParts(event.date)?.day}
@@ -496,7 +496,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                     <div style={{
                       fontSize: '0.5rem',
                       fontWeight: 600,
-                      color: '#a3a3a3',
+                      color: 'var(--color-text-light)',
                       textTransform: 'uppercase',
                       lineHeight: 1,
                       marginBottom: '2px'
@@ -506,7 +506,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                     <div style={{
                       fontSize: '1rem',
                       fontWeight: 600,
-                      color: '#d4d4d4',
+                      color: 'var(--color-border)',
                       lineHeight: 1
                     }}>
                       —
@@ -522,13 +522,13 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                 <h3 style={{
                   fontSize: '0.9375rem',
                   fontWeight: 600,
-                  color: '#171717',
+                  color: 'var(--color-text)',
                   margin: '0 0 4px',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}>{event.name}</h3>
-                <div style={{ fontSize: '0.8125rem', color: '#737373' }}>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                   {formatEventType(event.event_type)} · {formatDate(event.date)} · {event.guests?.[0]?.count || 0} guests
                 </div>
               </Link>
@@ -547,7 +547,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                     border: 'none',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    color: '#a3a3a3'
+                    color: 'var(--color-text-light)'
                   }}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -568,7 +568,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                     border: 'none',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    color: '#a3a3a3'
+                    color: 'var(--color-text-light)'
                   }}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -619,7 +619,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                 <div className="form-group">
                   <label htmlFor="projectSelect">
                     Project
-                    <span style={{ fontWeight: 400, color: '#737373', marginLeft: '4px' }}>(optional)</span>
+                    <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)', marginLeft: '4px' }}>(optional)</span>
                   </label>
                   <select
                     id="projectSelect"
@@ -633,7 +633,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
                       </option>
                     ))}
                   </select>
-                  <p style={{ fontSize: '0.75rem', color: '#737373', margin: '4px 0 0' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
                     Events in projects share a master guest list
                   </p>
                 </div>
@@ -762,37 +762,37 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
               <div style={{
                 width: '48px',
                 height: '48px',
-                background: '#fff5f4',
+                background: 'var(--color-primary-light)',
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 1rem'
               }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97352" strokeWidth="2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 8v4M12 16h.01" />
                 </svg>
               </div>
               <h2 style={{ margin: '0 0 0.5rem' }}>Event Limit Reached</h2>
-              <p style={{ color: '#737373', margin: 0 }}>
+              <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
                 You&apos;ve reached the maximum of {limits.maxEvents} events on the Free plan.
               </p>
             </div>
 
             <div style={{
-              background: '#fafafa',
+              background: 'var(--color-bg)',
               borderRadius: '12px',
               padding: '1rem',
               marginBottom: '1.5rem'
             }}>
-              <p style={{ fontWeight: 600, color: '#171717', margin: '0 0 0.75rem' }}>
+              <p style={{ fontWeight: 600, color: 'var(--color-text)', margin: '0 0 0.75rem' }}>
                 Upgrade to Pro for:
               </p>
               <ul style={{
                 margin: 0,
                 paddingLeft: '1.25rem',
-                color: '#525252',
+                color: 'var(--color-text-secondary)',
                 fontSize: '0.875rem',
                 lineHeight: 1.6
               }}>
@@ -828,7 +828,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
         <div className="modal-overlay" onClick={closeModals}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>New Project</h2>
-            <p style={{ color: '#737373', margin: '-8px 0 16px', fontSize: '0.875rem' }}>
+            <p style={{ color: 'var(--color-text-secondary)', margin: '-8px 0 16px', fontSize: '0.875rem' }}>
               Projects group related events (like multi-day conferences) and share a master guest list.
             </p>
             <form onSubmit={handleCreateProject}>
