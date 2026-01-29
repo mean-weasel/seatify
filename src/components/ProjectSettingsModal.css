@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .project-settings-modal .modal-header h2 {
@@ -24,14 +24,14 @@
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: #737373;
+  color: var(--color-text-secondary);
   border-radius: 4px;
   transition: all 0.15s ease;
 }
 
 .project-settings-modal .close-btn:hover {
-  background: #f5f5f5;
-  color: #171717;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
 }
 
 /* Error Banner */
@@ -40,8 +40,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--color-error-light);
+  color: var(--color-error-text);
   font-size: 0.875rem;
 }
 
@@ -50,8 +50,8 @@
   display: flex;
   gap: 4px;
   padding: 12px 24px;
-  background: #fafafa;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .project-settings-modal .settings-tab {
@@ -64,24 +64,24 @@
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #737373;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .project-settings-modal .settings-tab:hover {
-  background: #e5e5e5;
-  color: #171717;
+  background: var(--color-border);
+  color: var(--color-text);
 }
 
 .project-settings-modal .settings-tab.active {
-  background: white;
-  color: #171717;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .project-settings-modal .tab-badge {
-  background: #f0f0f0;
+  background: var(--color-border-light);
   padding: 2px 6px;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -89,7 +89,7 @@
 }
 
 .project-settings-modal .settings-tab.active .tab-badge {
-  background: #f97352;
+  background: var(--color-primary);
   color: white;
 }
 
@@ -116,23 +116,25 @@
 .project-settings-modal .form-group label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #525252;
+  color: var(--color-text-secondary);
 }
 
 .project-settings-modal .form-group input,
 .project-settings-modal .form-group textarea {
   padding: 10px 12px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.9375rem;
+  background: var(--color-bg);
+  color: var(--color-text);
   transition: all 0.15s ease;
 }
 
 .project-settings-modal .form-group input:focus,
 .project-settings-modal .form-group textarea:focus {
   outline: none;
-  border-color: #f97352;
-  box-shadow: 0 0 0 3px rgba(249, 115, 82, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
 .project-settings-modal .form-group textarea {
@@ -151,7 +153,7 @@
   display: flex;
   gap: 24px;
   padding: 16px;
-  background: #fafafa;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
@@ -164,12 +166,12 @@
 .project-settings-modal .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #171717;
+  color: var(--color-text);
 }
 
 .project-settings-modal .stat-label {
   font-size: 0.75rem;
-  color: #737373;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -180,39 +182,40 @@
   justify-content: flex-end;
   gap: 8px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-light);
 }
 
 /* Guests Tab */
 .project-settings-modal .guests-info {
   padding: 16px;
-  background: #fef3c7;
+  background: var(--color-warning-light);
   border-radius: 8px;
-  border: 1px solid #fde68a;
+  border: 1px solid var(--color-warning);
 }
 
 .project-settings-modal .guests-info p {
   margin: 0 0 8px;
-  color: #92400e;
+  color: var(--color-warning-text);
   font-size: 0.9375rem;
 }
 
 .project-settings-modal .guests-info .info-text {
   margin: 0;
-  color: #a16207;
+  color: var(--color-warning-text);
   font-size: 0.8125rem;
+  opacity: 0.85;
 }
 
 .project-settings-modal .events-list {
   padding: 16px;
-  background: #fafafa;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
 .project-settings-modal .events-list h4 {
   margin: 0 0 12px;
   font-size: 0.875rem;
-  color: #525252;
+  color: var(--color-text-secondary);
 }
 
 .project-settings-modal .events-list ul {
@@ -225,7 +228,7 @@
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .project-settings-modal .events-list li:last-child {
@@ -234,12 +237,12 @@
 
 .project-settings-modal .event-name {
   font-weight: 500;
-  color: #171717;
+  color: var(--color-text);
 }
 
 .project-settings-modal .event-date {
   font-size: 0.8125rem;
-  color: #737373;
+  color: var(--color-text-secondary);
 }
 
 /* Danger Zone */
@@ -249,48 +252,50 @@
 
 .project-settings-modal .danger-section {
   padding: 20px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--color-error-light);
+  border: 1px solid var(--color-error);
   border-radius: 8px;
 }
 
 .project-settings-modal .danger-section h4 {
   margin: 0 0 8px;
-  color: #dc2626;
+  color: var(--color-error-text);
 }
 
 .project-settings-modal .danger-section p {
   margin: 0 0 16px;
-  color: #b91c1c;
+  color: var(--color-error-text);
   font-size: 0.875rem;
+  opacity: 0.85;
 }
 
 /* Delete Confirm */
 .project-settings-modal .delete-confirm {
   padding: 20px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--color-error-light);
+  border: 1px solid var(--color-error);
   border-radius: 8px;
 }
 
 .project-settings-modal .delete-confirm h4 {
   margin: 0 0 12px;
-  color: #dc2626;
+  color: var(--color-error-text);
 }
 
 .project-settings-modal .delete-confirm p {
   margin: 0 0 16px;
-  color: #7f1d1d;
+  color: var(--color-error-text);
   font-size: 0.875rem;
   line-height: 1.5;
+  opacity: 0.85;
 }
 
 .project-settings-modal .delete-option {
   margin-bottom: 16px;
   padding: 12px;
-  background: white;
+  background: var(--color-bg);
   border-radius: 6px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-error);
 }
 
 .project-settings-modal .delete-option label {
@@ -299,19 +304,19 @@
   gap: 8px;
   cursor: pointer;
   font-weight: 500;
-  color: #171717;
+  color: var(--color-text);
 }
 
 .project-settings-modal .delete-option input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #dc2626;
+  accent-color: var(--color-error-dark);
 }
 
 .project-settings-modal .option-hint {
   margin: 8px 0 0 24px;
   font-size: 0.8125rem;
-  color: #737373;
+  color: var(--color-text-secondary);
 }
 
 /* Button Styles */
@@ -328,12 +333,12 @@
 }
 
 .project-settings-modal .btn-primary {
-  background: #f97352;
+  background: var(--color-primary);
   color: white;
 }
 
 .project-settings-modal .btn-primary:hover:not(:disabled) {
-  background: #e86342;
+  background: var(--color-primary-hover);
 }
 
 .project-settings-modal .btn-primary:disabled {
@@ -342,21 +347,21 @@
 }
 
 .project-settings-modal .btn-secondary {
-  background: #f5f5f5;
-  color: #525252;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
 }
 
 .project-settings-modal .btn-secondary:hover {
-  background: #e5e5e5;
+  background: var(--color-border);
 }
 
 .project-settings-modal .btn-danger {
-  background: #dc2626;
+  background: var(--color-error-dark);
   color: white;
 }
 
 .project-settings-modal .btn-danger:hover:not(:disabled) {
-  background: #b91c1c;
+  background: var(--color-error);
 }
 
 .project-settings-modal .btn-danger:disabled {
