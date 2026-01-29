@@ -24,7 +24,7 @@ interface HeaderProps {
 export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
   const navigate = useNavigate();
   const { eventId } = useParams<{ eventId?: string }>();
-  const { event, setEventName, theme, cycleTheme, currentEventId, isTourComplete, completedTours, isDemo } = useStore();
+  const { event, setEventName, theme, currentEventId, isTourComplete, completedTours, isDemo } = useStore();
 
   // Check if user is new (hasn't completed any tours)
   const isNewUser = completedTours.size === 0;
@@ -87,22 +87,6 @@ export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
       root.removeAttribute('data-theme');
     }
   }, [theme]);
-
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light': return '\u2600'; // Sun
-      case 'dark': return '\u263D'; // Moon
-      default: return '\u2699'; // Gear (system)
-    }
-  };
-
-  const getThemeTitle = () => {
-    switch (theme) {
-      case 'light': return 'Light mode (click for dark)';
-      case 'dark': return 'Dark mode (click for system)';
-      default: return 'System theme (click for light)';
-    }
-  };
 
   return (
     <header className="header">
@@ -215,13 +199,6 @@ export function Header({ onLogoClick, onShowHelp, onStartTour }: HeaderProps) {
             <span className="share-btn-text">Share</span>
           </button>
         )}
-        <button
-          className="theme-btn"
-          onClick={cycleTheme}
-          title={getThemeTitle()}
-        >
-          {getThemeIcon()}
-        </button>
         {isInsideEvent && (
           <div className="event-info">
             {isDemo ? (
