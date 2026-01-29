@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import './LandingPage.css';
 import { EmailCaptureModal } from './EmailCaptureModal';
 import { LandingChoiceModal } from './LandingChoiceModal';
@@ -10,6 +11,7 @@ import { MobileSettingsHeader } from './MobileSettingsHeader';
 import { trackCTAClick, trackAppEntryConversion, trackFunnelStep, initScrollDepthTracking } from '../utils/analytics';
 import { captureUtmParams } from '../utils/utm';
 import { shouldShowEmailCapture } from '../utils/emailCaptureManager';
+import { useThemeApplier, getThemeIcon, getThemeTitle } from '../hooks/useThemeApplier';
 import type { TourId } from '../data/tourRegistry';
 import { DEMO_EVENT_ID } from '../lib/constants';
 
@@ -159,6 +161,9 @@ export function LandingPageClient() {
   const [showChoiceModal, setShowChoiceModal] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
+  // Apply theme on landing page load
+  const { theme, cycleTheme } = useThemeApplier();
+
   // Check if user has already subscribed (don't show button if so)
   const canShowEmailButton = typeof window !== 'undefined' && (
     shouldShowEmailCapture('guestMilestone') ||
@@ -214,6 +219,25 @@ export function LandingPageClient() {
 
   return (
     <div className="landing-page">
+      {/* Desktop Navigation Header */}
+      <header className="landing-navbar">
+        <Link href="/" className="navbar-logo">
+          <span className="logo-seat">Seat</span>
+          <span className="logo-ify">ify</span>
+        </Link>
+        <nav className="navbar-links">
+          <button
+            className="navbar-theme-btn"
+            onClick={cycleTheme}
+            title={getThemeTitle(theme)}
+          >
+            {getThemeIcon(theme)}
+          </button>
+          <Link href="/login" className="navbar-link">Sign In</Link>
+          <Link href="/signup" className="navbar-btn">Sign Up Free</Link>
+        </nav>
+      </header>
+
       {/* Mobile Settings Header - only visible on mobile */}
       <div className="mobile-settings-container">
         <MobileSettingsHeader
