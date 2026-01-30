@@ -76,6 +76,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               <Link href="/profile" className="menu-item" onClick={() => setShowMenu(false)}>
                 Profile Settings
               </Link>
+              <Link href="/settings/billing" className="menu-item" onClick={() => setShowMenu(false)}>
+                Billing
+              </Link>
               <hr className="menu-divider" />
               <button
                 className="menu-item feedback-item"

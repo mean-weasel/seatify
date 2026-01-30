@@ -2,6 +2,28 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getStripe } from '@/lib/stripe/server';
 
+// Valid price IDs for checkout
+const VALID_PRICE_IDS = new Set(
+  [
+    process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+    process.env.STRIPE_PRO_YEARLY_PRICE_ID,
+    process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID,
+    process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID,
+  ].filter(Boolean)
+);
+
+// Structured logging helper
+function logCheckout(action: string, details: Record<string, unknown>) {
+  console.log(
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      service: 'stripe-checkout',
+      action,
+      ...details,
+    })
+  );
+}
+
 export async function POST(request: Request) {
   try {
     const stripe = getStripe();
@@ -23,6 +45,12 @@ export async function POST(request: Request) {
 
     if (!priceId) {
       return NextResponse.json({ error: 'Price ID is required' }, { status: 400 });
+    }
+
+    // Validate price ID is a known valid price
+    if (!VALID_PRICE_IDS.has(priceId)) {
+      logCheckout('invalid_price_id', { priceId, userId: user.id });
+      return NextResponse.json({ error: 'Invalid price ID' }, { status: 400 });
     }
 
     // Get or create Stripe customer
@@ -61,7 +89,7 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: successUrl || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successUrl || `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       subscription_data: {
         metadata: {
@@ -72,9 +100,19 @@ export async function POST(request: Request) {
       billing_address_collection: 'auto',
     });
 
+    logCheckout('session_created', {
+      userId: user.id,
+      customerId,
+      sessionId: session.id,
+      priceId,
+    });
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Checkout error:', error);
+    logCheckout('error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create checkout session' },
       { status: 500 }

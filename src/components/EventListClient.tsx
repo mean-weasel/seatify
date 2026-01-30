@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useTransition, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { showToast } from './toastStore';
 import { createEvent, updateEvent, deleteEvent } from '@/actions/events';
 import { createProject, deleteProject, updateProject } from '@/actions/projects';
 import { getDateParts, formatDate, formatEventType } from '@/utils/date';
@@ -16,7 +17,27 @@ import {
 } from '@/utils/analytics';
 import { useProjectStore } from '@/store/projectStore';
 import { ProjectCard } from './ProjectCard';
+import { SubscriptionAlert } from './SubscriptionAlert';
 import type { ProjectWithSummary } from '@/types';
+
+// Component to handle upgrade success URL parameter
+function UpgradeSuccessHandler() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const upgraded = searchParams.get('upgraded');
+    if (upgraded === 'true') {
+      showToast('Welcome to Pro! Your subscription is now active.', 'success');
+      // Remove the query parameter from URL without refresh
+      const url = new URL(window.location.href);
+      url.searchParams.delete('upgraded');
+      router.replace(url.pathname, { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  return null;
+}
 
 export interface Event {
   id: string;
@@ -64,7 +85,7 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { limits } = useSubscription();
+  const { limits, subscription, isPendingCancellation, isPastDue, daysUntilRenewal } = useSubscription();
   const { setProjects: setStoreProjects } = useProjectStore();
 
   // Sync projects to store
@@ -323,6 +344,19 @@ export function EventListClient({ initialEvents, initialProjects = [] }: EventLi
 
   return (
     <div className="events-page">
+      {/* Handle upgrade success URL parameter */}
+      <Suspense fallback={null}>
+        <UpgradeSuccessHandler />
+      </Suspense>
+
+      {/* Subscription status alerts */}
+      <SubscriptionAlert
+        subscription={subscription}
+        isPendingCancellation={isPendingCancellation}
+        isPastDue={isPastDue}
+        daysUntilRenewal={daysUntilRenewal}
+      />
+
       <div className="events-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)', margin: 0 }}>Dashboard</h1>

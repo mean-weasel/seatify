@@ -9,6 +9,9 @@ import { getPlanLimits, isWithinLimit } from '@/types/subscription';
 export { getPlanLimits, isWithinLimit } from '@/types/subscription';
 export type { SubscriptionPlan, PlanLimits } from '@/types/subscription';
 
+// Grace period in days for past_due subscriptions
+const PAST_DUE_GRACE_PERIOD_DAYS = 7;
+
 interface UseSubscriptionReturn {
   subscription: Subscription | null;
   plan: SubscriptionPlan;
@@ -22,6 +25,11 @@ interface UseSubscriptionReturn {
   canAddGuest: (currentGuestCount: number) => boolean;
   hasWatermark: boolean;
   refresh: () => Promise<void>;
+  // Enhanced subscription state properties
+  isPendingCancellation: boolean;
+  isPastDue: boolean;
+  daysUntilRenewal: number | null;
+  canAccessProFeatures: boolean;
 }
 
 /**
@@ -105,6 +113,48 @@ export function useSubscription(): UseSubscriptionReturn {
     };
   }, [fetchSubscription]);
 
+  // Realtime subscription for instant updates when webhooks modify the database
+  useEffect(() => {
+    const supabase = createClient();
+    let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Subscribe to changes on this user's subscription row
+      realtimeChannel = supabase
+        .channel(`subscription:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to INSERT, UPDATE, DELETE
+            schema: 'public',
+            table: 'subscriptions',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            // Refetch subscription when changes detected
+            console.log('Subscription changed:', payload.eventType);
+            fetchSubscription();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Realtime subscription active');
+          }
+        });
+    };
+
+    setupRealtime();
+
+    return () => {
+      if (realtimeChannel) {
+        realtimeChannel.unsubscribe();
+      }
+    };
+  }, [fetchSubscription]);
+
   // Derive plan and limits
   const plan: SubscriptionPlan = subscription?.plan || 'free';
   const limits = getPlanLimits(plan);
@@ -125,6 +175,54 @@ export function useSubscription(): UseSubscriptionReturn {
     [limits.maxGuestsPerEvent]
   );
 
+  // Enhanced subscription state computations
+  const isPendingCancellation = Boolean(
+    subscription?.cancelAtPeriodEnd &&
+    (subscription.status === 'active' || subscription.status === 'trialing')
+  );
+
+  const isPastDue = subscription?.status === 'past_due';
+
+  // Calculate days until renewal/period end
+  const daysUntilRenewal = (() => {
+    if (!subscription?.currentPeriodEnd) return null;
+    const periodEnd = new Date(subscription.currentPeriodEnd);
+    const now = new Date();
+    const diffMs = periodEnd.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  })();
+
+  // Determine if user can access Pro features (includes grace period logic)
+  const canAccessProFeatures = (() => {
+    // Free plan users don't have Pro access
+    if (!subscription || subscription.plan === 'free') return false;
+
+    // Active or trialing subscriptions have full access
+    if (subscription.status === 'active' || subscription.status === 'trialing') {
+      return true;
+    }
+
+    // Past due subscriptions get a grace period
+    if (subscription.status === 'past_due') {
+      // Check if within grace period from when status changed
+      // Since we don't track when it became past_due, use currentPeriodEnd as reference
+      if (subscription.currentPeriodEnd) {
+        const periodEnd = new Date(subscription.currentPeriodEnd);
+        const graceEnd = new Date(periodEnd.getTime() + PAST_DUE_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
+        return new Date() < graceEnd;
+      }
+      return false;
+    }
+
+    // Canceled subscriptions - check if period hasn't ended yet
+    if (subscription.status === 'canceled' && subscription.currentPeriodEnd) {
+      return new Date() < new Date(subscription.currentPeriodEnd);
+    }
+
+    return false;
+  })();
+
   return {
     subscription,
     plan,
@@ -138,5 +236,10 @@ export function useSubscription(): UseSubscriptionReturn {
     canAddGuest,
     hasWatermark: limits.hasWatermark,
     refresh: fetchSubscription,
+    // Enhanced subscription state
+    isPendingCancellation,
+    isPastDue,
+    daysUntilRenewal,
+    canAccessProFeatures,
   };
 }

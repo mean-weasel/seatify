@@ -1,8 +1,23 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getStripe } from '@/lib/stripe/server';
+
+// Structured logging helper
+function logWebhook(
+  action: string,
+  details: Record<string, unknown>
+) {
+  console.log(
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      service: 'stripe-webhook',
+      action,
+      ...details,
+    })
+  );
+}
 
 // Use service role for webhook operations (bypasses RLS)
 function getSupabaseAdmin() {
@@ -13,6 +28,32 @@ function getSupabaseAdmin() {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
+}
+
+// Check if event was already processed (idempotency)
+async function isEventProcessed(
+  supabase: SupabaseClient,
+  eventId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('stripe_event_logs')
+    .select('id')
+    .eq('stripe_event_id', eventId)
+    .single();
+
+  return !!data;
+}
+
+// Log event as processed
+async function markEventProcessed(
+  supabase: SupabaseClient,
+  eventId: string,
+  eventType: string
+): Promise<void> {
+  await supabase.from('stripe_event_logs').insert({
+    stripe_event_id: eventId,
+    event_type: eventType,
+  });
 }
 
 // Map Stripe price IDs to plan names
@@ -52,11 +93,23 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    logWebhook('signature_verification_failed', {
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
     );
+  }
+
+  // Check for duplicate event (idempotency)
+  const alreadyProcessed = await isEventProcessed(supabase, event.id);
+  if (alreadyProcessed) {
+    logWebhook('duplicate_event_skipped', {
+      eventId: event.id,
+      eventType: event.type,
+    });
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   try {
@@ -76,7 +129,11 @@ export async function POST(request: Request) {
           session.metadata?.supabase_user_id;
 
         if (!userId) {
-          console.error('No user ID in subscription metadata');
+          logWebhook('missing_user_id', {
+            eventId: event.id,
+            eventType: event.type,
+            subscriptionId,
+          });
           break;
         }
 
@@ -101,7 +158,13 @@ export async function POST(request: Request) {
           .update({ plan })
           .eq('id', userId);
 
-        console.log(`Subscription created for user ${userId}: ${plan}`);
+        logWebhook('subscription_created', {
+          eventId: event.id,
+          userId,
+          plan,
+          subscriptionId,
+          customerId,
+        });
         break;
       }
 
@@ -119,7 +182,11 @@ export async function POST(request: Request) {
           .single();
 
         if (!existingSub) {
-          console.error('Subscription not found:', subscriptionId);
+          logWebhook('subscription_not_found', {
+            eventId: event.id,
+            eventType: event.type,
+            subscriptionId,
+          });
           break;
         }
 
@@ -160,7 +227,13 @@ export async function POST(request: Request) {
           .update({ plan })
           .eq('id', existingSub.user_id);
 
-        console.log(`Subscription updated: ${subscriptionId} -> ${plan} (${status})`);
+        logWebhook('subscription_updated', {
+          eventId: event.id,
+          subscriptionId,
+          userId: existingSub.user_id,
+          plan,
+          status,
+        });
         break;
       }
 
@@ -169,14 +242,18 @@ export async function POST(request: Request) {
         const subscriptionId = subscription.id;
 
         // Find subscription and reset to free
-        const { data: existingSub } = await supabase
+        const { data: existingSubDel } = await supabase
           .from('subscriptions')
           .select('user_id')
           .eq('stripe_subscription_id', subscriptionId)
           .single();
 
-        if (!existingSub) {
-          console.error('Subscription not found:', subscriptionId);
+        if (!existingSubDel) {
+          logWebhook('subscription_not_found', {
+            eventId: event.id,
+            eventType: event.type,
+            subscriptionId,
+          });
           break;
         }
 
@@ -194,9 +271,13 @@ export async function POST(request: Request) {
         await supabase
           .from('profiles')
           .update({ plan: 'free' })
-          .eq('id', existingSub.user_id);
+          .eq('id', existingSubDel.user_id);
 
-        console.log(`Subscription deleted: ${subscriptionId} -> free`);
+        logWebhook('subscription_deleted', {
+          eventId: event.id,
+          subscriptionId,
+          userId: existingSubDel.user_id,
+        });
         break;
       }
 
@@ -212,7 +293,10 @@ export async function POST(request: Request) {
           .update({ status: 'past_due' })
           .eq('stripe_subscription_id', subscriptionId);
 
-        console.log(`Payment failed for subscription: ${subscriptionId}`);
+        logWebhook('payment_failed', {
+          eventId: event.id,
+          subscriptionId,
+        });
         break;
       }
 
@@ -228,17 +312,31 @@ export async function POST(request: Request) {
           .update({ status: 'active' })
           .eq('stripe_subscription_id', subscriptionId);
 
-        console.log(`Payment succeeded for subscription: ${subscriptionId}`);
+        logWebhook('payment_succeeded', {
+          eventId: event.id,
+          subscriptionId,
+        });
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logWebhook('unhandled_event', {
+          eventId: event.id,
+          eventType: event.type,
+        });
     }
+
+    // Mark event as processed for idempotency
+    await markEventProcessed(supabase, event.id, event.type);
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    logWebhook('processing_error', {
+      eventId: event.id,
+      eventType: event.type,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
