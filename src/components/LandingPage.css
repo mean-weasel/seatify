@@ -181,6 +181,7 @@
   font-weight: var(--font-weight-extrabold);
   margin: 0;
   letter-spacing: -0.02em;
+  text-decoration: none;
   animation: floatDown 0.6s var(--ease-bounce) backwards;
   animation-delay: 0.1s;
 }

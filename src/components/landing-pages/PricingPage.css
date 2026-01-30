@@ -4,6 +4,11 @@
   --primary-color: #F97066;
 }
 
+/* Remove the wavy underline decoration on pricing page */
+.pricing-page .logo-wrapper::after {
+  display: none;
+}
+
 .billing-section {
   display: flex;
   justify-content: center;
