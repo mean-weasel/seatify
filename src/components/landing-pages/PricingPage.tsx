@@ -121,7 +121,7 @@ function PricingCard({
 }
 
 export function PricingPage() {
-  const [annual, setAnnual] = useState(true);
+  const [annual, setAnnual] = useState(false); // Default to monthly (yearly not yet available)
   const [isLoading, setIsLoading] = useState(false);
   const { plan: currentPlan, isLoading: subscriptionLoading } = useSubscription();
 
@@ -175,10 +175,10 @@ export function PricingPage() {
           </p>
         </section>
 
-        {/* Billing Toggle */}
-        <section className="billing-section">
+        {/* Billing Toggle - hidden until yearly pricing is available */}
+        {/* <section className="billing-section">
           <BillingToggle annual={annual} onChange={setAnnual} />
-        </section>
+        </section> */}
 
         {/* Pricing Cards */}
         <section className="pricing-grid">
