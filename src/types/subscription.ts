@@ -133,8 +133,8 @@ export const PRICING_TIERS: PricingTier[] = [
     plan: 'pro',
     name: 'Pro',
     description: 'For professional event planners',
-    monthlyPrice: 20,
-    yearlyPrice: 168,
+    monthlyPrice: 19,
+    yearlyPrice: 159,
     features: [
       'Unlimited events',
       'Unlimited guests',

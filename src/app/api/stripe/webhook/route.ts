@@ -59,8 +59,8 @@ async function markEventProcessed(
 // Map Stripe price IDs to plan names
 function getPlanFromPriceId(priceId: string): string {
   const priceMap: Record<string, string> = {
-    [process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '']: 'pro',
-    [process.env.STRIPE_PRO_YEARLY_PRICE_ID || '']: 'pro',
+    [process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '']: 'pro',
+    [process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '']: 'pro',
   };
   return priceMap[priceId] || 'pro';
 }

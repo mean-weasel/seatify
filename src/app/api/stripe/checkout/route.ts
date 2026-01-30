@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getStripe } from '@/lib/stripe/server';
 
-// Valid price IDs for checkout
+// Valid price IDs for checkout (NEXT_PUBLIC_ vars are readable server-side too)
 const VALID_PRICE_IDS = new Set(
   [
-    process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
-    process.env.STRIPE_PRO_YEARLY_PRICE_ID,
     process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID,
     process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID,
   ].filter(Boolean)
