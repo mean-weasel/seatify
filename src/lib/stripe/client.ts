@@ -1,5 +1,8 @@
 'use client';
 
+// Supported flow types for deep-linking to specific portal sections
+type PortalFlowType = 'payment_method_update' | 'subscription_cancel' | 'subscription_update';
+
 /**
  * Start Stripe checkout for a subscription plan
  */
@@ -30,8 +33,9 @@ export async function startCheckout(priceId: string): Promise<void> {
 
 /**
  * Open Stripe Customer Portal for subscription management
+ * @param flowType - Optional flow type to deep-link to a specific section
  */
-export async function openCustomerPortal(): Promise<void> {
+export async function openCustomerPortal(flowType?: PortalFlowType): Promise<void> {
   const response = await fetch('/api/stripe/portal', {
     method: 'POST',
     headers: {
@@ -39,6 +43,7 @@ export async function openCustomerPortal(): Promise<void> {
     },
     body: JSON.stringify({
       returnUrl: window.location.href,
+      flowType,
     }),
   });
 
@@ -52,6 +57,27 @@ export async function openCustomerPortal(): Promise<void> {
   if (data.url) {
     window.location.href = data.url;
   }
+}
+
+/**
+ * Open Stripe Customer Portal directly to payment method update
+ */
+export async function openPaymentMethodUpdate(): Promise<void> {
+  return openCustomerPortal('payment_method_update');
+}
+
+/**
+ * Open Stripe Customer Portal directly to subscription cancellation
+ */
+export async function openSubscriptionCancel(): Promise<void> {
+  return openCustomerPortal('subscription_cancel');
+}
+
+/**
+ * Open Stripe Customer Portal directly to subscription/plan change
+ */
+export async function openSubscriptionChange(): Promise<void> {
+  return openCustomerPortal('subscription_update');
 }
 
 /**
