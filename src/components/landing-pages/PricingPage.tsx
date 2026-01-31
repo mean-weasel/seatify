@@ -24,42 +24,19 @@ const CheckIcon = () => (
   </svg>
 );
 
-// Billing toggle component
-function BillingToggle({ annual, onChange }: { annual: boolean; onChange: (annual: boolean) => void }) {
-  return (
-    <div className="billing-toggle">
-      <button
-        className={`toggle-option ${!annual ? 'active' : ''}`}
-        onClick={() => onChange(false)}
-      >
-        Monthly
-      </button>
-      <button
-        className={`toggle-option ${annual ? 'active' : ''}`}
-        onClick={() => onChange(true)}
-      >
-        Yearly
-        <span className="save-badge">Save 30%</span>
-      </button>
-    </div>
-  );
-}
-
 // Pricing card component
 function PricingCard({
   tier,
-  annual,
   currentPlan,
   onUpgrade,
   isLoading,
 }: {
   tier: typeof PRICING_TIERS[number];
-  annual: boolean;
   currentPlan: SubscriptionPlan;
-  onUpgrade: (plan: SubscriptionPlan, annual: boolean) => void;
+  onUpgrade: (plan: SubscriptionPlan) => void;
   isLoading: boolean;
 }) {
-  const price = annual ? tier.yearlyPrice : tier.monthlyPrice;
+  const price = tier.monthlyPrice;
   const isCurrentPlan = tier.plan === currentPlan;
   const isEnterprise = tier.plan === 'enterprise';
   const isFree = tier.plan === 'free';
@@ -68,7 +45,7 @@ function PricingCard({
     if (isEnterprise) {
       window.location.href = 'mailto:support@seatify.app?subject=Enterprise%20Inquiry';
     } else if (!isFree && !isCurrentPlan) {
-      onUpgrade(tier.plan, annual);
+      onUpgrade(tier.plan);
     }
   };
 
@@ -89,16 +66,10 @@ function PricingCard({
           <>
             <span className="price-currency">$</span>
             <span className="price-amount">{price}</span>
-            <span className="price-period">/{annual ? 'year' : 'month'}</span>
+            <span className="price-period">/month</span>
           </>
         )}
       </div>
-
-      {annual && !isFree && !isEnterprise && (
-        <p className="price-monthly-equiv">
-          ${Math.round(price / 12)}/month billed annually
-        </p>
-      )}
 
       <ul className="feature-list">
         {tier.features.map((feature, index) => (
@@ -121,7 +92,6 @@ function PricingCard({
 }
 
 export function PricingPage() {
-  const [annual, setAnnual] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { plan: currentPlan, isLoading: subscriptionLoading } = useSubscription();
 
@@ -136,12 +106,10 @@ export function PricingPage() {
     }
   }, []);
 
-  const handleUpgrade = async (plan: SubscriptionPlan, isAnnual: boolean) => {
+  const handleUpgrade = async (plan: SubscriptionPlan) => {
     setIsLoading(true);
     try {
-      const priceId = isAnnual
-        ? STRIPE_PRICES[plan as 'pro']?.yearly
-        : STRIPE_PRICES[plan as 'pro']?.monthly;
+      const priceId = STRIPE_PRICES[plan as 'pro']?.monthly;
 
       if (!priceId) {
         console.error('Price ID not found for plan:', plan);
@@ -175,18 +143,12 @@ export function PricingPage() {
           </p>
         </section>
 
-        {/* Billing Toggle */}
-        <section className="billing-section">
-          <BillingToggle annual={annual} onChange={setAnnual} />
-        </section>
-
         {/* Pricing Cards */}
         <section className="pricing-grid">
           {PRICING_TIERS.map((tier) => (
             <PricingCard
               key={tier.plan}
               tier={tier}
-              annual={annual}
               currentPlan={subscriptionLoading ? 'free' : currentPlan}
               onUpgrade={handleUpgrade}
               isLoading={isLoading}

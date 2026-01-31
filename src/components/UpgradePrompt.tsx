@@ -35,7 +35,7 @@ export function UpgradePrompt({
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
-      const priceId = STRIPE_PRICES.pro.yearly;
+      const priceId = STRIPE_PRICES.pro.monthly;
       if (priceId) {
         await startCheckout(priceId);
       } else {
@@ -74,7 +74,7 @@ export function UpgradePrompt({
       <div className="upgrade-plan-preview">
         <div className="plan-name">
           <span className="plan-label">Seatify Pro</span>
-          <span className="plan-price">${proTier.yearlyPrice}/year</span>
+          <span className="plan-price">${proTier.monthlyPrice}/month</span>
         </div>
         <ul className="plan-features">
           <li>Unlimited events</li>
