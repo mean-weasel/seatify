@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_ROUTES = [
   '/coming-soon',
   '/api/email/webhook',
+  '/api/stripe/webhook', // Stripe webhooks
   '/api/cron',
   '/api/health',
   '/rsvp', // Guest RSVP pages (accessed via email links)
